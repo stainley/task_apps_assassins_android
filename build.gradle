@@ -11,7 +11,7 @@ checkstyle {
     configFile file("config/checkstyle/checkstyle.xml")
 }
 
-tasks.withType(Checkstyle) {
+tasks.withType(Checkstyle).configureEach {
     reports {
         xml.required = false
         html.required = true
