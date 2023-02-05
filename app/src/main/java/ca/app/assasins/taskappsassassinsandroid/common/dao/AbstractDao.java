@@ -8,13 +8,11 @@ import androidx.room.Update;
 import java.util.List;
 
 public interface AbstractDao<T> {
-    @Insert
+
     void save(T type);
 
-    @Delete
     void delete(T type);
 
-    @Update
     void update(T type);
 
     LiveData<List<T>> fetchAll();

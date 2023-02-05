@@ -2,39 +2,36 @@ package ca.app.assasins.taskappsassassinsandroid.category.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import java.util.List;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 
 @Dao
-public abstract class CategoryDao implements AbstractDao<Category> {
+public interface CategoryDao extends AbstractDao<Category> {
 
+    @Insert
     @Override
-    public void save(Category type) {
+    void save(Category type);
 
-    }
-
+    @Delete
     @Override
-    public void delete(Category type) {
+    void delete(Category type);
 
-    }
 
+    @Update
     @Override
-    public void update(Category type) {
-
-    }
+    void update(Category type);
 
     @Query("SELECT * FROM CATEGORY_TBL")
     @Override
-    public LiveData<List<Category>> fetchAll() {
-        return null;
-    }
+    LiveData<List<Category>> fetchAll();
 
     @Query("SELECT * FROM CATEGORY_TBL WHERE id = :id")
     @Override
-    public LiveData<Category> fetchById(Long id) {
-        return null;
-    }
+    LiveData<Category> fetchById(Long id);
 }
