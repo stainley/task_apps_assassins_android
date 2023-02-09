@@ -1,20 +1,17 @@
-package ca.app.assasins.taskappsassassinsandroid.common.dao;
+package ca.app.assasins.taskappsassassinsandroid.common.repository;
 
 import androidx.lifecycle.LiveData;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.Update;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface AbstractDao<T> {
+public interface Repository<T> {
 
     void save(T type);
 
-    void delete(T type);
-
     void update(T type);
+
+    void delete(T type);
 
     LiveData<List<T>> fetchAll();
 
