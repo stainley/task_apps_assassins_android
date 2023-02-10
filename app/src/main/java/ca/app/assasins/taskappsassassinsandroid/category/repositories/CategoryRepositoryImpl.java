@@ -13,27 +13,26 @@ import ca.app.assasins.taskappsassassinsandroid.common.db.AppDatabase;
 
 public class CategoryRepositoryImpl implements CategoryRepository {
 
-    private final AppDatabase db;
-    private CategoryDao categoryDao;
+    private final CategoryDao categoryDao;
 
     public CategoryRepositoryImpl(Application application) {
-        db = AppDatabase.getInstance(application);
+        AppDatabase db = AppDatabase.getInstance(application);
         categoryDao = db.categoryDao();
     }
 
     @Override
     public void save(Category category) {
-        categoryDao.save(category);
+        AppDatabase.databaseWriterExecutor.execute(() -> categoryDao.save(category));
     }
 
     @Override
     public void update(Category category) {
-        categoryDao.update(category);
+        AppDatabase.databaseWriterExecutor.execute(() -> categoryDao.update(category));
     }
 
     @Override
     public void delete(Category category) {
-        categoryDao.delete(category);
+        AppDatabase.databaseWriterExecutor.execute(() -> categoryDao.delete(category));
     }
 
     @Override
