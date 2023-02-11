@@ -8,6 +8,8 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 import java.util.List;
+import java.util.Optional;
+
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 
@@ -22,7 +24,6 @@ public interface CategoryDao extends AbstractDao<Category> {
     @Override
     void delete(Category type);
 
-
     @Update
     @Override
     void update(Category type);
@@ -33,5 +34,8 @@ public interface CategoryDao extends AbstractDao<Category> {
 
     @Query("SELECT * FROM CATEGORY_TBL WHERE id = :id")
     @Override
-    LiveData<Category> fetchById(Long id);
+    LiveData<Optional<Category>> fetchById(Long id);
+
+    @Query("SELECT * FROM CATEGORY_TBL WHERE name = :name")
+    LiveData<Category> fetchByName(String name);
 }

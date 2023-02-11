@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.Update;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AbstractDao<T> {
 
@@ -17,5 +18,5 @@ public interface AbstractDao<T> {
 
     LiveData<List<T>> fetchAll();
 
-    LiveData<T> fetchById(Long id);
+    LiveData<Optional<T>> fetchById(Long id);
 }

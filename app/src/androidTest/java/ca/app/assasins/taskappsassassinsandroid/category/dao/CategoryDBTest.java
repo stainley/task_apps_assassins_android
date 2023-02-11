@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.LiveDataTestUtil;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
@@ -58,19 +59,19 @@ public class CategoryDBTest {
         category.setName("School");
         categoryDao.save(category);
 
-        Category result = LiveDataTestUtil.getValue(categoryDao.fetchById(1L));
+        Optional<Category> result = LiveDataTestUtil.getValue(categoryDao.fetchById(1L));
         List<Category> numResults = LiveDataTestUtil.getValue(categoryDao.fetchAll());
 
         TestCase.assertNotNull(result);
         TestCase.assertEquals(1, numResults.size());
-        result.setName("Grocery");
-        categoryDao.update(result);
+        result.get().setName("Grocery");
+        categoryDao.update(result.get());
 
         List<Category> numResultsAfterUpdate = LiveDataTestUtil.getValue(categoryDao.fetchAll());
         TestCase.assertEquals(1, numResultsAfterUpdate.size());
 
-        Category resultAfterUpdate = LiveDataTestUtil.getValue(categoryDao.fetchById(1L));
-        TestCase.assertEquals("Grocery", resultAfterUpdate.getName());
+        Optional<Category> resultAfterUpdate = LiveDataTestUtil.getValue(categoryDao.fetchById(1L));
+        TestCase.assertEquals("Grocery", resultAfterUpdate.get().getName());
 
     }
 
@@ -83,8 +84,8 @@ public class CategoryDBTest {
         List<Category> numResults = LiveDataTestUtil.getValue(categoryDao.fetchAll());
         TestCase.assertEquals(1, numResults.size());
 
-        Category result = LiveDataTestUtil.getValue(categoryDao.fetchById(1L));
-        categoryDao.delete(result);
+        Optional<Category> result = LiveDataTestUtil.getValue(categoryDao.fetchById(1L));
+        categoryDao.delete(result.get());
 
         List<Category> numResultsAfterDelete = LiveDataTestUtil.getValue(categoryDao.fetchAll());
         TestCase.assertEquals(0, numResultsAfterDelete.size());
