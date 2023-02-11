@@ -31,4 +31,8 @@ public class CategoryViewModel extends ViewModel {
     public LiveData<Category> getCategoryByName(String name) {
         return categoryRepository.fetchByName(name);
     }
+
+    public void deleteCategory(@NonNull Category category) {
+        categoryRepository.delete(category);
+    }
 }
