@@ -1,6 +1,5 @@
 package ca.app.assasins.taskappsassassinsandroid.category.ui.adpter;
 
-import android.app.Application;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -13,28 +12,22 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.category.ui.CategoryNavigationActivity;
-import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
-import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 
 public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycleAdapter.ViewHolder> {
 
+    private final OnCategoryCallback onCategoryCallback;
     private final List<Category> categories;
-    private final Application application;
 
-    public CategoryRecycleAdapter(List<Category> categories, Application application) {
+    public CategoryRecycleAdapter(List<Category> categories, OnCategoryCallback onCallback) {
         this.categories = categories;
-        this.application = application;
+        this.onCategoryCallback = onCallback;
     }
 
     @NonNull
@@ -67,18 +60,16 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
         inflater.inflate(R.menu.category_menu, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
-                case R.id.delete_category_menu:
 
-                    Snackbar deleteSnackbar = Snackbar.make(view, "Are sure you want do delete this category?", Snackbar.LENGTH_LONG).setAction("Accept", v -> {
-                        new ViewModelProvider(new ViewModelStore(), new CategoryViewModelFactory(application)).get(CategoryViewModel.class).deleteCategory(categories.get(position));
-                        categories.remove(position);
-                        notifyItemRemoved(position);
-                    });
-                    deleteSnackbar.show();
+                case R.id.delete_category_menu:
+                    onCategoryCallback.onDeleteCategory(view, position);
+
 
                     return true;
                 case R.id.rename_category_menu:
                     Toast.makeText(view.getContext(), "RENAME MENU", Toast.LENGTH_SHORT).show();
+                    onCategoryCallback.onRenameCategory(view, position);
+
                     return true;
             }
             return false;
@@ -105,5 +96,11 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
             overflowMenu = itemView.findViewById(R.id.categoryOverflowMenu);
 
         }
+    }
+
+    public interface OnCategoryCallback {
+        void onRenameCategory(View view, int position);
+
+        void onDeleteCategory(View view, int position);
     }
 }
