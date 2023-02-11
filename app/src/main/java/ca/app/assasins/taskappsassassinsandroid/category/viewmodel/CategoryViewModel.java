@@ -24,6 +24,10 @@ public class CategoryViewModel extends ViewModel {
         categoryRepository.save(category);
     }
 
+    public void updateCategory(@NonNull Category category) {
+        categoryRepository.update(category);
+    }
+
     public LiveData<List<Category>> getAllCategories() {
         return categoryRepository.fetchAll();
     }
