@@ -12,8 +12,10 @@ import java.util.concurrent.Executors;
 
 import ca.app.assasins.taskappsassassinsandroid.category.dao.CategoryDao;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
+import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 
-@Database(entities = {Category.class}, version = 1, exportSchema = false)
+@Database(entities = {Category.class, Note.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
@@ -32,4 +34,5 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract CategoryDao categoryDao();
 
+    public abstract NoteDao noteDao();
 }
