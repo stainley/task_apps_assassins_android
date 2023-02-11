@@ -2,6 +2,7 @@ package ca.app.assasins.taskappsassassinsandroid.category.repositories;
 
 import android.app.Application;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
@@ -41,7 +42,15 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
+    public LiveData<Category> fetchByName(@NonNull String name) {
+
+        return categoryDao.fetchByName(name);
+    }
+
+    @Override
     public LiveData<Optional<Category>> fetchById(Long id) {
         return categoryDao.fetchById(id);
     }
+
+
 }

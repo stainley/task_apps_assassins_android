@@ -26,10 +26,12 @@
         tools:targetApi="31">
         <activity
             android:name=".category.ui.CategoryNavigationActivity"
-            android:exported="false" />
+            android:theme="@style/AppTheme.ActionBar"
+            android:exported="false"
+            android:parentActivityName=".category.ui.CategoryActivity" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".category.ui.CategoryActivity"
             android:exported="true">

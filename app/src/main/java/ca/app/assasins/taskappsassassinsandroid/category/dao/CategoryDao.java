@@ -35,4 +35,7 @@ public interface CategoryDao extends AbstractDao<Category> {
     @Query("SELECT * FROM CATEGORY_TBL WHERE id = :id")
     @Override
     LiveData<Optional<Category>> fetchById(Long id);
+
+    @Query("SELECT * FROM CATEGORY_TBL WHERE name = :name")
+    LiveData<Category> fetchByName(String name);
 }
