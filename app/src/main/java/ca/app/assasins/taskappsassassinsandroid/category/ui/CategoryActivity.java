@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
@@ -32,7 +34,7 @@ public class CategoryActivity extends AppCompatActivity {
 
     ActivityCategoryBinding binding;
     private CategoryViewModel categoryViewModel;
-    private List<Category> categories = new ArrayList<>();
+    private final List<Category> categories = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,7 +46,7 @@ public class CategoryActivity extends AppCompatActivity {
         RecyclerView recyclerView = binding.categoryList;
         categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(getApplication())).get(CategoryViewModel.class);
 
-        CategoryRecycleAdapter adapter = new CategoryRecycleAdapter(categories);
+        CategoryRecycleAdapter adapter = new CategoryRecycleAdapter(categories, getApplication());
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
@@ -53,17 +55,21 @@ public class CategoryActivity extends AppCompatActivity {
         categoryViewModel.getAllCategories().observe(this, categories -> {
             this.categories.clear();
             this.categories.addAll(categories);
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemChanged(categories.size());
         });
 
     }
 
+    /**
+     * Create a new category using AlertDialog
+     *
+     * @param view View
+     */
     public void newCategory(View view) {
         TextInputEditText newEditText = new TextInputEditText(this);
         newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
         newEditText.setHint("Category Name");
 
-        // TODO: validate if is empty of container duplicated record
         new MaterialAlertDialogBuilder(this)
                 .setTitle("New Category")
                 .setMessage("Would you like to create new category?")
@@ -72,21 +78,20 @@ public class CategoryActivity extends AppCompatActivity {
                 .setNeutralButton("Cancel", (dialog, which) -> {
 
                 }).setPositiveButton("Accept", (dialog, which) -> {
-                    String inputText = newEditText.getText().toString();
+
+                    String inputText = Objects.requireNonNull(newEditText.getText()).toString();
                     if (inputText.equals("")) {
                         Toast.makeText(this, "Couldn't be empty", Toast.LENGTH_SHORT).show();
                     } else {
-                        Category category = categoryViewModel.getCategoryByName(inputText).getValue();
-                        String categoryFound = category != null ? category.getName() : "";
-                        if (categoryFound.isEmpty()) {
+
+                        List<Category> resultCategory = categories.stream().filter(cat -> inputText.equalsIgnoreCase(cat.getName())).collect(Collectors.toList());
+
+                        if (resultCategory.isEmpty()) {
                             categoryViewModel.createCategory(new Category(inputText));
                         } else {
                             Toast.makeText(this, inputText + " is in our database.", Toast.LENGTH_SHORT).show();
                         }
                     }
-
-                    Toast.makeText(this, inputText, Toast.LENGTH_SHORT).show();
-
                 })
                 .setCancelable(false)
                 .show();
