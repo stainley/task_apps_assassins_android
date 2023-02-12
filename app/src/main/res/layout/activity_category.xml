@@ -9,23 +9,21 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/searchAppBar"
         android:layout_width="match_parent"
-        android:nestedScrollingEnabled="false"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:nestedScrollingEnabled="false">
 
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/categoryList"
-            android:padding="8dp"
-            android:layout_marginTop="76dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
-            />
+            android:layout_marginTop="76dp"
+            android:padding="8dp" />
 
         <com.google.android.material.appbar.AppBarLayout
-            android:isScrollContainer="false"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:isScrollContainer="false">
 
             <com.google.android.material.search.SearchBar
                 android:id="@+id/search_bar"
@@ -36,12 +34,20 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <com.google.android.material.search.SearchView
+            android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
             android:hint="Search your category"
             app:layout_anchor="@id/search_bar">
             <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoryFilterRecycle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="76dp"
+                android:padding="8dp" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/categoryLis"
                 android:layout_width="match_parent"
