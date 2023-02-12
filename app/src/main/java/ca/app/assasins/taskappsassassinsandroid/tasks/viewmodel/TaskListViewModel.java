@@ -1,16 +1,16 @@
-package ca.app.assasins.taskappsassassinsandroid.common.ui.ui.dashboard;
+package ca.app.assasins.taskappsassassinsandroid.tasks.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class DashboardViewModel extends ViewModel {
+public class TaskListViewModel extends ViewModel {
 
     private final MutableLiveData<String> mText;
 
-    public DashboardViewModel() {
+    public TaskListViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+        mText.setValue("This is task list fragment");
     }
 
     public LiveData<String> getText() {

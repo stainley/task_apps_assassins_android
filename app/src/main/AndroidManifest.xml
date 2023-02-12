@@ -25,7 +25,7 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".common.ui.NavigationActivity"
+            android:name=".common.view.NavigationActivity"
             android:parentActivityName=".category.ui.CategoryActivity"
             android:theme="@style/AppTheme.ActionBar"
             android:exported="false"

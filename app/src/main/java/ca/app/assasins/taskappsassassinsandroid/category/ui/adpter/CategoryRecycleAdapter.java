@@ -18,7 +18,7 @@ import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
-import ca.app.assasins.taskappsassassinsandroid.common.ui.NavigationActivity;
+import ca.app.assasins.taskappsassassinsandroid.common.view.NavigationActivity;
 
 public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycleAdapter.ViewHolder> {
 

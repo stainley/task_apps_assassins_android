@@ -1,4 +1,4 @@
-package ca.app.assasins.taskappsassassinsandroid.common.ui.ui.home;
+package ca.app.assasins.taskappsassassinsandroid.note.view;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,15 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentHomeBinding;
+import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 
 public class NoteListFragment extends Fragment {
 
-    private FragmentHomeBinding binding;
+    private FragmentNoteListBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentNoteListBinding.inflate(inflater, container, false);
 
         return binding.getRoot();
     }

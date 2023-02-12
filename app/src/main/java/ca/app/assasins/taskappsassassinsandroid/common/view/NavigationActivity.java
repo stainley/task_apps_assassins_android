@@ -1,4 +1,4 @@
-package ca.app.assasins.taskappsassassinsandroid.common.ui;
+package ca.app.assasins.taskappsassassinsandroid.common.view;
 
 import android.content.Intent;
 import android.os.Bundle;

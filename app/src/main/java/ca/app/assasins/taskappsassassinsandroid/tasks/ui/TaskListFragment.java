@@ -1,4 +1,4 @@
-package ca.app.assasins.taskappsassassinsandroid.common.ui.ui.dashboard;
+package ca.app.assasins.taskappsassassinsandroid.tasks.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,22 +10,23 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentDashboardBinding;
+import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
+import ca.app.assasins.taskappsassassinsandroid.tasks.viewmodel.TaskListViewModel;
 
-public class DashboardFragment extends Fragment {
+public class TaskListFragment extends Fragment {
 
-    private FragmentDashboardBinding binding;
+    private FragmentTaskListBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        DashboardViewModel dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
+        TaskListViewModel taskListViewModel =
+                new ViewModelProvider(this).get(TaskListViewModel.class);
 
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        binding = FragmentTaskListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         final TextView textView = binding.textDashboard;
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        taskListViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         return root;
     }
 

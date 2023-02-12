@@ -7,13 +7,13 @@
 
     <fragment
         android:id="@+id/navigation_note"
-        android:name="ca.app.assasins.taskappsassassinsandroid.common.ui.ui.home.NoteListFragment"
-        tools:layout="@layout/fragment_home" >
+        android:name="ca.app.assasins.taskappsassassinsandroid.note.view.NoteListFragment"
+        tools:layout="@layout/fragment_note_list" >
     </fragment>
 
     <fragment
         android:id="@+id/navigation_task"
-        android:name="ca.app.assasins.taskappsassassinsandroid.common.ui.ui.dashboard.DashboardFragment"
-        tools:layout="@layout/fragment_dashboard" />
+        android:name="ca.app.assasins.taskappsassassinsandroid.tasks.ui.TaskListFragment"
+        tools:layout="@layout/fragment_task_list" />
 
 </navigation>
