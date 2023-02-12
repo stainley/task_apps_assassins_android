@@ -1,5 +1,6 @@
 package ca.app.assasins.taskappsassassinsandroid.category.model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,6 +9,7 @@ import java.io.Serializable;
 @Entity(tableName = "CATEGORY_TBL")
 public class Category implements Serializable {
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "CATEGORY_ID")
     private Long id;
     private String name;
 

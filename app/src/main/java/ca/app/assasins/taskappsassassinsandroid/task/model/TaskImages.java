@@ -5,20 +5,22 @@ import androidx.room.Relation;
 
 import java.util.List;
 
-public class TaskWithSubTask {
+import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+
+public class TaskImages {
 
     @Embedded
     private Task task;
 
     @Relation(
             parentColumn = "TASK_ID",
-            entityColumn = "SUB_TASK_ID"
+            entityColumn = "PICTURE_ID"
     )
-    private List<SubTask> subTasks;
+    private List<Picture> pictures;
 
-    public TaskWithSubTask(Task task, List<SubTask> subTasks) {
+    public TaskImages(Task task, List<Picture> pictures) {
         this.task = task;
-        this.subTasks = subTasks;
+        this.pictures = pictures;
     }
 
     public Task getTask() {
@@ -29,11 +31,11 @@ public class TaskWithSubTask {
         this.task = task;
     }
 
-    public List<SubTask> getSubTasks() {
-        return subTasks;
+    public List<Picture> getPictures() {
+        return pictures;
     }
 
-    public void setSubTasks(List<SubTask> subTasks) {
-        this.subTasks = subTasks;
+    public void setPictures(List<Picture> pictures) {
+        this.pictures = pictures;
     }
 }

@@ -1,14 +1,16 @@
 package ca.app.assasins.taskappsassassinsandroid.common.model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "PICTURE_TBL")
 public class Picture {
     @PrimaryKey
+    @ColumnInfo(name = "PICTURE_ID")
     private Long id;
     private String path;
-
+    @ColumnInfo(name = "CREATION_DATE")
     private Long creationDate;
 
     public Long getId() {
