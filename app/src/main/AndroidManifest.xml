@@ -25,10 +25,15 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
-            android:name=".category.ui.CategoryNavigationActivity"
-            android:theme="@style/AppTheme.ActionBar"
+            android:name=".common.ui.NavigationActivity"
+            android:parentActivityName=".category.ui.CategoryActivity"
             android:exported="false"
-            android:parentActivityName=".category.ui.CategoryActivity" />
+            android:label="@string/title_activity_navigation" />
+        <activity
+            android:name=".category.ui.CategoryNavigationActivity"
+            android:exported="false"
+            android:parentActivityName=".category.ui.CategoryActivity"
+            android:theme="@style/AppTheme.ActionBar" />
         <activity
             android:name=".MainActivity"
             android:exported="true" />

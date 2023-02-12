@@ -19,6 +19,7 @@ import java.util.List;
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.category.ui.CategoryNavigationActivity;
+import ca.app.assasins.taskappsassassinsandroid.common.ui.NavigationActivity;
 
 public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycleAdapter.ViewHolder> {
 
@@ -45,7 +46,7 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
 
         holder.categoryCard.setOnClickListener(view -> {
             Toast.makeText(holder.itemView.getContext(), categories.get(position).getName(), Toast.LENGTH_LONG).show();
-            Intent categoryNavActivity = new Intent(view.getContext(), CategoryNavigationActivity.class);
+            Intent categoryNavActivity = new Intent(view.getContext(), NavigationActivity.class);
 
             view.getContext().startActivity(categoryNavActivity);
         });

@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".category.ui.CategoryActivity">
+    tools:context=".common.ui.ui.home.HomeFragment">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/searchAppBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:nestedScrollingEnabled="false">
-
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/categoryList"
@@ -25,12 +24,23 @@
             android:layout_height="wrap_content"
             android:isScrollContainer="false">
 
-            <com.google.android.material.search.SearchBar
-                android:id="@+id/search_bar"
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/topAppBar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="Search category"
-                android:hint="Search your category" />
+                android:layout_height="?attr/actionBarSize"
+                app:menu="@menu/bottom_nav_menu"
+                app:title="School">
+
+                <com.google.android.material.search.SearchBar
+                    android:id="@+id/search_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+
+                    android:contentDescription="Search note"
+                    android:hint="Search your category" />
+            </com.google.android.material.appbar.MaterialToolbar>
+
         </com.google.android.material.appbar.AppBarLayout>
 
         <com.google.android.material.search.SearchView
@@ -67,5 +77,4 @@
         android:src="@android:drawable/ic_input_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
