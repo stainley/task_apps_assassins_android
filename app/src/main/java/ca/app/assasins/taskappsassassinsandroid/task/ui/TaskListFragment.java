@@ -1,4 +1,4 @@
-package ca.app.assasins.taskappsassassinsandroid.tasks.ui;
+package ca.app.assasins.taskappsassassinsandroid.task.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
-import ca.app.assasins.taskappsassassinsandroid.tasks.viewmodel.TaskListViewModel;
+import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
 
 public class TaskListFragment extends Fragment {
 

@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_task"
-        android:name="ca.app.assasins.taskappsassassinsandroid.tasks.ui.TaskListFragment"
+        android:name="ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragment"
         tools:layout="@layout/fragment_task_list" />
 
 </navigation>

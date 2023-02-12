@@ -2,7 +2,9 @@ package ca.app.assasins.taskappsassassinsandroid.common.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.EditText;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -31,7 +33,10 @@ public class NavigationActivity extends AppCompatActivity {
         Category category = (Category) categoryIntent.getSerializableExtra("category");
         setTitle(category.getName());
 
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
 

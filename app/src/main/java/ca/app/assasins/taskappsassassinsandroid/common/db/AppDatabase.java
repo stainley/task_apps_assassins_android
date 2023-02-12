@@ -14,8 +14,14 @@ import ca.app.assasins.taskappsassassinsandroid.category.dao.CategoryDao;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
+import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 
-@Database(entities = {Category.class, Note.class}, version = 1, exportSchema = false)
+@Database(entities = {Category.class,
+        Note.class,
+        Task.class,
+        SubTask.class
+}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;

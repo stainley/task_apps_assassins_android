@@ -1,4 +1,4 @@
-package ca.app.assasins.taskappsassassinsandroid.tasks.viewmodel;
+package ca.app.assasins.taskappsassassinsandroid.task.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

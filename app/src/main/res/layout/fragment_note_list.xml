@@ -26,26 +26,12 @@
             android:isScrollContainer="false"
             android:showDividers="middle">
 
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/topAppBar"
+            <com.google.android.material.search.SearchBar
+                android:id="@+id/search_bar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:menu="@menu/note_menu">
-
-                <Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <com.google.android.material.search.SearchBar
-                        android:id="@+id/search_bar"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:contentDescription="Search note"
-                        android:hint="Search note" />
-                </Toolbar>
-            </com.google.android.material.appbar.MaterialToolbar>
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:hint="@string/search_note" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -53,7 +39,7 @@
             android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Filter note"
+            android:hint="@string/search_note"
             app:layout_anchor="@id/search_bar">
             <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
 
@@ -72,14 +58,13 @@
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/createCategoryBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
-        android:contentDescription="Create category"
+        android:contentDescription="@string/new_note"
         android:src="@android:drawable/ic_input_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
