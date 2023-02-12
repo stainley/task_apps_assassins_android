@@ -73,9 +73,7 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
         SearchView searchView = binding.searchView;
 
 
-        Supplier<TextWatcher> textWatcherSupplier = getTextWatcherSupplier();
-
-        searchView.getEditText().addTextChangedListener(textWatcherSupplier.get());
+        searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
         searchView.setOnMenuItemClickListener(this);
 
     }
@@ -184,7 +182,6 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
     @Override
     public boolean onMenuItemClick(MenuItem item) {
 
-        System.out.println("onMENU_ITEM_CLICK: " + item.getItemId());
         return false;
     }
 
