@@ -19,5 +19,7 @@ public interface Repository<T> {
 
     LiveData<T> fetchByName(String name);
 
+    LiveData<T> fetchByTitle(String title);
+
     LiveData<Optional<T>> fetchById(Long id);
 }

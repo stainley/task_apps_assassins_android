@@ -48,6 +48,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
+    public LiveData<Category> fetchByTitle(String title) {
+        return null;
+    }
+
+    @Override
     public LiveData<Optional<Category>> fetchById(Long id) {
         return categoryDao.fetchById(id);
     }
