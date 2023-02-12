@@ -20,25 +20,31 @@
             android:padding="8dp" />
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/noteAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:isScrollContainer="false">
+            android:isScrollContainer="false"
+            android:showDividers="middle">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/topAppBar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:menu="@menu/bottom_nav_menu"
-                app:title="School">
+                app:menu="@menu/note_menu">
 
-                <com.google.android.material.search.SearchBar
-                    android:id="@+id/search_bar"
+                <Toolbar
+                    android:id="@+id/toolbar"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_height="wrap_content">
 
-                    android:contentDescription="Search note"
-                    android:hint="Search your category" />
+                    <com.google.android.material.search.SearchBar
+                        android:id="@+id/search_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:contentDescription="Search note"
+                        android:hint="Search note" />
+                </Toolbar>
             </com.google.android.material.appbar.MaterialToolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -47,12 +53,12 @@
             android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Search your category"
+            android:hint="Filter note"
             app:layout_anchor="@id/search_bar">
             <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/categoryFilterRecycle"
+                android:id="@+id/noteFilterRecycle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="76dp"

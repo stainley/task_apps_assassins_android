@@ -27,13 +27,14 @@
         <activity
             android:name=".common.ui.NavigationActivity"
             android:parentActivityName=".category.ui.CategoryActivity"
+            android:theme="@style/AppTheme.ActionBar"
             android:exported="false"
             android:label="@string/title_activity_navigation" />
-        <activity
+        <!--<activity
             android:name=".category.ui.CategoryNavigationActivity"
             android:exported="false"
             android:parentActivityName=".category.ui.CategoryActivity"
-            android:theme="@style/AppTheme.ActionBar" />
+            android:theme="@style/AppTheme.ActionBar" />-->
         <activity
             android:name=".MainActivity"
             android:exported="true" />

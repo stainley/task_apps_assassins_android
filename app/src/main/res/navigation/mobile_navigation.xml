@@ -3,15 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_note">
 
     <fragment
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_note"
         android:name="ca.app.assasins.taskappsassassinsandroid.common.ui.ui.home.HomeFragment"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+    </fragment>
 
     <fragment
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/navigation_task"
         android:name="ca.app.assasins.taskappsassassinsandroid.common.ui.ui.dashboard.DashboardFragment"
         tools:layout="@layout/fragment_dashboard" />
 

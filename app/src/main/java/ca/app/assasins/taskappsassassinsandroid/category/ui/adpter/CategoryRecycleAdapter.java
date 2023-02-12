@@ -47,7 +47,7 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
         holder.categoryCard.setOnClickListener(view -> {
             Toast.makeText(holder.itemView.getContext(), categories.get(position).getName(), Toast.LENGTH_LONG).show();
             Intent categoryNavActivity = new Intent(view.getContext(), NavigationActivity.class);
-
+            categoryNavActivity.putExtra("category", categories.get(position));
             view.getContext().startActivity(categoryNavActivity);
         });
 
