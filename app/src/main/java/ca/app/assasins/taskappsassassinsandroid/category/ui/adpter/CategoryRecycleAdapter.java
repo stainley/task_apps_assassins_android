@@ -67,8 +67,7 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
 
                     return true;
                 case R.id.rename_category_menu:
-                    Toast.makeText(view.getContext(), "RENAME MENU", Toast.LENGTH_SHORT).show();
-                    onCategoryCallback.onRenameCategory(view, position);
+                    onCategoryCallback.onRenameCategory(position);
 
                     return true;
             }
@@ -99,7 +98,7 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
     }
 
     public interface OnCategoryCallback {
-        void onRenameCategory(View view, int position);
+        void onRenameCategory(int position);
 
         void onDeleteCategory(View view, int position);
     }
