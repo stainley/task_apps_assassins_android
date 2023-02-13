@@ -5,4 +5,8 @@
     <string name="title_note">Note</string>
     <string name="title_task">Task</string>
     <string name="title_search">Search</string>
+    <string name="search_note">Search note</string>
+    <string name="new_note">New Note</string>
+    <string name="new_task">New Task</string>
+    <string name="search_task">Search Task</string>
 </resources>
