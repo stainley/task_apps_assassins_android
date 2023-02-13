@@ -1,7 +1,11 @@
 package ca.app.assasins.taskappsassassinsandroid.common.model;
 
+import androidx.room.ColumnInfo;
+
 public class Coordinate {
+    @ColumnInfo(name = "LATITUDE")
     private double latitude;
+    @ColumnInfo(name = "LONGITUDE")
     private double longitude;
 
     public Coordinate(double latitude, double longitude) {

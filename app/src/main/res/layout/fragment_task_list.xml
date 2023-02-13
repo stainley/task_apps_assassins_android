@@ -40,21 +40,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="@string/search_task"
-            app:layout_anchor="@id/search_bar">
-            <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
+            app:layout_anchor="@id/search_bar"/>
+        <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/noteFilterRecycle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="76dp"
-                android:padding="8dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/categoryLis"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </com.google.android.material.search.SearchView>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/taskFilterRecycle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="76dp"
+            android:padding="8dp" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

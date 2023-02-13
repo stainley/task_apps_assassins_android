@@ -1,6 +1,8 @@
 package ca.app.assasins.taskappsassassinsandroid.category.ui.adpter;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -25,6 +27,7 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
     private final OnCategoryCallback onCategoryCallback;
     private final List<Category> categories;
 
+
     public CategoryRecycleAdapter(List<Category> categories, OnCategoryCallback onCallback) {
         this.categories = categories;
         this.onCategoryCallback = onCallback;
@@ -44,10 +47,7 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
         holder.categoryNameLabel.setText(categories.get(position).getName());
 
         holder.categoryCard.setOnClickListener(view -> {
-            Toast.makeText(holder.itemView.getContext(), categories.get(position).getName(), Toast.LENGTH_LONG).show();
-            Intent categoryNavActivity = new Intent(view.getContext(), NavigationActivity.class);
-            categoryNavActivity.putExtra("category", categories.get(position));
-            view.getContext().startActivity(categoryNavActivity);
+            onCategoryCallback.onRowClicked(position);
         });
 
         holder.overflowMenu.setOnClickListener(view -> showPopupMenu(holder.overflowMenu, holder.getAdapterPosition()));
@@ -101,5 +101,7 @@ public class CategoryRecycleAdapter extends RecyclerView.Adapter<CategoryRecycle
         void onRenameCategory(int position);
 
         void onDeleteCategory(View view, int position);
+
+        void onRowClicked(int position);
     }
 }
