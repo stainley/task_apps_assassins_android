@@ -19,7 +19,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel
 public class TaskListFragment extends Fragment {
 
     private FragmentTaskListBinding binding;
-    private Category category;
+    private long categoryId;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -37,16 +37,11 @@ public class TaskListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Bundle arguments = getArguments();
-        assert arguments != null;
-        category = (Category) arguments.getSerializable("category");
-        if (category != null)
-            System.out.println(category.getName());
 
     }
 
     public void createNewTask(View view) {
-        Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity(category).setCategory(category));
+        Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setCategoryID(categoryId));
     }
 
     @Override
