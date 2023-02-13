@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_note">Search note</string>
+    <string name="new_note">New Note</string>
+    <string name="new_task">New Task</string>
+    <string name="search_task">Search Task</string>
+</resources>

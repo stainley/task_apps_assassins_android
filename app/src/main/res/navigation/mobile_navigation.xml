@@ -3,17 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_note">
+    app:startDestination="@id/navigation_task">
 
     <fragment
         android:id="@+id/navigation_note"
         android:name="ca.app.assasins.taskappsassassinsandroid.note.view.NoteListFragment"
-        tools:layout="@layout/fragment_note_list" >
-    </fragment>
+        tools:layout="@layout/fragment_note_list" />
 
     <fragment
         android:id="@+id/navigation_task"
-        android:name="ca.app.assasins.taskappsassassinsandroid.tasks.ui.TaskListFragment"
-        tools:layout="@layout/fragment_task_list" />
+        android:name="ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragment"
+        tools:layout="@layout/fragment_task_list">
+        <argument
+            android:name="category_task"
+            app:argType="ca.app.assasins.taskappsassassinsandroid.category.model.Category" />
+        <action
+            android:id="@+id/action_taskDetailActivity"
+            app:destination="@id/taskDetailActivity" />
+    </fragment>
+    <activity
+        android:id="@+id/taskDetailActivity"
+        android:name="ca.app.assasins.taskappsassassinsandroid.task.ui.TaskDetailActivity"
+        android:label="activity_task_detail"
+        tools:layout="@layout/activity_task_detail">
+        <argument
+            android:name="category"
+            app:argType="ca.app.assasins.taskappsassassinsandroid.category.model.Category" />
+    </activity>
 
 </navigation>
