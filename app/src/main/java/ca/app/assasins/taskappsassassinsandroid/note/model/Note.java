@@ -14,6 +14,8 @@ import ca.app.assasins.taskappsassassinsandroid.common.helper.Converters;
 public class Note implements Serializable {
     @PrimaryKey(autoGenerate = true)
     private Long id;
+
+    private Long categoryId;
     private String title;
     private String description;
 
@@ -24,10 +26,12 @@ public class Note implements Serializable {
 
     public Note(String title,
                 String description,
-                Date createdDate) {
+                Date createdDate,
+                Long categoryId) {
         this.title = title;
         this.description = description;
         this.createdDate = createdDate;
+        this.categoryId = categoryId;
     }
 
     public Long getId() {
@@ -36,6 +40,14 @@ public class Note implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long id) {
+        this.categoryId = categoryId;
     }
 
     public String getTitle() {

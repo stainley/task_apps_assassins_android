@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TaskAppsAssassinsAndroid</string>
+    <string name="app_name">Note and Task</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="title_activity_navigation">NavigationActivity</string>
     <string name="title_note">Note</string>
