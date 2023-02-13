@@ -28,9 +28,10 @@
         android:label="activity_task_detail"
         tools:layout="@layout/activity_task_detail">
         <argument
-            android:name="categoryID"
-            android:defaultValue="-1L"
-            app:argType="long" />
+            android:name="oldTask"
+            app:argType="ca.app.assasins.taskappsassassinsandroid.task.model.Task"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </activity>
 
 </navigation>

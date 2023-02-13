@@ -3,10 +3,13 @@ package ca.app.assasins.taskappsassassinsandroid.common.view;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
 import androidx.navigation.NavGraph;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -48,6 +51,17 @@ public class NavigationActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_navigation);
         Bundle bundle = new Bundle();
         bundle.putLong("categoryId", categoryId);
+        navController.addOnDestinationChangedListener((navControl, navDestination, bundleResult) -> {
+
+            if (navDestination.getId() == R.id.navigation_note) {
+                NavArgument argumentNote = new NavArgument.Builder().setDefaultValue(categoryId).build();
+                navDestination.addArgument("categoryId", argumentNote);
+            } else {
+                NavArgument argumentTask = new NavArgument.Builder().setDefaultValue(categoryId).build();
+                navDestination.addArgument("categoryId", argumentTask);
+            }
+
+        });
 
 
         navController.setGraph(R.navigation.mobile_navigation, bundle);
