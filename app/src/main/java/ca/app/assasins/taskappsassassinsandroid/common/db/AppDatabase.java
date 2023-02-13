@@ -14,6 +14,7 @@ import ca.app.assasins.taskappsassassinsandroid.category.dao.CategoryDao;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.task.dao.TaskDao;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 
@@ -41,4 +42,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CategoryDao categoryDao();
 
     public abstract NoteDao noteDao();
+    public abstract TaskDao taskDao();
+
 }

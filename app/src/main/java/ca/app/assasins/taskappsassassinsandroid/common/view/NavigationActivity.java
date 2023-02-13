@@ -6,13 +6,16 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
+import androidx.navigation.NavGraph;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Map;
 import java.util.Objects;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
@@ -45,7 +48,24 @@ public class NavigationActivity extends AppCompatActivity {
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_note, R.id.navigation_task).build();
 
+
+
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_navigation);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("category", category);
+
+
+
+        navController.setGraph(R.navigation.mobile_navigation, bundle);
+        NavGraph graph = navController.getGraph();
+
+        NavArgument argument = new NavArgument.Builder().setDefaultValue(category).build();
+        graph.addArgument("category", argument);
+
+        Map<String, NavArgument> arguments = graph.getArguments();
+        System.out.println(arguments);
+
+
         NavigationUI.setupWithNavController(navView, navController);
     }
 
