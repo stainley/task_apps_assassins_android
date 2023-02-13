@@ -15,13 +15,12 @@ import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 
 @Entity(tableName = "TASK_TBL",
-        foreignKeys = @ForeignKey(entity = Category.class, parentColumns = "CATEGORY_ID", childColumns = "TASK_ID", onDelete = ForeignKey.CASCADE),
         indices = @Index("TASK_NAME")
 )
 public class Task implements Serializable {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "TASK_ID")
-    private Long taskId;
+    private long taskId;
     @ColumnInfo(name = "TASK_NAME")
     private String taskName;
     @ColumnInfo(name = "COMPLETED")
@@ -36,11 +35,11 @@ public class Task implements Serializable {
     @ColumnInfo(name = "CATEGORY_ID")
     private Long categoryId;
 
-    public Long getTaskId() {
+    public long getTaskId() {
         return taskId;
     }
 
-    public void setTaskId(Long taskId) {
+    public void setTaskId(long taskId) {
         this.taskId = taskId;
     }
 

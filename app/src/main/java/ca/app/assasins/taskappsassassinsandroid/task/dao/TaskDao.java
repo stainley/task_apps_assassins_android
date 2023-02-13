@@ -35,4 +35,8 @@ public interface TaskDao extends AbstractDao<Task> {
     @Query("SELECT * FROM TASK_TBL WHERE TASK_ID = :id")
     @Override
     LiveData<Optional<Task>> fetchById(Long id);
+
+    @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId")
+    LiveData<List<Task>> fetchAllByCategory(Long categoryId);
+
 }
