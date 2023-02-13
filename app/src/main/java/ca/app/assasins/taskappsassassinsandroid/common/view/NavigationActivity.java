@@ -1,8 +1,7 @@
 package ca.app.assasins.taskappsassassinsandroid.common.view;
 
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.EditText;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,11 +14,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.Map;
-import java.util.Objects;
-
 import ca.app.assasins.taskappsassassinsandroid.R;
-import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNavigationBinding;
 
 public class NavigationActivity extends AppCompatActivity {
@@ -32,9 +27,10 @@ public class NavigationActivity extends AppCompatActivity {
 
         setContentView(binding.getRoot());
 
-        Intent categoryIntent = getIntent();
-        Category category = (Category) categoryIntent.getSerializableExtra("category");
-        setTitle(category.getName());
+        SharedPreferences categorySP = getSharedPreferences("category_sp", MODE_PRIVATE);
+        String categoryName = categorySP.getString("categoryName", "No Category");
+        long categoryId = categorySP.getLong("categoryId", -1);
+        setTitle(categoryName);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -49,21 +45,15 @@ public class NavigationActivity extends AppCompatActivity {
                 R.id.navigation_note, R.id.navigation_task).build();
 
 
-
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_navigation);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("category", category);
-
+        bundle.putLong("categoryId", categoryId);
 
 
         navController.setGraph(R.navigation.mobile_navigation, bundle);
         NavGraph graph = navController.getGraph();
-
-        NavArgument argument = new NavArgument.Builder().setDefaultValue(category).build();
+        NavArgument argument = new NavArgument.Builder().setDefaultValue(categoryId).build();
         graph.addArgument("category", argument);
-
-        Map<String, NavArgument> arguments = graph.getArguments();
-        System.out.println(arguments);
 
 
         NavigationUI.setupWithNavController(navView, navController);

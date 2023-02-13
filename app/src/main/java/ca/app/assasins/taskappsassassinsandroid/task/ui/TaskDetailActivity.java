@@ -2,7 +2,9 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,7 +29,15 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         Category category = (Category) getIntent().getSerializableExtra("category");
 
-        System.out.println("FROM TASK DETAIL: " + category.getName());
+        //System.out.println("FROM TASK DETAIL: " + category.getName());
 
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+
+
+
+        return super.onContextItemSelected(item);
     }
 }
