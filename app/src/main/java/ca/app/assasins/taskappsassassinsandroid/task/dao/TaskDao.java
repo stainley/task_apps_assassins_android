@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
+import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 
 @Dao
 public interface TaskDao extends AbstractDao<Task> {
@@ -38,5 +39,8 @@ public interface TaskDao extends AbstractDao<Task> {
 
     @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId")
     LiveData<List<Task>> fetchAllByCategory(Long categoryId);
+
+    @Query("SELECT * FROM TASK_TBL WHERE TASK_ID = :id")
+    LiveData<List<TaskImages>> getAllImagesByTaskId(long id);
 
 }

@@ -1,6 +1,7 @@
 package ca.app.assasins.taskappsassassinsandroid.task.model;
 
 import androidx.room.Embedded;
+import androidx.room.Ignore;
 import androidx.room.Relation;
 
 import java.util.List;
@@ -18,6 +19,10 @@ public class TaskImages {
     )
     private List<Picture> pictures;
 
+    public TaskImages() {
+    }
+
+    @Ignore
     public TaskImages(Task task, List<Picture> pictures) {
         this.task = task;
         this.pictures = pictures;

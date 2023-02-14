@@ -9,6 +9,7 @@ public class Picture {
     @PrimaryKey
     @ColumnInfo(name = "PICTURE_ID")
     private Long id;
+    @ColumnInfo(name = "PICTURE_PATH")
     private String path;
     @ColumnInfo(name = "CREATION_DATE")
     private Long creationDate;

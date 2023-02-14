@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
+import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
+import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 import ca.app.assasins.taskappsassassinsandroid.task.repositories.TaskRepository;
 
 public class TaskListViewModel extends ViewModel {
@@ -24,6 +26,7 @@ public class TaskListViewModel extends ViewModel {
         taskRepository.saveTask(task);
     }
 
+
     public void deleteTask(@NonNull Task task) {
 
     }
@@ -38,5 +41,13 @@ public class TaskListViewModel extends ViewModel {
 
     public LiveData<List<Task>> fetchAllTaskByCategory(Long categoryId) {
         return taskRepository.fetchAllTaskByCategory(categoryId);
+    }
+
+    public void savePictures(List<Picture> pictures) {
+        taskRepository.savePictures(pictures);
+    }
+
+    public LiveData<List<TaskImages>> fetchPicturesByTaskId(long taskId) {
+        return taskRepository.fetchPicturesByTaskId(taskId);
     }
 }

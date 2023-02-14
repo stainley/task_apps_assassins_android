@@ -10,4 +10,6 @@
     <string name="new_task">New Task</string>
     <string name="search_task">Search Task</string>
     <string name="task_name">Task Name</string>
+
+    <string name="authorities">com.example.fileprovider</string>
 </resources>

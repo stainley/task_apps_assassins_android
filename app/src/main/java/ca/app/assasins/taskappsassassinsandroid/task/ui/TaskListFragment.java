@@ -31,10 +31,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     private FragmentTaskListBinding binding;
     private TaskListViewModel taskListViewModel;
     private final List<Task> tasks = new ArrayList<>();
-
     private TaskListViewAdapter taskListViewAdapter;
-
-
     private long categoryId;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
