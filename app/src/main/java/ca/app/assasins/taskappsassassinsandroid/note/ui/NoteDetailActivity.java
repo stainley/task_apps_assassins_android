@@ -2,9 +2,10 @@ package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,19 +14,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 import java.util.Date;
 import java.util.Objects;
 
-import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
+import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
-import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityTaskDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
-import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
-import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskDetailActivityArgs;
-import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
-import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
 
 public class NoteDetailActivity extends AppCompatActivity {
 
@@ -48,32 +46,25 @@ public class NoteDetailActivity extends AppCompatActivity {
         SharedPreferences categorySP = getSharedPreferences("category_sp", MODE_PRIVATE);
         categoryId = categorySP.getLong("categoryId", -1);
         noteViewModel = new ViewModelProvider(new ViewModelStore(), new NoteViewModelFactory(getApplication())).get(NoteViewModel.class);
+
+        binding.addBtn.setOnClickListener(this::addBtnClicked);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        //saveNote(this);
-        //return super.onOptionsItemSelected(item);
-
         if (item.getItemId() == android.R.id.home) {
             Toast.makeText(this, "SAVING NOTE", Toast.LENGTH_SHORT).show();
-            //Editable taskName = binding.title.getText();
-            // Save the task
-//            Task task = new Task();
-//            task.setTaskId(this.task != null ? this.task.getTaskId() : 0);
-//            task.setCreationDate(new Date().getTime());
 
             String title = Objects.requireNonNull(binding.title.getText()).toString();
             String description = Objects.requireNonNull(binding.description.getText()).toString();
             Date createdDate = new Date();
 
-            Note newNote = new Note(title, description, createdDate, categoryId);
+            Note newNote = new Note(title, description, createdDate, categoryId/*, new Coordinate(43.44, -79.45)*/);
 
-            assert title != null;
-            if (!title.toString().isEmpty() && note.getId() == 0) {
-                noteViewModel.createNote(note);
-            } else {
-                // update
+            if (note == null && title != null) {
+                noteViewModel.createNote(newNote);
+            }
+            else {
                 newNote.setCategoryId(categoryId);
                 noteViewModel.updateNote(note);
             }
@@ -84,15 +75,21 @@ public class NoteDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void saveNote(NoteDetailActivity view) {
+    private void addBtnClicked(View view) {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
+                NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                .inflate(R.layout.activity_add_image_audio_sheet,
+                        (LinearLayout)findViewById(R.id.bottomSheetContainer));
+                bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(NoteDetailActivity.this, "Take a photo!!!", Toast.LENGTH_SHORT).show();
+                        bottomSheetDialog.dismiss();
+                    }
+                });
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
 
-
-//        if (note != null) {
-//            newNote.setId(note.getId());
-//        }
-//
-//        noteViewModel.createNote(note);
-//
-//        finish();
     }
 }

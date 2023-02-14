@@ -10,4 +10,10 @@
     <string name="new_task">New Task</string>
     <string name="search_task">Search Task</string>
     <string name="task_name">Task Name</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="add_image">Add Image</string>
+    <string name="recording">Recording</string>
+
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="share_with_friends">Share with Friends</string>
 </resources>
