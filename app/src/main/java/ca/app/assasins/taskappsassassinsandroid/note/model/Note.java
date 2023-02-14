@@ -34,6 +34,7 @@ public class Note implements Serializable {
         this.categoryId = categoryId;
     }
 
+
     public Long getId() {
         return id;
     }

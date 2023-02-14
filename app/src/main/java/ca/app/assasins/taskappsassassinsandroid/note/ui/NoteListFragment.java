@@ -1,5 +1,8 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,22 +12,50 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
+import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
+import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
+import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
 
 public class NoteListFragment extends Fragment {
 
     private FragmentNoteListBinding binding;
+
+    private NoteViewModel noteViewModel;
     private Category category;
+
+    private long categoryId;
+
+    private final List<Note> notes = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentNoteListBinding.inflate(inflater, container, false);
 
-        binding.createNoteBtn.setOnClickListener(this::createNewNote);
+        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
+        categoryId = categorySP.getLong("categoryId", -1);
 
+
+        noteViewModel = new ViewModelProvider(this, new NoteViewModelFactory(requireActivity().getApplication())).get(NoteViewModel.class);
+
+        noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+            this.notes.clear();
+            this.notes.addAll(notesResult);
+            //this.noteListViewAdapter.notifyItemChanged(notesResult.size());
+        });
+
+        binding.createNoteBtn.setOnClickListener(this::createNewNote);
         return binding.getRoot();
     }
 
@@ -61,6 +92,6 @@ public class NoteListFragment extends Fragment {
     }
 
     private void createNewNote(View view) {
-        Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity(category).setCategory(category));
+        Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity());
     }
 }
