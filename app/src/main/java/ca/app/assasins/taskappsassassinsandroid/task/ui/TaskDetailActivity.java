@@ -4,6 +4,7 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -11,10 +12,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -25,9 +26,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -35,7 +38,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
 
 import java.util.ArrayList;
@@ -43,12 +47,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
+import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityTaskDetailBinding;
+import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.SubTaskViewAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskPictureRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
@@ -61,12 +70,12 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private long categoryId;
     private Task task;
+    private SubTaskViewAdapter subTaskViewAdapter;
     private TaskPictureRVAdapter taskPictureRVAdapter;
     private Uri tempImageUri = null;
 
-    private ImageView imageView;
     private final List<Picture> myPictures = new ArrayList<>();
-    private static final int REQUEST_IMAGE_CAPTURE = 3322;
+    private final List<SubTask> subTasks = new ArrayList<>();
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -134,6 +143,19 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         taskPictureRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         taskPictureRV.setAdapter(taskPictureRVAdapter);
 
+        //subtask rv/adapter
+        subTaskViewAdapter = new SubTaskViewAdapter(subTasks, (view, position) -> {
+            // TODO: Delete subtask
+            //
+            subTasks.remove(position);
+            subTaskViewAdapter.notifyItemRemoved(position);
+        });
+
+        RecyclerView subTaskRV = binding.subTaskRV;
+        subTaskRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        subTaskRV.setNestedScrollingEnabled(false);
+        subTaskRV.setAdapter(subTaskViewAdapter);
+
 
         TaskDetailActivityArgs taskDetailActivityArgs = TaskDetailActivityArgs.fromBundle(getIntent().getExtras());
         task = taskDetailActivityArgs.getOldTask();
@@ -143,28 +165,22 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
             taskListViewModel.fetchPicturesByTaskId(task.getTaskId()).observe(this, taskImages -> {
                 myPictures.clear();
-                taskImages.forEach(image -> {
-                    myPictures.addAll(image.pictures);
-                });
+                taskImages.forEach(image -> myPictures.addAll(image.pictures));
                 taskPictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
             });
         }
     }
 
-
+    //TODO: Save into DB
     public void startTaskDate(View view) {
 
-        StringBuilder dateSelected = new StringBuilder();
         final int[] hour = new int[1];
         final int[] minute = new int[1];
         final Date[] date = new Date[1];
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
 
 
-        MaterialTimePicker selectTime = new MaterialTimePicker
-                .Builder()
-                .setTitleText("Start Time")
-                .build();
+        MaterialTimePicker selectTime = new MaterialTimePicker.Builder().setTitleText("Start Time").build();
 
         selectTime.setCancelable(false);
         selectTime.show(getSupportFragmentManager(), null);
@@ -182,17 +198,10 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         });
 
 
-        MaterialDatePicker<Long> selectDate = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Select date")
-                .build();
+        MaterialDatePicker<Long> selectDate = MaterialDatePicker.Builder.datePicker().setTitleText("Select date").build();
         selectDate.setCancelable(false);
         selectDate.show(getSupportFragmentManager(), "calendar");
-        selectDate.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-            @Override
-            public void onPositiveButtonClick(Long selection) {
-                date[0] = new Date(selection);
-            }
-        });
+        selectDate.addOnPositiveButtonClickListener(selection -> date[0] = new Date(selection));
 
 
     }
@@ -219,27 +228,73 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     }
 
     private void addBtnClicked(View view) {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
-                this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext())
-                .inflate(R.layout.activity_add_image_audio_sheet,
-                        (LinearLayout) findViewById(R.id.bottomSheetContainer));
-        bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Take a photo!!!", Toast.LENGTH_SHORT).show();
-                takePhoto();
-                bottomSheetDialog.dismiss();
-            }
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_task_functionality_sheet, (LinearLayout) findViewById(R.id.bottomSheetContainer));
+        bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(view1 -> {
+            takePhoto();
+            bottomSheetDialog.dismiss();
         });
 
-        bottomSheetView.findViewById(R.id.upload_image_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(), "Upload Image!!", Toast.LENGTH_SHORT).show();
-                addPhotoFromLibrary();
-                bottomSheetDialog.dismiss();
-            }
+        bottomSheetView.findViewById(R.id.upload_image_btn).setOnClickListener(view12 -> {
+            addPhotoFromLibrary();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetView.findViewById(R.id.addSubTaskBtn).setOnClickListener(v2 -> {
+
+            // TODO: Add SubTask Dialog Menu
+
+            TextInputEditText newEditText = new TextInputEditText(this);
+            newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+            newEditText.setHint("Add subtask");
+
+            new MaterialAlertDialogBuilder(this).setTitle("New Sub Task").setMessage("Would you like to add a subtask?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
+
+            }).setPositiveButton("Add", (dialog, which) -> {
+
+                String inputText = Objects.requireNonNull(newEditText.getText()).toString();
+                if (inputText.equals("")) {
+                    Toast.makeText(this, "Couldn't be empty", Toast.LENGTH_SHORT).show();
+                } else {
+                    SubTask subTask = new SubTask();
+                    subTask.setTaskParentId(task.getTaskId());
+                    subTask.setName(newEditText.getText().toString());
+                    subTasks.add(subTask);
+                    subTaskViewAdapter.notifyDataSetChanged();
+                    //List<Category> resultCategory = categories.stream().filter(cat -> inputText.equalsIgnoreCase(cat.getName())).collect(Collectors.toList());
+
+                    /*if (resultCategory.isEmpty()) {
+                        categoryViewModel.createCategory(new Category(inputText));
+                    } else {
+                        Toast.makeText(this, inputText + " is in our database.", Toast.LENGTH_SHORT).show();
+                    }*/
+                }
+            }).setCancelable(false).show();
+
+           /* AlertDialog.Builder builder = new AlertDialog.Builder(TaskDetailActivity.this);
+            // Get the layout inflater
+            LayoutInflater inflater = getLayoutInflater();
+
+            // Inflate and set the layout for the dialog
+            // Pass null as the parent view because its going in the dialog layout
+            builder.setView(inflater.inflate(R.layout.fragment_sub_task_dialog, null))
+                    // Add action buttons
+                    .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            // sign in the user ...
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            TaskDetailActivity.this.getDialog().cancel();
+                        }
+                    });
+            return builder.create();*/
+
+
+            //bottomSheetDialog.dismiss();
         });
 
 
@@ -248,11 +303,8 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     }
 
     private void moreActionBtnClicked(View view) {
-        final BottomSheetDialog moreActionBottomSheetDialog = new BottomSheetDialog(
-                this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext())
-                .inflate(R.layout.activity_more_action_sheet,
-                        (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
+        final BottomSheetDialog moreActionBottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_more_action_sheet, (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
         bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(v -> {
 
             if (task != null) {
@@ -271,10 +323,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            //selectCameraLauncher.launch(tempImageUri);
-            //selectPictureLauncher.launch();
-        }
+        // if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
     }
 
     @Override
@@ -325,9 +374,9 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         return super.onOptionsItemSelected(item);
     }
 
+    // Remote picture from the Task
     @Override
     public void onDeletePicture(View view, int position) {
-        // TODO: delete
         taskListViewModel.deletePicture(myPictures.get(position));
         myPictures.remove(position);
         taskPictureRVAdapter.notifyItemRemoved(position);

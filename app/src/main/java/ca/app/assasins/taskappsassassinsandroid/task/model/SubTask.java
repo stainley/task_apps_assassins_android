@@ -18,10 +18,10 @@ public class SubTask implements Serializable {
     private Long subTaskId;
     @ColumnInfo(name = "SUBTASK_NAME")
     private String name;
-    @ColumnInfo(name = "COMPLETION_DATE")
-    private Long completionDate;
-    @ColumnInfo(name = "UPDATED_DATE")
-    private Long updatedDate;
+
+    @ColumnInfo(name = "TASK_PARENT_ID")
+    private Long taskParentId;
+
     @Embedded
     private Coordinate coordinate;
 
@@ -41,27 +41,19 @@ public class SubTask implements Serializable {
         this.name = name;
     }
 
-    public Long getCompletionDate() {
-        return completionDate;
-    }
-
-    public void setCompletionDate(Long completionDate) {
-        this.completionDate = completionDate;
-    }
-
-    public Long getUpdatedDate() {
-        return updatedDate;
-    }
-
-    public void setUpdatedDate(Long updatedDate) {
-        this.updatedDate = updatedDate;
-    }
-
     public Coordinate getCoordinate() {
         return coordinate;
     }
 
     public void setCoordinate(Coordinate coordinate) {
         this.coordinate = coordinate;
+    }
+
+    public Long getTaskParentId() {
+        return taskParentId;
+    }
+
+    public void setTaskParentId(Long taskParentId) {
+        this.taskParentId = taskParentId;
     }
 }
