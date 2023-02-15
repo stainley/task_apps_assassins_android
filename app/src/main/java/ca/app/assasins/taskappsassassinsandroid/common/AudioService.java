@@ -97,4 +97,12 @@ public class AudioService extends AppCompatActivity {
         mediaPlayer.start();
     }
 
+    private void stopPlayingAudio() {
+
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            setUpMediaRecorder();
+        }
+    }
 }
