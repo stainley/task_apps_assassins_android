@@ -59,6 +59,10 @@ public class AudioService extends AppCompatActivity {
             requestPermission();
     }
 
+    private void stopRecordAudio() {
+        mediaRecorder.stop();
+    }
+
     private void setUpMediaRecorder() {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
