@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -125,6 +126,17 @@ public class AudioService extends AppCompatActivity {
         int record_audio_result = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
         return write_external_storage_result == PackageManager.PERMISSION_GRANTED &&
                 record_audio_result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
