@@ -107,6 +107,12 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         binding = null;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        noteRecycleAdapter.notifyDataSetChanged();
+    }
+
     private void createNewNote(View view) {
         Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity());
     }
