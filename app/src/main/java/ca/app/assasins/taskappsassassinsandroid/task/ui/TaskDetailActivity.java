@@ -53,11 +53,12 @@ import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskPictureRVAda
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
 
-public class TaskDetailActivity extends AppCompatActivity {
+public class TaskDetailActivity extends AppCompatActivity implements TaskPictureRVAdapter.OnPictureTaskCallback {
 
     private ActivityTaskDetailBinding binding;
 
     private TaskListViewModel taskListViewModel;
+
     private long categoryId;
     private Task task;
     private TaskPictureRVAdapter taskPictureRVAdapter;
@@ -129,7 +130,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         RecyclerView taskPictureRV = binding.taskPictureRV;
 
         // adapter picture
-        taskPictureRVAdapter = new TaskPictureRVAdapter(myPictures);
+        taskPictureRVAdapter = new TaskPictureRVAdapter(myPictures, this);
         taskPictureRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         taskPictureRV.setAdapter(taskPictureRVAdapter);
 
@@ -150,11 +151,6 @@ public class TaskDetailActivity extends AppCompatActivity {
         }
     }
 
-
-    public void taskOptionMenu(View view) {
-
-
-    }
 
     public void startTaskDate(View view) {
 
@@ -257,10 +253,10 @@ public class TaskDetailActivity extends AppCompatActivity {
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(R.layout.activity_more_action_sheet,
                         (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
-        bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //noteViewModel.deleteNote(note);
+        bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(v -> {
+
+            if (task != null) {
+                taskListViewModel.deleteTask(task);
                 Toast.makeText(getApplicationContext(), "Delete!!!", Toast.LENGTH_SHORT).show();
                 moreActionBottomSheetDialog.dismiss();
                 finish();
@@ -311,9 +307,16 @@ public class TaskDetailActivity extends AppCompatActivity {
                     taskListViewModel.saveTask(task);
                 }
             } else {
-                // update
                 task.setTaskName(taskName.toString());
-                taskListViewModel.updateTask(task);
+                // update
+                if (!myPictures.isEmpty()) {
+                    List<Picture> pictureList = new ArrayList<>(myPictures);
+                    taskListViewModel.updatePictures(task, pictureList);
+                } else {
+                    // Task without pictures (Pictures are optional
+                    task.setTaskName(taskName.toString());
+                    taskListViewModel.updateTask(task);
+                }
             }
 
             return false;
@@ -322,4 +325,11 @@ public class TaskDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onDeletePicture(View view, int position) {
+        // TODO: delete
+        taskListViewModel.deletePicture(myPictures.get(position));
+        myPictures.remove(position);
+        taskPictureRVAdapter.notifyItemRemoved(position);
+    }
 }

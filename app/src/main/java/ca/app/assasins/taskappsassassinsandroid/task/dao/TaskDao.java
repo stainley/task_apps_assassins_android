@@ -29,7 +29,7 @@ public abstract class TaskDao implements AbstractDao<Task> {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract long saveTask(Task task);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract void savePicture(Picture picture);
 
     @Delete
@@ -61,6 +61,16 @@ public abstract class TaskDao implements AbstractDao<Task> {
         final long taskId = saveTask(task);
         pictures.forEach(picture -> {
             picture.setParentTaskId(taskId);
+            savePicture(picture);
+        });
+        return true;
+    }
+
+    @Transaction
+    public Boolean updatePicture(Task task, List<Picture> pictures) {
+        update(task);
+        pictures.forEach(picture -> {
+            picture.setParentTaskId(task.getTaskId());
             savePicture(picture);
         });
         return true;
