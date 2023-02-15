@@ -13,7 +13,7 @@
         android:nestedScrollingEnabled="false">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/categoryList"
+            android:id="@+id/noteList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="76dp"
