@@ -8,11 +8,13 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
 import androidx.room.Update;
+import androidx.room.Upsert;
 
 import java.util.List;
 import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
@@ -53,13 +55,21 @@ public abstract class TaskDao implements AbstractDao<Task> {
     @Query("SELECT * FROM TASK_TBL WHERE TASK_ID = :id")
     public abstract LiveData<List<TaskImages>> getAllImagesByTaskId(long id);
 
+
     @Transaction
-    public void saveTaskWithPicture(Task task, List<Picture> pictures) {
+    public Boolean addPicture(Task task, List<Picture> pictures) {
         final long taskId = saveTask(task);
         pictures.forEach(picture -> {
             picture.setParentTaskId(taskId);
             savePicture(picture);
         });
+        return true;
     }
 
+
+    //TODO: to be implement saving audios to the task
+    @Transaction
+    public void addAudio(Task type, List<Audio> audios) {
+
+    }
 }

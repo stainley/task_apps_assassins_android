@@ -2,24 +2,15 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 
 
 import android.Manifest;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.media.ExifInterface;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.view.LayoutInflater;
@@ -42,21 +33,14 @@ import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
-
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import ca.app.assasins.taskappsassassinsandroid.common.ImageService;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityTaskDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
-import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskPictureRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
@@ -68,10 +52,9 @@ public class TaskDetailActivity extends AppCompatActivity {
     private TaskListViewModel taskListViewModel;
     private long categoryId;
     private Task task;
-    Bitmap myBitmap;
-    Uri picUri;
-
     private TaskPictureRVAdapter taskPictureRVAdapter;
+    private Uri tempImageUri = null;
+
     private ImageView imageView;
     private final List<Picture> myPictures = new ArrayList<>();
     private static final int REQUEST_IMAGE_CAPTURE = 3322;
@@ -79,11 +62,11 @@ public class TaskDetailActivity extends AppCompatActivity {
     private ActivityResultLauncher<String> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
         @Override
         public void onActivityResult(Uri result) {
-            imageView.setImageURI(result);
+
         }
     });
 
-    private Uri tempImageUri = null;
+    // Take photo from the camera
     private final ActivityResultLauncher<Uri> selectCameraLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
         if (result) {
 
@@ -91,9 +74,8 @@ public class TaskDetailActivity extends AppCompatActivity {
                 Picture picture = new Picture();
                 picture.setCreationDate(new Date().getTime());
                 picture.setPath("content://media/" + tempImageUri.getPath());
-                //myPictures.add("content://media/" + tempImageUri.getPath());
                 myPictures.add(picture);
-                taskPictureRVAdapter.notifyDataSetChanged();
+                taskPictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -137,7 +119,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 taskImages.forEach(image -> {
                     myPictures.addAll(image.pictures);
                 });
-                taskPictureRVAdapter.notifyDataSetChanged();
+                taskPictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
             });
         }
     }
@@ -147,22 +129,17 @@ public class TaskDetailActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
         }
-        File file = new File(getFilesDir(), "images");
-        //Uri uri = FileProvider.getUriForFile(this, getString(R.string.authorities), file);
-        //Uri uri = Uri.parse("data://" + file.getAbsolutePath());
 
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         ContentResolver cr = getContentResolver();
         ContentValues values = new ContentValues();
-        //String imageFileName = "dasdsad";
-        //values.put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName);
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
         values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
 
         tempImageUri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-        //FIXME: execute when the user approve the permission.
-        selectCameraLauncher.launch(tempImageUri);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            selectCameraLauncher.launch(tempImageUri);
+        }
 
     }
 
@@ -172,14 +149,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            ImageService imageService = new ImageService();
-            dispatchTakePictureIntent(REQUEST_IMAGE_CAPTURE);
+            selectCameraLauncher.launch(tempImageUri);
         }
-    }
-
-    private void dispatchTakePictureIntent(int actionCode) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(takePictureIntent, actionCode);
     }
 
     @Override
@@ -201,20 +172,15 @@ public class TaskDetailActivity extends AppCompatActivity {
             task.setCompleted(binding.taskCompletionCkb.isChecked());
             task.setCategoryId(categoryId);
 
-            //TaskImages taskImages = new TaskImages();
-            //taskImages.setTask(task);
-            //taskImages.setPictures(myPictures);
-
-
             assert taskName != null;
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
                 task.setTaskName(taskName.toString());
-                //Long taskID = taskListViewModel.saveTask(task);
 
                 if (!myPictures.isEmpty()) {
-                    //picture.setParentTaskId(ta);
                     List<Picture> pictureList = new ArrayList<>(myPictures);
                     taskListViewModel.savePictures(task, pictureList);
+                } else {
+                    taskListViewModel.saveTask(task);
                 }
             } else {
                 // update

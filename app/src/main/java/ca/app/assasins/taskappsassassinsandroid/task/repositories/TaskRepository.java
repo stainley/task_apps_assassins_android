@@ -26,12 +26,8 @@ public class TaskRepository {
         pictureDao = db.pictureDao();
     }
 
-    public Long saveTask(@NonNull Task task) {
-        Long[] rowId = new Long[1];
-        AppDatabase.databaseWriterExecutor.execute(() -> rowId[0] = taskDao.saveTask(task));
-
-        return rowId[0];
-
+    public void saveTask(@NonNull Task task) {
+        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.saveTask(task));
     }
 
     public void deleteTask(@NonNull Task task) {
@@ -57,6 +53,6 @@ public class TaskRepository {
 
     @Transaction
     public void saveTaskWithPictures(Task task, List<Picture> pictures) {
-        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.saveTaskWithPicture(task, pictures));
+        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.addPicture(task, pictures));
     }
 }

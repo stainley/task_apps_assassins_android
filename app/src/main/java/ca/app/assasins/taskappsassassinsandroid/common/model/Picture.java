@@ -17,6 +17,8 @@ public class Picture implements Serializable {
     private Long creationDate;
     @ColumnInfo(name = "PARENT_TASK_ID")
     private long parentTaskId;
+    @ColumnInfo(name = "PARENT_NOTE_ID")
+    private long parentNoteId;
 
     public Long getId() {
         return id;
@@ -48,5 +50,13 @@ public class Picture implements Serializable {
 
     public void setParentTaskId(long parentTaskId) {
         this.parentTaskId = parentTaskId;
+    }
+
+    public long getParentNoteId() {
+        return parentNoteId;
+    }
+
+    public void setParentNoteId(long parentNoteId) {
+        this.parentNoteId = parentNoteId;
     }
 }

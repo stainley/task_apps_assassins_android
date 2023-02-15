@@ -21,12 +21,9 @@ public class TaskListViewModel extends ViewModel {
         taskRepository = new TaskRepository(application);
     }
 
-
-    public Long saveTask(@NonNull Task task) {
-        Long rowId = taskRepository.saveTask(task);
-        return rowId;
+    public void saveTask(@NonNull Task task) {
+        taskRepository.saveTask(task);
     }
-
 
     public void deleteTask(@NonNull Task task) {
 
@@ -44,6 +41,11 @@ public class TaskListViewModel extends ViewModel {
         return taskRepository.fetchAllTaskByCategory(categoryId);
     }
 
+    /***
+     * Save task with pictures
+     * @param task Task
+     * @param pictures List<Picture>
+     */
     public void savePictures(Task task, List<Picture> pictures) {
         taskRepository.saveTaskWithPictures(task, pictures);
     }
