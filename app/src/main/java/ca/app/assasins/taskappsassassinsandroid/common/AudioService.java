@@ -2,6 +2,7 @@ package ca.app.assasins.taskappsassassinsandroid.common;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,7 @@ public class AudioService extends AppCompatActivity {
     String pathSave = "";
     MediaRecorder mediaRecorder;
     final private static String RECORDED_FILE = "/audio.3gp";
+    MediaPlayer mediaPlayer;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +75,26 @@ public class AudioService extends AppCompatActivity {
 //        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 //        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 
+    }
+
+    private void playAudio() {
+
+        mediaPlayer = new MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(pathSave);
+            mediaPlayer.prepare();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+            }
+        });
+
+        mediaPlayer.start();
     }
 
 }
