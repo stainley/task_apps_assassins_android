@@ -8,7 +8,6 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,20 +32,16 @@ public class AudioService extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-        // set the volume of played media to maximum.
+
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
-        // check the permission
-        /*if (!checkPermissionDevice())
-            requestPermission();*/
+        if (!checkPermissionDevice())
+            requestPermission();
     }
 
     private void recordAudio() {
         if (checkPermissionDevice()) {
-//                    pathSave = Environment.getExternalStorageDirectory().getAbsolutePath()
-//                            + "/recording.3gp";
-//                    pathSave = getExternalFilesDir(null).getAbsolutePath()
-//                            + RECORDED_FILE;
+
             pathSave = getExternalCacheDir().getAbsolutePath()
                     + RECORDED_FILE;
 
@@ -79,14 +74,10 @@ public class AudioService extends AppCompatActivity {
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         /*mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);*/
         mediaRecorder.setOutputFile(pathSave);
-//        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-//        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-//        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
 
     }
 
     private void playAudio() {
-
         mediaPlayer = new MediaPlayer();
         try {
             mediaPlayer.setDataSource(pathSave);
@@ -106,7 +97,6 @@ public class AudioService extends AppCompatActivity {
     }
 
     private void stopPlayingAudio() {
-
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();
