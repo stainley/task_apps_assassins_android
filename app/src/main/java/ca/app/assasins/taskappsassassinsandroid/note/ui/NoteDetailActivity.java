@@ -15,15 +15,24 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.snackbar.Snackbar;
 
+import java.sql.SQLOutput;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskDetailActivityArgs;
 
 public class NoteDetailActivity extends AppCompatActivity {
 
@@ -47,13 +56,23 @@ public class NoteDetailActivity extends AppCompatActivity {
         categoryId = categorySP.getLong("categoryId", -1);
         noteViewModel = new ViewModelProvider(new ViewModelStore(), new NoteViewModelFactory(getApplication())).get(NoteViewModel.class);
 
-        if (note == null) {
-            binding.moreActionBtn.setVisibility(View.INVISIBLE);
-            binding.editDateInfo.setVisibility(View.INVISIBLE);
-        }
-        else {
+        NoteDetailActivityArgs noteDetailActivityArgs = NoteDetailActivityArgs.fromBundle(getIntent().getExtras());
+        note = noteDetailActivityArgs.getOldNote();
+
+        if (note != null) {
             binding.moreActionBtn.setVisibility(View.VISIBLE);
             binding.editDateInfo.setVisibility(View.VISIBLE);
+
+            binding.title.setText(note.getTitle());
+            binding.description.setText(note.getDescription());
+
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh.mm aa");
+            String updatedDate = dateFormat.format(note.getUpdatedDate()).toString();
+            binding.editDateInfo.setText("Edited: " + updatedDate);
+        }
+        else {
+            binding.moreActionBtn.setVisibility(View.INVISIBLE);
+            binding.editDateInfo.setVisibility(View.INVISIBLE);
         }
 
         binding.addBtn.setOnClickListener(this::addBtnClicked);
@@ -63,32 +82,24 @@ public class NoteDetailActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            Toast.makeText(this, "SAVING NOTE", Toast.LENGTH_SHORT).show();
-
             String title = Objects.requireNonNull(binding.title.getText()).toString();
             String description = Objects.requireNonNull(binding.description.getText()).toString();
 
-            Date createdDate;
-            Date updatedDate;
+            Note newNote = new Note();
+            newNote.setTitle(title);
+            newNote.setDescription(description);
+            newNote.setCreatedDate(this.note != null ? this.note.getCreatedDate() : new Date());
+            newNote.setUpdatedDate(new Date());
+            newNote.setCategoryId(categoryId);
+            newNote.setNoteId(this.note != null ? this.note.getNoteId() : 0);
 
-            if (note == null) {
-                createdDate = new Date();
-                updatedDate = new Date();
-            }
-            else {
-                createdDate = note.getCreatedDate();
-                updatedDate = new Date();
-            }
-
-
-            Note newNote = new Note(title, description, createdDate, updatedDate, categoryId/*, new Coordinate(43.44, -79.45)*/);
-
-            if (note == null && title != "") {
+            assert title != null;
+            if (!title.toString().isEmpty() && newNote.getNoteId() == 0) {
                 noteViewModel.createNote(newNote);
-            }
-            else {
-                newNote.setNoteId(note.getNoteId());
-                noteViewModel.updateNote(note);
+                Toast.makeText(this, "SAVING " + title, Toast.LENGTH_SHORT).show();
+            } else {
+                noteViewModel.updateNote(newNote);
+                Toast.makeText(this, "UPDATING " + newNote.getTitle(), Toast.LENGTH_SHORT).show();
             }
 
             return false;
@@ -123,8 +134,10 @@ public class NoteDetailActivity extends AppCompatActivity {
         bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                noteViewModel.deleteNote(note);
                 Toast.makeText(NoteDetailActivity.this, "Delete!!!", Toast.LENGTH_SHORT).show();
                 moreActionBottomSheetDialog.dismiss();
+                finish();
             }
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);

@@ -30,26 +30,11 @@ public class Note implements Serializable {
 
     public Note() {
     }
-
-    public Note(String title,
-                String description,
-                Date createdDate,
-                Date updatedDate,
-                Long categoryId
-                /*Coordinate coordinate*/) {
-        this.title = title;
-        this.description = description;
-        this.createdDate = createdDate;
-        this.updatedDate = updatedDate;
-        this.categoryId = categoryId;
-        //this.coordinate = coordinate;
-    }
-
     public Long getNoteId() {
         return noteId;
     }
 
-    public void setNoteId(Long id) {
+    public void setNoteId(Long noteId) {
         this.noteId = noteId;
     }
 
@@ -57,7 +42,7 @@ public class Note implements Serializable {
         return categoryId;
     }
 
-    public void setCategoryId(Long id) {
+    public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 
