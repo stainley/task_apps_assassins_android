@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="8dp"
+
     tools:context=".task.ui.TaskDetailActivity">
 
     <LinearLayout
@@ -28,6 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
+            android:focusable="true"
             android:hint="@string/task_name"
             android:paddingBottom="16dp"
             android:textSize="18sp"
@@ -36,7 +37,6 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </LinearLayout>
-
 
     <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
@@ -49,6 +49,24 @@
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/taskTitleLayout">
 
+        <Button
+            android:id="@+id/startDateTask"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableLeft="@drawable/outline_task_alt_24"
+            android:hint="No start date"
+            android:textAlignment="textStart" />
+
+        <Button
+            android:id="@+id/dueDateTask"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableLeft="@drawable/ic_due_time_24"
+            android:hint="No due date"
+            android:textAlignment="textStart" />
+
         <ImageView
             android:id="@+id/pictureImg"
             android:layout_width="wrap_content"
@@ -60,9 +78,9 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/taskPictureRV"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

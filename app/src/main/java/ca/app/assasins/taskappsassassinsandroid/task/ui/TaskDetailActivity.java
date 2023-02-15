@@ -32,9 +32,20 @@ import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointBackward;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityTaskDetailBinding;
@@ -102,8 +113,15 @@ public class TaskDetailActivity extends AppCompatActivity {
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
+        }
+
         imageView = binding.pictureImg;
         binding.takePhotoMenu.setOnClickListener(this::taskOptionMenu);
+
+        binding.startDateTask.setOnClickListener(this::startTaskDate);
 
         SharedPreferences categorySP = getSharedPreferences("category_sp", MODE_PRIVATE);
         categoryId = categorySP.getLong("categoryId", -1);
@@ -135,33 +153,74 @@ public class TaskDetailActivity extends AppCompatActivity {
 
 
     public void taskOptionMenu(View view) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
-        }
 
-        ContentResolver cr = getContentResolver();
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-        values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
 
-        tempImageUri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            //select camera
-            //selectCameraLauncher.launch(tempImageUri);
-            //load image from library
-            PickVisualMediaRequest pickVisualMediaRequest = new PickVisualMediaRequest();
-
-            selectPictureLauncher.launch(pickVisualMediaRequest);
-        }
     }
 
-    public void takePhoto() {
+    public void startTaskDate(View view) {
 
+        StringBuilder dateSelected = new StringBuilder();
+        final int[] hour = new int[1];
+        final int[] minute = new int[1];
+        final Date[] date = new Date[1];
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
+
+
+        MaterialTimePicker selectTime = new MaterialTimePicker
+                .Builder()
+                .setTitleText("Start Time")
+                .build();
+
+        selectTime.setCancelable(false);
+        selectTime.show(getSupportFragmentManager(), null);
+
+        selectTime.addOnPositiveButtonClickListener(v -> {
+            hour[0] = selectTime.getHour();
+            minute[0] = selectTime.getMinute();
+            calendar.setTime(date[0]);
+            calendar.add(Calendar.HOUR_OF_DAY, selectTime.getHour() + 5);
+            calendar.add(Calendar.MINUTE, selectTime.getMinute());
+
+
+            binding.startDateTask.setHint(calendar.getTime().toString());
+            System.out.println(date[0] + " " + hour[0] + ":" + minute[0]);
+        });
+
+
+        MaterialDatePicker<Long> selectDate = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select date")
+                .build();
+        selectDate.setCancelable(false);
+        selectDate.show(getSupportFragmentManager(), "calendar");
+        selectDate.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
+            @Override
+            public void onPositiveButtonClick(Long selection) {
+                date[0] = new Date(selection);
+            }
+        });
+
+
+    }
+
+
+    public void takePhoto() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+
+
+            ContentResolver cr = getContentResolver();
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+
+            tempImageUri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            selectCameraLauncher.launch(tempImageUri);
+        }
     }
 
     public void addPhotoFromLibrary() {
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            selectPictureLauncher.launch(new PickVisualMediaRequest());
+        }
     }
 
 
