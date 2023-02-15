@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 
 @Dao
 public interface NoteDao extends AbstractDao<Note> {
@@ -32,10 +33,13 @@ public interface NoteDao extends AbstractDao<Note> {
     @Override
     LiveData<List<Note>> fetchAll();
 
-    @Query("SELECT * FROM NOTE_TBL WHERE id = :id")
+    @Query("SELECT * FROM NOTE_TBL WHERE noteId = :noteId")
     @Override
-    LiveData<Optional<Note>> fetchById(Long id);
+    LiveData<Optional<Note>> fetchById(Long noteId);
 
     @Query("SELECT * FROM NOTE_TBL WHERE title = :title")
-    LiveData<Note> fetchByTitle(String title);
+    LiveData<List<Note>> fetchByTitle(String title);
+
+    @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId")
+    LiveData<List<Note>> fetchAllByCategory(Long categoryId);
 }
