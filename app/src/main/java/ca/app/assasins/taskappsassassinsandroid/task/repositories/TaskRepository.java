@@ -55,4 +55,13 @@ public class TaskRepository {
     public void saveTaskWithPictures(Task task, List<Picture> pictures) {
         AppDatabase.databaseWriterExecutor.execute(() -> taskDao.addPicture(task, pictures));
     }
+
+    @Transaction
+    public void updateTaskWithPictures(Task task, List<Picture> pictures) {
+        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.updatePicture(task, pictures));
+    }
+
+    public void deletePicture(Picture picture) {
+        AppDatabase.databaseWriterExecutor.execute(() -> pictureDao.delete(picture));
+    }
 }

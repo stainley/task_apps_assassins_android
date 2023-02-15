@@ -26,7 +26,7 @@ public class TaskListViewModel extends ViewModel {
     }
 
     public void deleteTask(@NonNull Task task) {
-
+        taskRepository.deleteTask(task);
     }
 
     public void updateTask(@NonNull Task task) {
@@ -50,7 +50,15 @@ public class TaskListViewModel extends ViewModel {
         taskRepository.saveTaskWithPictures(task, pictures);
     }
 
+    public void updatePictures(Task task, List<Picture> pictures) {
+        taskRepository.updateTaskWithPictures(task, pictures);
+    }
+
     public LiveData<List<TaskImages>> fetchPicturesByTaskId(long taskId) {
         return taskRepository.fetchPicturesByTaskId(taskId);
+    }
+
+    public void deletePicture(@NonNull Picture picture) {
+        this.taskRepository.deletePicture(picture);
     }
 }

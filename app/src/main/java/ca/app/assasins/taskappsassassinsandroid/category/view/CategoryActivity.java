@@ -1,6 +1,5 @@
-package ca.app.assasins.taskappsassassinsandroid.category.ui;
+package ca.app.assasins.taskappsassassinsandroid.category.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
-import ca.app.assasins.taskappsassassinsandroid.category.ui.adpter.CategoryRecycleAdapter;
+import ca.app.assasins.taskappsassassinsandroid.category.view.adpter.CategoryRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.common.view.NavigationActivity;
