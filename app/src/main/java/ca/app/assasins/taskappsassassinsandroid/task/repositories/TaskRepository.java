@@ -4,8 +4,10 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
+import androidx.room.Transaction;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
 import ca.app.assasins.taskappsassassinsandroid.common.db.AppDatabase;
@@ -24,8 +26,12 @@ public class TaskRepository {
         pictureDao = db.pictureDao();
     }
 
-    public void saveTask(@NonNull Task task) {
-        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.save(task));
+    public Long saveTask(@NonNull Task task) {
+        Long[] rowId = new Long[1];
+        AppDatabase.databaseWriterExecutor.execute(() -> rowId[0] = taskDao.saveTask(task));
+
+        return rowId[0];
+
     }
 
     public void deleteTask(@NonNull Task task) {
@@ -49,10 +55,8 @@ public class TaskRepository {
         return taskDao.getAllImagesByTaskId(taskId);
     }
 
-    public void savePictures(List<Picture> pictures) {
-        pictures.forEach(picture -> {
-            AppDatabase.databaseWriterExecutor.execute(() -> pictureDao.save(picture));
-        });
-
+    @Transaction
+    public void saveTaskWithPictures(Task task, List<Picture> pictures) {
+        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.saveTaskWithPicture(task, pictures));
     }
 }

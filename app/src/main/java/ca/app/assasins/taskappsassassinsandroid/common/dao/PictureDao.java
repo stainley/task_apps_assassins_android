@@ -11,22 +11,17 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
-import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 
 @Dao
 public interface PictureDao extends AbstractDao<Picture> {
 
     @Insert
     @Override
-    void save(Picture type);
-
-    @Insert
-    void savePictures(Picture... picture);
-
+    void save(Picture picture);
 
     @Delete
     @Override
-    void delete(Picture type);
+    void delete(Picture picture);
 
     @Delete
     void deletePictures(Picture... pictures);
@@ -45,6 +40,5 @@ public interface PictureDao extends AbstractDao<Picture> {
     @Query("SELECT * FROM PICTURE_TBL WHERE PICTURE_ID = :id")
     @Override
     LiveData<Optional<Picture>> fetchById(Long id);
-
 
 }

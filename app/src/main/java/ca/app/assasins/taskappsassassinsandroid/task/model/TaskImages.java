@@ -11,36 +11,12 @@ import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 public class TaskImages {
 
     @Embedded
-    private Task task;
+    public Task task;
 
     @Relation(
             parentColumn = "TASK_ID",
-            entityColumn = "PICTURE_ID"
+            entityColumn = "PARENT_TASK_ID"
     )
-    private List<Picture> pictures;
+    public List<Picture> pictures;
 
-    public TaskImages() {
-    }
-
-    @Ignore
-    public TaskImages(Task task, List<Picture> pictures) {
-        this.task = task;
-        this.pictures = pictures;
-    }
-
-    public Task getTask() {
-        return task;
-    }
-
-    public void setTask(Task task) {
-        this.task = task;
-    }
-
-    public List<Picture> getPictures() {
-        return pictures;
-    }
-
-    public void setPictures(List<Picture> pictures) {
-        this.pictures = pictures;
-    }
 }
