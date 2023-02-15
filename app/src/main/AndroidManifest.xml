@@ -37,6 +37,11 @@
             android:theme="@style/AppTheme.ActionBar" />
 
         <activity
+            android:name=".note.ui.NoteDetailActivity"
+            android:theme="@style/AppTheme.ActionBar"
+            android:exported="false"
+            android:parentActivityName=".note.ui.NoteDetailActivity" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" />
         <activity

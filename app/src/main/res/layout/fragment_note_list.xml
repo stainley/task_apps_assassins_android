@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".note.view.NoteListFragment">
+    tools:context=".note.ui.NoteListFragment">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/searchAppBar"
@@ -13,7 +13,7 @@
         android:nestedScrollingEnabled="false">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/categoryList"
+            android:id="@+id/noteList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="76dp"
@@ -59,7 +59,7 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/createCategoryBtn"
+        android:id="@+id/createNoteBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
