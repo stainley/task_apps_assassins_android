@@ -1,5 +1,6 @@
 package ca.app.assasins.taskappsassassinsandroid.common;
 
+import android.Manifest;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
 
@@ -19,7 +21,10 @@ public class AudioService extends AppCompatActivity {
     String pathSave = "";
     MediaRecorder mediaRecorder;
     final private static String RECORDED_FILE = "/audio.3gp";
+
     MediaPlayer mediaPlayer;
+
+    final int REQUEST_PERMISSION_CODE = 1000;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,4 +110,14 @@ public class AudioService extends AppCompatActivity {
             setUpMediaRecorder();
         }
     }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO
+        }, REQUEST_PERMISSION_CODE);
+    }
+
+
+
 }
