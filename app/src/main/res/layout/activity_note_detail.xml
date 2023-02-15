@@ -65,7 +65,7 @@
             app:srcCompat="@drawable/color_lens" />
 
         <TextView
-            android:id="@+id/more_action_btn"
+            android:id="@+id/edit_date_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="70"
@@ -74,6 +74,7 @@
             android:text="Edited " />
 
         <ImageButton
+            android:id="@+id/more_action_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="10"

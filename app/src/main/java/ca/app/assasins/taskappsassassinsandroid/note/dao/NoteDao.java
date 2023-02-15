@@ -33,9 +33,9 @@ public interface NoteDao extends AbstractDao<Note> {
     @Override
     LiveData<List<Note>> fetchAll();
 
-    @Query("SELECT * FROM NOTE_TBL WHERE id = :id")
+    @Query("SELECT * FROM NOTE_TBL WHERE noteId = :noteId")
     @Override
-    LiveData<Optional<Note>> fetchById(Long id);
+    LiveData<Optional<Note>> fetchById(Long noteId);
 
     @Query("SELECT * FROM NOTE_TBL WHERE title = :title")
     LiveData<List<Note>> fetchByTitle(String title);

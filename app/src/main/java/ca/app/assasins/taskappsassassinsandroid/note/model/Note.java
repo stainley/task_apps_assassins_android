@@ -15,13 +15,15 @@ import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 @Entity(tableName = "NOTE_TBL")
 public class Note implements Serializable {
     @PrimaryKey(autoGenerate = true)
-    private Long id;
+    private Long noteId;
 
     private Long categoryId;
     private String title;
     private String description;
 
     private Date createdDate;
+
+    private Date updatedDate;
 
     @Embedded
     private Coordinate coordinate;
@@ -32,21 +34,23 @@ public class Note implements Serializable {
     public Note(String title,
                 String description,
                 Date createdDate,
+                Date updatedDate,
                 Long categoryId
                 /*Coordinate coordinate*/) {
         this.title = title;
         this.description = description;
         this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
         this.categoryId = categoryId;
         //this.coordinate = coordinate;
     }
 
-    public Long getId() {
-        return id;
+    public Long getNoteId() {
+        return noteId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setNoteId(Long id) {
+        this.noteId = noteId;
     }
 
     public Long getCategoryId() {
@@ -79,6 +83,14 @@ public class Note implements Serializable {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public Date getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(Date updatedDate) {
+        this.updatedDate = updatedDate;
     }
 
     public Coordinate getCoordinate() {

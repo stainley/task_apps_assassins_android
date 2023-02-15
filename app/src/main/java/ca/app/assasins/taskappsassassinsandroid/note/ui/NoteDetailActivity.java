@@ -47,7 +47,17 @@ public class NoteDetailActivity extends AppCompatActivity {
         categoryId = categorySP.getLong("categoryId", -1);
         noteViewModel = new ViewModelProvider(new ViewModelStore(), new NoteViewModelFactory(getApplication())).get(NoteViewModel.class);
 
+        if (note == null) {
+            binding.moreActionBtn.setVisibility(View.INVISIBLE);
+            binding.editDateInfo.setVisibility(View.INVISIBLE);
+        }
+        else {
+            binding.moreActionBtn.setVisibility(View.VISIBLE);
+            binding.editDateInfo.setVisibility(View.VISIBLE);
+        }
+
         binding.addBtn.setOnClickListener(this::addBtnClicked);
+        binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
     }
 
     @Override
@@ -57,15 +67,27 @@ public class NoteDetailActivity extends AppCompatActivity {
 
             String title = Objects.requireNonNull(binding.title.getText()).toString();
             String description = Objects.requireNonNull(binding.description.getText()).toString();
-            Date createdDate = new Date();
 
-            Note newNote = new Note(title, description, createdDate, categoryId/*, new Coordinate(43.44, -79.45)*/);
+            Date createdDate;
+            Date updatedDate;
 
-            if (note == null && title != null) {
+            if (note == null) {
+                createdDate = new Date();
+                updatedDate = new Date();
+            }
+            else {
+                createdDate = note.getCreatedDate();
+                updatedDate = new Date();
+            }
+
+
+            Note newNote = new Note(title, description, createdDate, updatedDate, categoryId/*, new Coordinate(43.44, -79.45)*/);
+
+            if (note == null && title != "") {
                 noteViewModel.createNote(newNote);
             }
             else {
-                newNote.setCategoryId(categoryId);
+                newNote.setNoteId(note.getNoteId());
                 noteViewModel.updateNote(note);
             }
 
@@ -90,6 +112,22 @@ public class NoteDetailActivity extends AppCompatActivity {
                 });
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
+    }
 
+    private void moreActionBtnClicked(View view) {
+        final BottomSheetDialog moreActionBottomSheetDialog = new BottomSheetDialog(
+                NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                .inflate(R.layout.activity_more_action_sheet,
+                        (LinearLayout)findViewById(R.id.moreActionBottomSheetContainer));
+        bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(NoteDetailActivity.this, "Delete!!!", Toast.LENGTH_SHORT).show();
+                moreActionBottomSheetDialog.dismiss();
+            }
+        });
+        moreActionBottomSheetDialog.setContentView(bottomSheetView);
+        moreActionBottomSheetDialog.show();
     }
 }
