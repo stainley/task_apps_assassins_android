@@ -1,5 +1,7 @@
 package ca.app.assasins.taskappsassassinsandroid.task.model;
 
+import android.net.Uri;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
@@ -90,4 +92,6 @@ public class Task implements Serializable {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
+
+
 }
