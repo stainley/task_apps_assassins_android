@@ -4,10 +4,8 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,7 +32,6 @@ import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -59,10 +57,21 @@ public class TaskDetailActivity extends AppCompatActivity {
     private final List<Picture> myPictures = new ArrayList<>();
     private static final int REQUEST_IMAGE_CAPTURE = 3322;
 
-    private ActivityResultLauncher<String> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), new ActivityResultCallback<Uri>() {
+    private ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
+
         @Override
         public void onActivityResult(Uri result) {
+            try {
+                tempImageUri = result;
 
+                Picture picture = new Picture();
+                picture.setCreationDate(new Date().getTime());
+                picture.setPath("content://media/" + tempImageUri.getPath());
+                myPictures.add(picture);
+                taskPictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     });
 
@@ -138,8 +147,20 @@ public class TaskDetailActivity extends AppCompatActivity {
         tempImageUri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            selectCameraLauncher.launch(tempImageUri);
+            //select camera
+            //selectCameraLauncher.launch(tempImageUri);
+            //load image from library
+            PickVisualMediaRequest pickVisualMediaRequest = new PickVisualMediaRequest();
+
+            selectPictureLauncher.launch(pickVisualMediaRequest);
         }
+    }
+
+    public void takePhoto() {
+
+    }
+
+    public void addPhotoFromLibrary() {
 
     }
 
@@ -149,7 +170,8 @@ public class TaskDetailActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            selectCameraLauncher.launch(tempImageUri);
+            //selectCameraLauncher.launch(tempImageUri);
+            //selectPictureLauncher.launch();
         }
     }
 
