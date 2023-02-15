@@ -1,14 +1,16 @@
 package ca.app.assasins.taskappsassassinsandroid.common.dao;
 
 import androidx.lifecycle.LiveData;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.Update;
+import androidx.room.Transaction;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public interface AbstractDao<T> {
+import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+
+public interface AbstractDao<T extends Serializable> {
 
     void save(T type);
 
@@ -19,4 +21,5 @@ public interface AbstractDao<T> {
     LiveData<List<T>> fetchAll();
 
     LiveData<Optional<T>> fetchById(Long id);
+
 }

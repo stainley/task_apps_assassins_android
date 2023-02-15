@@ -1,14 +1,17 @@
 package ca.app.assasins.taskappsassassinsandroid.task.ui.adapter;
 
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckedTextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textview.MaterialTextView;
 
 import java.util.List;
@@ -38,6 +41,12 @@ public class TaskListViewAdapter extends RecyclerView.Adapter<TaskListViewAdapte
     @Override
     public void onBindViewHolder(@NonNull TaskListAdapter holder, int position) {
         holder.taskTitleLabel.setText(tasks.get(position).getTaskName());
+        holder.taskTitleLabel.setChecked(tasks.get(position).isCompleted());
+        if (holder.taskTitleLabel.isChecked()) {
+            holder.taskTitleLabel.setCheckMarkDrawable(R.drawable.ic_check_24);
+
+        }
+        //holder.taskCompletedCkb.setChecked(tasks.get(position).isCompleted());
         holder.taskCardView.setOnClickListener(view -> {
             this.onTaskListCallback.onTaskSelected(view, position);
         });
@@ -49,13 +58,16 @@ public class TaskListViewAdapter extends RecyclerView.Adapter<TaskListViewAdapte
     }
 
     static class TaskListAdapter extends RecyclerView.ViewHolder {
-        private final MaterialTextView taskTitleLabel;
+        private final CheckedTextView taskTitleLabel;
         private final MaterialCardView taskCardView;
+
+        //private final MaterialCheckBox taskCompletedCkb;
 
         public TaskListAdapter(@NonNull View itemView) {
             super(itemView);
             taskTitleLabel = itemView.findViewById(R.id.taskTitleLabel);
             taskCardView = itemView.findViewById(R.id.taskCardView);
+            //taskCompletedCkb = itemView.findViewById(R.id.taskStatusChk);
         }
     }
 
