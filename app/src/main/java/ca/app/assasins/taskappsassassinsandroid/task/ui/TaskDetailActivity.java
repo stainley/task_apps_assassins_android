@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -32,14 +33,11 @@ import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.datepicker.CalendarConstraints;
-import com.google.android.material.datepicker.DateValidatorPointBackward;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -47,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityTaskDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -68,7 +67,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private final List<Picture> myPictures = new ArrayList<>();
     private static final int REQUEST_IMAGE_CAPTURE = 3322;
 
-    private ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
+    private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
         @Override
         public void onActivityResult(Uri result) {
@@ -118,10 +117,10 @@ public class TaskDetailActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
         }
 
-        imageView = binding.pictureImg;
-        binding.takePhotoMenu.setOnClickListener(this::taskOptionMenu);
-
         binding.startDateTask.setOnClickListener(this::startTaskDate);
+        binding.addBtn.setOnClickListener(this::addBtnClicked);
+        binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
+
 
         SharedPreferences categorySP = getSharedPreferences("category_sp", MODE_PRIVATE);
         categoryId = categorySP.getLong("categoryId", -1);
@@ -221,6 +220,54 @@ public class TaskDetailActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             selectPictureLauncher.launch(new PickVisualMediaRequest());
         }
+    }
+
+    private void addBtnClicked(View view) {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
+                this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                .inflate(R.layout.activity_add_image_audio_sheet,
+                        (LinearLayout) findViewById(R.id.bottomSheetContainer));
+        bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "Take a photo!!!", Toast.LENGTH_SHORT).show();
+                takePhoto();
+                bottomSheetDialog.dismiss();
+            }
+        });
+
+        bottomSheetView.findViewById(R.id.upload_image_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "Upload Image!!", Toast.LENGTH_SHORT).show();
+                addPhotoFromLibrary();
+                bottomSheetDialog.dismiss();
+            }
+        });
+
+
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
+    }
+
+    private void moreActionBtnClicked(View view) {
+        final BottomSheetDialog moreActionBottomSheetDialog = new BottomSheetDialog(
+                this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext())
+                .inflate(R.layout.activity_more_action_sheet,
+                        (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
+        bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //noteViewModel.deleteNote(note);
+                Toast.makeText(getApplicationContext(), "Delete!!!", Toast.LENGTH_SHORT).show();
+                moreActionBottomSheetDialog.dismiss();
+                finish();
+            }
+        });
+        moreActionBottomSheetDialog.setContentView(bottomSheetView);
+        moreActionBottomSheetDialog.show();
     }
 
 
