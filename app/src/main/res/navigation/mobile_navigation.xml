@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/navigation_note">
+
+    <fragment
+        android:id="@+id/navigation_note"
+        android:name="ca.app.assasins.taskappsassassinsandroid.note.ui.NoteListFragment"
+        tools:layout="@layout/fragment_note_list">
+        <action
+            android:id="@+id/action_noteDetailActivity"
+            app:destination="@id/noteDetailActivity" />
+        <argument
+            android:name="categoryID"
+            android:defaultValue="-1L"
+            app:argType="long" />
+    </fragment>
+    <activity
+        android:id="@+id/noteDetailActivity"
+        android:name="ca.app.assasins.taskappsassassinsandroid.note.ui.NoteDetailActivity"
+        android:label="activity_note_detail"
+        tools:layout="@layout/activity_note_detail">
+        <argument
+            android:name="oldNote"
+            app:argType="ca.app.assasins.taskappsassassinsandroid.note.model.Note"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </activity>
+
+
+    <fragment
+        android:id="@+id/navigation_task"
+        android:name="ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragment"
+        tools:layout="@layout/fragment_task_list">
+        <action
+            android:id="@+id/action_taskDetailActivity"
+            app:destination="@id/taskDetailActivity" />
+        <argument
+            android:name="categoryID"
+            android:defaultValue="-1L"
+            app:argType="long" />
+    </fragment>
+    <activity
+        android:id="@+id/taskDetailActivity"
+        android:name="ca.app.assasins.taskappsassassinsandroid.task.ui.TaskDetailActivity"
+        android:label="activity_task_detail"
+        tools:layout="@layout/activity_task_detail">
+        <argument
+            android:name="oldTask"
+            app:argType="ca.app.assasins.taskappsassassinsandroid.task.model.Task"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </activity>
+
+</navigation>

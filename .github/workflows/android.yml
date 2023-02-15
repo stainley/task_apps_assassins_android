@@ -3,7 +3,7 @@ name: Android CI
 on:
   push:
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 jobs:
   codesmell:
