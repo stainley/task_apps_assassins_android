@@ -30,7 +30,7 @@
             android:paddingStart="8dp"
             android:paddingTop="8dp"
             android:paddingEnd="8dp"
-            android:src="@drawable/three_dots_menu"
+            android:src="@drawable/more_menu"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

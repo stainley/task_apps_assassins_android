@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="8dp"
+
     tools:context=".task.ui.TaskDetailActivity">
 
     <LinearLayout
@@ -28,6 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
+            android:focusable="true"
             android:hint="@string/task_name"
             android:paddingBottom="16dp"
             android:textSize="18sp"
@@ -36,7 +37,6 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </LinearLayout>
-
 
     <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
@@ -49,32 +49,68 @@
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/taskTitleLayout">
 
-        <ImageView
-            android:id="@+id/pictureImg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <Button
+            android:id="@+id/startDateTask"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableLeft="@drawable/outline_task_alt_24"
+            android:hint="No start date"
+            android:textAlignment="textStart" />
 
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_image_24" />
+        <Button
+            android:id="@+id/dueDateTask"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableLeft="@drawable/ic_due_time_24"
+            android:hint="No due date"
+            android:textAlignment="textStart" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/taskPictureRV"
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/takePhotoMenu"
-        android:layout_width="56dp"
-        android:layout_height="54dp"
-        android:layout_marginBottom="32dp"
-        android:clickable="true"
-        android:focusable="true"
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.899"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_zoom" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/add_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/outline_add_box" />
+
+
+        <TextView
+            android:id="@+id/edit_date_info"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_weight="70"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="Edited " />
+
+        <ImageButton
+            android:id="@+id/more_action_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/more_menu" />
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
