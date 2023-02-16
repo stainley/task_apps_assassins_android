@@ -4,20 +4,28 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
+import androidx.room.Transaction;
 
 import java.util.List;
 
+import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
 import ca.app.assasins.taskappsassassinsandroid.common.db.AppDatabase;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
+import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
+import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 
 public class NoteRepository {
 
     private final NoteDao noteDao;
+    private final PictureDao pictureDao;
 
     public NoteRepository(Application application) {
         AppDatabase db = AppDatabase.getInstance(application);
         noteDao = db.noteDao();
+        pictureDao = db.pictureDao();
     }
 
     public void save(@NonNull Note note) {
@@ -38,6 +46,24 @@ public class NoteRepository {
 
     public LiveData<List<Note>> fetchAllNoteByCategory(Long categoryId) {
         return noteDao.fetchAllByCategory(categoryId);
+    }
+
+    public LiveData<List<NoteImages>> fetchPicturesByNoteId(long noteId) {
+        return noteDao.getAllImagesByNoteId(noteId);
+    }
+
+    public void saveNoteWithPictures(Note note, List<Picture> pictures) {
+        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.saveNoteAll(note, pictures));
+
+    }
+
+    @Transaction
+    public void updateNoteWithPictures(Note note, List<Picture> pictures) {
+        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.updatePicture(note, pictures));
+    }
+
+    public void deletePicture(Picture picture) {
+        AppDatabase.databaseWriterExecutor.execute(() -> pictureDao.delete(picture));
     }
 
 }
