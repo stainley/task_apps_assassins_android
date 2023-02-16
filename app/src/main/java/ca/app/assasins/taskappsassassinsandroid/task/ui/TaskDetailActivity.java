@@ -79,13 +79,15 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         @Override
         public void onActivityResult(Uri result) {
             try {
-                tempImageUri = result;
+                if (result != null) {
+                    tempImageUri = result;
 
-                Picture picture = new Picture();
-                picture.setCreationDate(new Date().getTime());
-                picture.setPath("content://media/" + tempImageUri.getPath());
-                myPictures.add(picture);
-                taskPictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
+                    Picture picture = new Picture();
+                    picture.setCreationDate(new Date().getTime());
+                    picture.setPath("content://media/" + tempImageUri.getPath());
+                    myPictures.add(picture);
+                    taskPictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
