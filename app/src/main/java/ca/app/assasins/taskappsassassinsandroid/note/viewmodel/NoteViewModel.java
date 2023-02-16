@@ -55,6 +55,10 @@ public class NoteViewModel extends ViewModel {
         return noteRepository.fetchPicturesByNoteId(noteId);
     }
 
+    public LiveData<NoteImages> findPictureByNoteId(long noteId) {
+        return noteRepository.findPictureByNoteId(noteId);
+    }
+
     public void deletePicture(@NonNull Picture picture) {
         this.noteRepository.deletePicture(picture);
     }
