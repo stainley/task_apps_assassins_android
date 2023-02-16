@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -23,13 +24,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.snackbar.Snackbar;
 
-import java.sql.SQLOutput;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,9 +44,6 @@ import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NotePictureRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
-import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
-import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskDetailActivityArgs;
-import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskPictureRVAdapter;
 
 public class NoteDetailActivity extends AppCompatActivity implements NotePictureRVAdapter.OnPictureNoteCallback {
 
@@ -58,9 +55,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private NotePictureRVAdapter notePictureRVAdapter;
     private Uri tempImageUri = null;
 
-    private ImageView imageView;
     private final List<Picture> myPictures = new ArrayList<>();
-    private static final int REQUEST_IMAGE_CAPTURE = 3322;
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -142,8 +137,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 taskImages.forEach(image -> myPictures.addAll(image.pictures));
                 notePictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
             });
-        }
-        else {
+        } else {
             binding.moreActionBtn.setVisibility(View.INVISIBLE);
             binding.editDateInfo.setVisibility(View.INVISIBLE);
         }
@@ -188,14 +182,14 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(R.layout.activity_add_image_audio_sheet,
-                        (LinearLayout)findViewById(R.id.bottomSheetContainer));
-                bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Toast.makeText(NoteDetailActivity.this, "Take a photo!!!", Toast.LENGTH_SHORT).show();
-                        bottomSheetDialog.dismiss();
-                    }
-                });
+                        (LinearLayout) findViewById(R.id.bottomSheetContainer));
+        bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(NoteDetailActivity.this, "Take a photo!!!", Toast.LENGTH_SHORT).show();
+                bottomSheetDialog.dismiss();
+            }
+        });
 
         bottomSheetView.findViewById(R.id.upload_image_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -222,7 +216,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(getApplicationContext())
                 .inflate(R.layout.activity_more_action_sheet,
-                        (LinearLayout)findViewById(R.id.moreActionBottomSheetContainer));
+                        (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
         bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

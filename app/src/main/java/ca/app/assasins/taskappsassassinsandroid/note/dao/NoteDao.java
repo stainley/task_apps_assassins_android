@@ -21,11 +21,11 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 
 @Dao
-public interface NoteDao extends AbstractDao<Note> {
+public abstract class NoteDao implements AbstractDao<Note> {
 
     @Insert
     @Override
-    void save(Note note);
+    public abstract void save(Note note);
     //public abstract void save(Task task);
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -36,31 +36,31 @@ public interface NoteDao extends AbstractDao<Note> {
 
     @Delete
     @Override
-    void delete(Note type);
+    public  abstract void delete(Note type);
 
     @Update
     @Override
-    void update(Note type);
+    public abstract void update(Note type);
 
     @Query("SELECT * FROM NOTE_TBL")
     @Override
-    LiveData<List<Note>> fetchAll();
+    public abstract LiveData<List<Note>> fetchAll();
 
-    @Query("SELECT * FROM NOTE_TBL WHERE noteId = :noteId")
+    @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :noteId")
     @Override
-    LiveData<Optional<Note>> fetchById(Long noteId);
+    public abstract LiveData<Optional<Note>> fetchById(Long noteId);
 
     @Query("SELECT * FROM NOTE_TBL WHERE title = :title")
-    LiveData<List<Note>> fetchByTitle(String title);
+    public abstract LiveData<List<Note>> fetchByTitle(String title);
 
     @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId")
-    LiveData<List<Note>> fetchAllByCategory(Long categoryId);
+    public abstract LiveData<List<Note>> fetchAllByCategory(Long categoryId);
 
     @Transaction
-    @Query("SELECT * FROM NOTE_TBL WHERE noteId = :id")
+    @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :id")
     public abstract LiveData<List<NoteImages>> getAllImagesByNoteId(long id);
     @Transaction
-    public default Boolean addPicture(Note note, List<Picture> pictures) {
+    public Boolean addPicture(Note note, List<Picture> pictures) {
         final long noteId = saveNote(note);
         pictures.forEach(picture -> {
             picture.setParentNoteId(noteId);
@@ -70,7 +70,7 @@ public interface NoteDao extends AbstractDao<Note> {
     }
 
     @Transaction
-    public default Boolean updatePicture(Note note, List<Picture> pictures) {
+    public Boolean updatePicture(Note note, List<Picture> pictures) {
         update(note);
         pictures.forEach(picture -> {
             picture.setParentNoteId(note.getNoteId());
@@ -80,7 +80,7 @@ public interface NoteDao extends AbstractDao<Note> {
     }
 
     @Transaction
-    public default void saveNoteAll(Note note, List<Picture> pictures) {
+    public void saveNoteAll(Note note, List<Picture> pictures) {
         final long noteId = saveNote(note);
         if (!pictures.isEmpty()) {
             pictures.forEach(picture -> {
