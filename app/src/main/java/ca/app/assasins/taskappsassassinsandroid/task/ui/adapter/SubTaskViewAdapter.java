@@ -1,5 +1,7 @@
 package ca.app.assasins.taskappsassassinsandroid.task.ui.adapter;
 
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,15 +39,31 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
     @Override
     public void onBindViewHolder(@NonNull SubTaskViewHolder holder, int position) {
         holder.subTaskCkb.setChecked(subTasks.get(position).isCompleted());
-        holder.subtaskNameTxt.setText(subTasks.get(position).getName());
+
+        textFormat(holder, position);
 
         holder.deleteTaskBtn.setOnClickListener(v -> onSubTaskCallback.onSubTaskDeleted(v, position));
 
         holder.subTaskCkb.setOnClickListener(v -> {
             SubTask subTask = subTasks.get(position);
             subTask.setCompleted(holder.subTaskCkb.isChecked());
+            holder.subtaskNameTxt.setPaintFlags(holder.subtaskNameTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             subTasks.set(position, subTask);
+
+            textFormat(holder, position);
         });
+    }
+
+    private void textFormat(@NonNull SubTaskViewHolder holder, int position) {
+        if (subTasks.get(position).isCompleted()) {
+            holder.subtaskNameTxt.setPaintFlags(holder.subtaskNameTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.subtaskNameTxt.setText(subTasks.get(position).getName());
+            holder.subtaskNameTxt.setTextColor(Color.GRAY);
+        } else {
+            holder.subtaskNameTxt.setText(subTasks.get(position).getName());
+            holder.subtaskNameTxt.setPaintFlags(0);
+            holder.subtaskNameTxt.setTextColor(Color.BLACK);
+        }
     }
 
     @Override

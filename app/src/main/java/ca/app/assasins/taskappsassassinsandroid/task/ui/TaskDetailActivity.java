@@ -263,7 +263,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                     subTask.setCompleted(binding.taskCompletionCkb.isChecked());
                     subTasks.add(subTask);
                     subTaskViewAdapter.notifyDataSetChanged();
-
+                    bottomSheetDialog.dismiss();
                 }
             }).setCancelable(false).show();
         });
