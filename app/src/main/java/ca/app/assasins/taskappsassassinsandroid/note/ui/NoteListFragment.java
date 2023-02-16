@@ -119,7 +119,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
     @Override
     public void onNoteSelected(View view, int position) {
-        Toast.makeText(getContext(), "CLICKED RECORD: " + notes.get(position).getTitle(), Toast.LENGTH_SHORT).show();
         Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notes.get(position)));
     }
 
@@ -175,7 +174,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
                     @Override
                     public void onNoteSelected(View view, int position) {
-                        Toast.makeText(getContext(), "CLICKED RECORD: " + notes.get(position).getTitle(), Toast.LENGTH_SHORT).show();
                         Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notes.get(position)));
                     }
                 });
