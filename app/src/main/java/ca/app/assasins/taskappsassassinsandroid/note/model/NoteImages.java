@@ -13,9 +13,24 @@ public class NoteImages {
     public Note note;
 
     @Relation(
-            parentColumn = "noteId",
+            parentColumn = "NOTE_ID",
             entityColumn = "PARENT_NOTE_ID"
     )
     public List<Picture> pictures;
 
+    public Note getNote() {
+        return note;
+    }
+
+    public void setNote(Note note) {
+        this.note = note;
+    }
+
+    public List<Picture> getPictures() {
+        return pictures;
+    }
+
+    public void setPictures(List<Picture> pictures) {
+        this.pictures = pictures;
+    }
 }

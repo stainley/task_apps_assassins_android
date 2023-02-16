@@ -5,12 +5,15 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -19,8 +22,8 @@ import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 
 public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.ViewHolder> {
 
-private final OnNoteCallback onNoteCallback;
-private final List<Note> notes;
+    private final OnNoteCallback onNoteCallback;
+    private final List<Note> notes;
 
 
     public NoteRecycleAdapter(List<Note> notes, OnNoteCallback onCallback) {
@@ -42,6 +45,9 @@ private final List<Note> notes;
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.title.setText(notes.get(position).getTitle());
         holder.description.setText(notes.get(position).getDescription());
+
+        onNoteCallback.onDisplayThumbnail(holder.noteThumbnailView, position);
+
 
         holder.noteCard.setOnClickListener(view -> {
             this.onNoteCallback.onNoteSelected(view, position);
@@ -84,6 +90,8 @@ private final List<Note> notes;
 
         private final TextView description;
         private final CardView noteCard;
+        private final ImageView noteThumbnailView;
+
         private final ImageButton cardNoteMenu;
 
         public ViewHolder(@NonNull View itemView) {
@@ -93,6 +101,7 @@ private final List<Note> notes;
             description = itemView.findViewById(R.id.description);
             noteCard = itemView.findViewById(R.id.noteCard);
             cardNoteMenu = itemView.findViewById(R.id.card_note_menu);
+            noteThumbnailView = itemView.findViewById(R.id.noteThumbnailView);
 
         }
     }
@@ -103,5 +112,7 @@ private final List<Note> notes;
         void onDeleteNote(View view, int position);
 
         void onMoveNote(int position);
+
+        void onDisplayThumbnail(ImageView Imageview, int position);
     }
 }

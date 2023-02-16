@@ -39,7 +39,7 @@
             android:layout_width="150dp"
             android:layout_height="147dp"
             android:contentDescription="TODO"
-            android:src="@drawable/note"
+            android:src="@drawable/baseline_folder_24"
             app:layout_constraintBottom_toTopOf="@id/divider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

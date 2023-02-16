@@ -21,6 +21,15 @@
         android:layout_height="210dp"
         android:orientation="vertical">
 
+        <ImageView
+            android:layout_marginTop="8dp"
+            android:id="@+id/noteThumbnailView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
@@ -33,8 +42,7 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/description"
             app:layout_constraintEnd_toEndOf="@id/description"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/noteThumbnailView"
             tools:text="Title" />
 
         <TextView
@@ -72,6 +80,7 @@
                 android:layout_weight="50"
                 android:background="@android:color/transparent"
                 android:scaleType="fitStart"
+                android:visibility="invisible"
                 app:srcCompat="@drawable/play_audio" />
 
             <ImageButton
