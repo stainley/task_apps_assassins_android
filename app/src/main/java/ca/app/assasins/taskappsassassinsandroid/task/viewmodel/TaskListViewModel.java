@@ -72,6 +72,10 @@ public class TaskListViewModel extends ViewModel {
         this.taskRepository.deleteSubTask(subTask);
     }
 
+    public void insertAllSubTask(@NonNull List<SubTask> subTask) {
+        this.taskRepository.insertAllSubTask(subTask);
+    }
+
     public LiveData<List<TaskWithSubTask>> fetchSubTaskByTaskId(long id) {
         return taskRepository.fetchAllSubTaskById(id);
     }

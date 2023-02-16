@@ -79,6 +79,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<SubTask> subTasks = new ArrayList<>();
+    private final List<SubTask> additionalSubTasks = new ArrayList<>();
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -270,6 +271,9 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                     subTask.setName(newEditText.getText().toString());
                     subTask.setCompleted(binding.taskCompletionCkb.isChecked());
                     subTasks.add(subTask);
+                    if (task != null) {
+                        additionalSubTasks.add(subTask);
+                    }
                     subTaskViewAdapter.notifyDataSetChanged();
                     bottomSheetDialog.dismiss();
                 }
@@ -310,7 +314,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCreationDate(new Date().getTime());
             task.setCompleted(binding.taskCompletionCkb.isChecked());
             task.setCategoryId(categoryId);
-            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : 0);
+            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : this.task.getCompletionDate());
 
             assert taskName != null;
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
@@ -324,6 +328,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                 } else {
                     //taskListViewModel.updateTask(task);
                     taskListViewModel.updateTaskAll(task, myPictures, subTasks);
+                    taskListViewModel.insertAllSubTask(additionalSubTasks);
                 }
             }
 
@@ -371,7 +376,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         if (subTasks.size() == 0 && task.isCompleted()) {
             deleteAllowed = true;
         }
-        else {
+        else if (subTasks.size() > 0 ) {
             int totalSubtaskComplete = 0;
 
             for (int i = 0; i < subTasks.size(); i++) {
