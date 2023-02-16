@@ -10,9 +10,11 @@ import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
 import ca.app.assasins.taskappsassassinsandroid.common.db.AppDatabase;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -52,6 +54,10 @@ public class NoteRepository {
         return noteDao.getAllImagesByNoteId(noteId);
     }
 
+    public LiveData<List<NoteAudios>> fetchAudiosByNoteId(long noteId) {
+        return noteDao.getAllAudiosByNoteId(noteId);
+    }
+
     public void saveNoteWithPictures(Note note, List<Picture> pictures) {
         AppDatabase.databaseWriterExecutor.execute(() -> noteDao.saveNoteAll(note, pictures));
 
@@ -68,5 +74,10 @@ public class NoteRepository {
 
     public LiveData<NoteImages> findPictureByNoteId(long noteId) {
         return noteDao.getLasNotePicture(noteId);
+    }
+
+    @Transaction
+    public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
+        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.saveNoteAll(newNote, myPictures, mAudios));
     }
 }

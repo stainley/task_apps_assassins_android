@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -33,7 +35,8 @@ public abstract class NoteDao implements AbstractDao<Note> {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract void savePicture(Picture picture);
-
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    public abstract void saveAudio(Audio audio);
     @Delete
     @Override
     public abstract void delete(Note type);
@@ -59,6 +62,10 @@ public abstract class NoteDao implements AbstractDao<Note> {
     @Transaction
     @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :id")
     public abstract LiveData<List<NoteImages>> getAllImagesByNoteId(long id);
+
+    @Transaction
+    @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :id")
+    public abstract LiveData<List<NoteAudios>> getAllAudiosByNoteId(long id);
 
     @Transaction
     public Boolean addPicture(Note note, List<Picture> pictures) {
@@ -94,4 +101,24 @@ public abstract class NoteDao implements AbstractDao<Note> {
     @Transaction
     @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :noteId")
     public abstract LiveData<NoteImages> getLasNotePicture(long noteId);
+
+    @Transaction
+    public void saveNoteAll(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
+        final long noteId = saveNote(newNote);
+
+        if (!myPictures.isEmpty()) {
+            myPictures.forEach(picture -> {
+                picture.setParentNoteId(noteId);
+                savePicture(picture);
+            });
+        }
+        if (!mAudios.isEmpty()) {
+            mAudios.forEach(audio -> {
+                audio.setParentNoteId(noteId);
+                saveAudio(audio);
+            });
+        }
+    }
+
+
 }

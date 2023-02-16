@@ -32,7 +32,6 @@ public class AudioService extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
         if (!checkPermissionDevice())

@@ -8,8 +8,10 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
+import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.note.repositories.NoteRepository;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -59,7 +61,15 @@ public class NoteViewModel extends ViewModel {
         return noteRepository.findPictureByNoteId(noteId);
     }
 
+    public LiveData<List<NoteAudios>> fetchAudiosByNote(long noteId) {
+        return noteRepository.fetchAudiosByNoteId(noteId);
+    }
+
     public void deletePicture(@NonNull Picture picture) {
         this.noteRepository.deletePicture(picture);
+    }
+
+    public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
+        noteRepository.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
     }
 }
