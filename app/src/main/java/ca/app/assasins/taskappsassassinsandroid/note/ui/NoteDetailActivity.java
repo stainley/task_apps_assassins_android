@@ -1,15 +1,17 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.GridLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -24,7 +26,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -187,6 +188,8 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             @Override
             public void onClick(View view) {
                 Toast.makeText(NoteDetailActivity.this, "Take a photo!!!", Toast.LENGTH_SHORT).show();
+                takePhoto();
+
                 bottomSheetDialog.dismiss();
             }
         });
@@ -203,9 +206,21 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         bottomSheetDialog.show();
     }
 
+    public void takePhoto() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+
+            ContentResolver cr = getContentResolver();
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+
+            tempImageUri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            selectCameraLauncher.launch(tempImageUri);
+        }
+    }
+
     public void addPhotoFromLibrary() {
         System.out.println("ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) " + ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA));
-        System.out.println("TESTTTTTTTT");
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             selectPictureLauncher.launch(new PickVisualMediaRequest());
         }
@@ -232,6 +247,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     @Override
     public void onDeletePicture(View view, int position) {
+        //TODO: delete photo
         //taskListViewModel.deletePicture(myPictures.get(position));
         //myPictures.remove(position);
         //taskPictureRVAdapter.notifyItemRemoved(position);
