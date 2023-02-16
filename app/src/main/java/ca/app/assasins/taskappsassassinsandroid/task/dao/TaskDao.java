@@ -16,8 +16,10 @@ import java.util.Optional;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
+import ca.app.assasins.taskappsassassinsandroid.task.model.TaskWithSubTask;
 
 @Dao
 public abstract class TaskDao implements AbstractDao<Task> {
@@ -31,6 +33,9 @@ public abstract class TaskDao implements AbstractDao<Task> {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract void savePicture(Picture picture);
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    public abstract void saveSubTask(SubTask subTask);
 
     @Delete
     @Override
@@ -55,6 +60,9 @@ public abstract class TaskDao implements AbstractDao<Task> {
     @Query("SELECT * FROM TASK_TBL WHERE TASK_ID = :id")
     public abstract LiveData<List<TaskImages>> getAllImagesByTaskId(long id);
 
+    @Transaction
+    @Query("SELECT * FROM TASK_TBL WHERE TASK_ID = :id")
+    public abstract LiveData<List<TaskWithSubTask>> getMySubTaskById(long id);
 
     @Transaction
     public Boolean addPicture(Task task, List<Picture> pictures) {
@@ -76,10 +84,39 @@ public abstract class TaskDao implements AbstractDao<Task> {
         return true;
     }
 
+    @Update
+    public abstract void updateSubTask(SubTask subTasks);
+
+    @Transaction
+    public void saveTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
+        final long taskId = saveTask(task);
+        if (!pictures.isEmpty()) {
+            pictures.forEach(picture -> {
+                picture.setParentTaskId(taskId);
+                savePicture(picture);
+            });
+        }
+        if (!subTasks.isEmpty()) {
+            subTasks.forEach(subTask -> {
+                subTask.setTaskParentId(taskId);
+                saveSubTask(subTask);
+            });
+        }
+    }
+
 
     //TODO: to be implement saving audios to the task
     @Transaction
     public void addAudio(Task type, List<Audio> audios) {
 
+    }
+
+    @Transaction
+    public void updateAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
+        updatePicture(task, pictures);
+
+        if (!subTasks.isEmpty()) {
+            subTasks.forEach(this::updateSubTask);
+        }
     }
 }
