@@ -1,18 +1,30 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
+import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
@@ -29,17 +41,62 @@ import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NotePictureRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskDetailActivityArgs;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskPictureRVAdapter;
 
-public class NoteDetailActivity extends AppCompatActivity {
+public class NoteDetailActivity extends AppCompatActivity implements NotePictureRVAdapter.OnPictureNoteCallback {
 
     private ActivityNoteDetailBinding binding;
     private long categoryId;
     private Note note;
     NoteViewModel noteViewModel;
+
+    private NotePictureRVAdapter notePictureRVAdapter;
+    private Uri tempImageUri = null;
+
+    private ImageView imageView;
+    private final List<Picture> myPictures = new ArrayList<>();
+    private static final int REQUEST_IMAGE_CAPTURE = 3322;
+
+    private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
+
+        @Override
+        public void onActivityResult(Uri result) {
+            try {
+                if (result != null) {
+                    tempImageUri = result;
+
+                    Picture picture = new Picture();
+                    picture.setCreationDate(new Date().getTime());
+                    picture.setPath("content://media/" + tempImageUri.getPath());
+                    myPictures.add(picture);
+                    notePictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    });
+
+    // Take photo from the camera
+    private final ActivityResultLauncher<Uri> selectCameraLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
+        if (result) {
+
+            try {
+                Picture picture = new Picture();
+                picture.setCreationDate(new Date().getTime());
+                picture.setPath("content://media/" + tempImageUri.getPath());
+                myPictures.add(picture);
+                notePictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +108,16 @@ public class NoteDetailActivity extends AppCompatActivity {
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
+        }
+
+        RecyclerView notePictureRV = binding.notePictureRV;
+        // adapter picture
+        notePictureRVAdapter = new NotePictureRVAdapter(myPictures, this);
+        notePictureRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        notePictureRV.setAdapter(notePictureRVAdapter);
 
         SharedPreferences categorySP = getSharedPreferences("category_sp", MODE_PRIVATE);
         categoryId = categorySP.getLong("categoryId", -1);
@@ -69,6 +136,12 @@ public class NoteDetailActivity extends AppCompatActivity {
             DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh.mm aa");
             String updatedDate = dateFormat.format(note.getUpdatedDate()).toString();
             binding.editDateInfo.setText("Edited: " + updatedDate);
+
+            noteViewModel.fetchPicturesByNoteId(note.getNoteId()).observe(this, taskImages -> {
+                myPictures.clear();
+                taskImages.forEach(image -> myPictures.addAll(image.pictures));
+                notePictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
+            });
         }
         else {
             binding.moreActionBtn.setVisibility(View.INVISIBLE);
@@ -95,11 +168,13 @@ public class NoteDetailActivity extends AppCompatActivity {
 
             assert title != null;
             if (!title.toString().isEmpty() && newNote.getNoteId() == 0) {
-                noteViewModel.createNote(newNote);
-                Toast.makeText(this, "SAVING " + title, Toast.LENGTH_SHORT).show();
-            } else {
-                noteViewModel.updateNote(newNote);
-                Toast.makeText(this, "UPDATING " + newNote.getTitle(), Toast.LENGTH_SHORT).show();
+                noteViewModel.saveNoteWithPictures(newNote, myPictures);
+            } else if (!title.toString().isEmpty() && newNote.getNoteId() > 0) {
+                if (!myPictures.isEmpty()) {
+                    noteViewModel.updateNoteWithPictures(newNote, myPictures);
+                } else {
+                    noteViewModel.updateNote(newNote);
+                }
             }
 
             return false;
@@ -121,8 +196,25 @@ public class NoteDetailActivity extends AppCompatActivity {
                         bottomSheetDialog.dismiss();
                     }
                 });
+
+        bottomSheetView.findViewById(R.id.upload_image_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addPhotoFromLibrary();
+                bottomSheetDialog.dismiss();
+            }
+        });
+
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
+    }
+
+    public void addPhotoFromLibrary() {
+        System.out.println("ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) " + ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA));
+        System.out.println("TESTTTTTTTT");
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            selectPictureLauncher.launch(new PickVisualMediaRequest());
+        }
     }
 
     private void moreActionBtnClicked(View view) {
@@ -142,5 +234,12 @@ public class NoteDetailActivity extends AppCompatActivity {
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
         moreActionBottomSheetDialog.show();
+    }
+
+    @Override
+    public void onDeletePicture(View view, int position) {
+        //taskListViewModel.deletePicture(myPictures.get(position));
+        //myPictures.remove(position);
+        //taskPictureRVAdapter.notifyItemRemoved(position);
     }
 }
