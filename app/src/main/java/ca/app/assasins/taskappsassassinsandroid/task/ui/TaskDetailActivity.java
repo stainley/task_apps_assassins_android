@@ -6,6 +6,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -15,7 +17,9 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -39,6 +43,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -57,7 +63,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskPictureRVAda
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
 
-public class TaskDetailActivity extends AppCompatActivity implements TaskPictureRVAdapter.OnPictureTaskCallback {
+public class TaskDetailActivity extends AppCompatActivity implements TaskPictureRVAdapter.OnPictureTaskCallback, SubTaskViewAdapter.OnSubTaskCallback{
 
     private ActivityTaskDetailBinding binding;
 
@@ -73,6 +79,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<SubTask> subTasks = new ArrayList<>();
+    private final List<SubTask> additionalSubTasks = new ArrayList<>();
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -126,10 +133,10 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
         }
 
-        binding.startDateTask.setOnClickListener(this::startTaskDate);
+        binding.dueDateTask.setOnClickListener(this::dueDateTask);
         binding.addBtn.setOnClickListener(this::addBtnClicked);
-        binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
-
+        binding.editDateInfo.setVisibility(View.INVISIBLE);
+        binding.moreActionBtn.setVisibility(View.INVISIBLE);
 
         SharedPreferences categorySP = getSharedPreferences("category_sp", MODE_PRIVATE);
         categoryId = categorySP.getLong("categoryId", -1);
@@ -142,12 +149,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         taskPictureRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         taskPictureRV.setAdapter(taskPictureRVAdapter);
 
-        // SUBTASK VIEW ADAPTER
-        subTaskViewAdapter = new SubTaskViewAdapter(subTasks, (view, position) -> {
-            taskListViewModel.deleteSubTask(subTasks.get(position));
-            subTasks.remove(position);
-            subTaskViewAdapter.notifyItemRemoved(position);
-        });
+        subTaskViewAdapter = new SubTaskViewAdapter(subTasks, this);
 
         RecyclerView subTaskRV = binding.subTaskRV;
         subTaskRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -158,9 +160,14 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         TaskDetailActivityArgs taskDetailActivityArgs = TaskDetailActivityArgs.fromBundle(getIntent().getExtras());
         task = taskDetailActivityArgs.getOldTask();
         if (task != null) {
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh.mm aa");
+            String completionDate = dateFormat.format(task.getCompletionDate()).toString();
+            binding.editDateInfo.setVisibility(View.INVISIBLE);
+
             binding.taskNameText.setText(task.getTaskName());
             binding.taskCompletionCkb.setChecked(task.isCompleted());
-            binding.startDateTask.setHint(task.getCompletionDate() != null ? new Date(task.getCompletionDate()).toString() : "");
+            binding.taskCompletionCkb.setEnabled(!task.isCompleted());
+            binding.dueDateTask.setHint(task.getCompletionDate() != null ? completionDate : "");
 
             taskListViewModel.fetchPicturesByTaskId(task.getTaskId()).observe(this, taskImages -> {
                 myPictures.clear();
@@ -173,11 +180,13 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                 taskWithSubTasks.forEach(sbTask -> subTasks.addAll(sbTask.getSubTasks()));
                 subTaskViewAdapter.notifyItemRangeChanged(0, subTasks.size());
             });
+
+            allowDelete();
         }
     }
 
     //TODO: Save into DB
-    public void startTaskDate(View view) {
+    public void dueDateTask(View view) {
 
         final int[] hour = new int[1];
         final int[] minute = new int[1];
@@ -197,7 +206,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             calendar.add(Calendar.MINUTE, selectTime.getMinute());
 
 
-            binding.startDateTask.setHint(calendar.getTime().toString());
+            binding.dueDateTask.setHint(calendar.getTime().toString());
             System.out.println(date[0] + " " + hour[0] + ":" + minute[0]);
         });
 
@@ -262,6 +271,9 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                     subTask.setName(newEditText.getText().toString());
                     subTask.setCompleted(binding.taskCompletionCkb.isChecked());
                     subTasks.add(subTask);
+                    if (task != null) {
+                        additionalSubTasks.add(subTask);
+                    }
                     subTaskViewAdapter.notifyDataSetChanged();
                     bottomSheetDialog.dismiss();
                 }
@@ -273,22 +285,10 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         bottomSheetDialog.show();
     }
 
-    private void moreActionBtnClicked(View view) {
-        final BottomSheetDialog moreActionBottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_more_action_sheet, (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
-        bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(v -> {
-
-            if (task != null) {
-                taskListViewModel.deleteTask(task);
-                Toast.makeText(getApplicationContext(), "Delete!!!", Toast.LENGTH_SHORT).show();
-                moreActionBottomSheetDialog.dismiss();
-                finish();
-            }
-        });
-        moreActionBottomSheetDialog.setContentView(bottomSheetView);
-        moreActionBottomSheetDialog.show();
+    private void deleteTask(View view) {
+        taskListViewModel.deleteTask(task);
+        finish();
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -307,7 +307,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         if (item.getItemId() == android.R.id.home) {
-            Toast.makeText(this, "SAVING TASK", Toast.LENGTH_SHORT).show();
             Editable taskName = binding.taskNameText.getText();
             // Save the task
             Task task = new Task();
@@ -315,7 +314,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCreationDate(new Date().getTime());
             task.setCompleted(binding.taskCompletionCkb.isChecked());
             task.setCategoryId(categoryId);
-            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : 0);
+            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : this.task.getCompletionDate());
 
             assert taskName != null;
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
@@ -329,6 +328,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                 } else {
                     //taskListViewModel.updateTask(task);
                     taskListViewModel.updateTaskAll(task, myPictures, subTasks);
+                    taskListViewModel.insertAllSubTask(additionalSubTasks);
                 }
             }
 
@@ -344,5 +344,68 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         taskListViewModel.deletePicture(myPictures.get(position));
         myPictures.remove(position);
         taskPictureRVAdapter.notifyItemRemoved(position);
+    }
+
+    @Override
+    public void onSubTaskDeleted(View view, int position) {
+        taskListViewModel.deleteSubTask(subTasks.get(position));
+        subTasks.remove(position);
+        subTaskViewAdapter.notifyItemRemoved(position);
+    }
+
+    @Override
+    public void onSubTaskCompleted(View view, int position) {
+            SubTask subTask = subTasks.get(position);
+
+            if (((CheckBox) view).isChecked()){
+                subTask.setCompleted(true);
+                subTasks.get(position).setCompleted(true);
+            }
+            else {
+                subTask.setCompleted(false);
+                subTasks.get(position).setCompleted(false);
+            }
+
+            allowDelete();
+            taskListViewModel.updateTaskAll(task, myPictures, subTasks);
+    }
+
+    public void allowDelete() {
+        boolean deleteAllowed = false;
+
+        if (subTasks.size() == 0 && task.isCompleted()) {
+            deleteAllowed = true;
+        }
+        else if (subTasks.size() > 0 ) {
+            int totalSubtaskComplete = 0;
+
+            for (int i = 0; i < subTasks.size(); i++) {
+                if (subTasks.get(i).isCompleted()) {
+                    totalSubtaskComplete++;
+                }
+            }
+
+            if (totalSubtaskComplete == subTasks.size()) {
+                task.setCompleted(true);
+                deleteAllowed = true;
+                binding.taskCompletionCkb.setChecked(task.isCompleted());
+                binding.taskCompletionCkb.setEnabled(false);
+            }
+            else {
+                task.setCompleted(false);
+                deleteAllowed = false;
+                binding.taskCompletionCkb.setChecked(task.isCompleted());
+                binding.taskCompletionCkb.setEnabled(true);
+            }
+        }
+
+        if (deleteAllowed) {
+            binding.moreActionBtn.setImageDrawable(getResources().getDrawable(R.drawable.delete));
+            binding.moreActionBtn.setOnClickListener(this::deleteTask);
+            binding.moreActionBtn.setVisibility(View.VISIBLE);
+        }
+        else {
+            binding.moreActionBtn.setVisibility(View.INVISIBLE);
+        }
     }
 }

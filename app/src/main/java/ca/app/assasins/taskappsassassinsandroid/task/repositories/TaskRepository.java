@@ -87,4 +87,9 @@ public class TaskRepository {
     public void deleteSubTask(SubTask subTask) {
         AppDatabase.databaseWriterExecutor.execute(() -> subTaskDao.deleteSubTask(subTask));
     }
+
+    public void insertAllSubTask(List<SubTask> subTask) {
+        AppDatabase.databaseWriterExecutor.execute(() -> subTaskDao.insertAll(subTask));
+    }
+
 }
