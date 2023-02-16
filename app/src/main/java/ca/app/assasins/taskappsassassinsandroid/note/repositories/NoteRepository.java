@@ -66,4 +66,7 @@ public class NoteRepository {
         AppDatabase.databaseWriterExecutor.execute(() -> pictureDao.delete(picture));
     }
 
+    public LiveData<NoteImages> findPictureByNoteId(long noteId) {
+        return noteDao.getLasNotePicture(noteId);
+    }
 }

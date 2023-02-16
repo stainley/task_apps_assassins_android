@@ -36,7 +36,7 @@ public abstract class NoteDao implements AbstractDao<Note> {
 
     @Delete
     @Override
-    public  abstract void delete(Note type);
+    public abstract void delete(Note type);
 
     @Update
     @Override
@@ -59,6 +59,7 @@ public abstract class NoteDao implements AbstractDao<Note> {
     @Transaction
     @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :id")
     public abstract LiveData<List<NoteImages>> getAllImagesByNoteId(long id);
+
     @Transaction
     public Boolean addPicture(Note note, List<Picture> pictures) {
         final long noteId = saveNote(note);
@@ -89,4 +90,8 @@ public abstract class NoteDao implements AbstractDao<Note> {
             });
         }
     }
+
+    @Transaction
+    @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :noteId")
+    public abstract LiveData<NoteImages> getLasNotePicture(long noteId);
 }
