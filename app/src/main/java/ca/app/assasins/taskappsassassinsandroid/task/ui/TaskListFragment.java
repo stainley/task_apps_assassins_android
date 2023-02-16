@@ -4,6 +4,8 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +16,22 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.search.SearchView;
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.ui.NoteListFragmentDirections;
+import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
@@ -31,6 +42,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     private FragmentTaskListBinding binding;
     private TaskListViewModel taskListViewModel;
     private final List<Task> tasks = new ArrayList<>();
+    private List<Task> tasksFiltered = new ArrayList<>();
     private TaskListViewAdapter taskListViewAdapter;
     private long categoryId;
 
@@ -54,6 +66,9 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         taskListViewAdapter = new TaskListViewAdapter(tasks, this);
         taskListRecycleView.setAdapter(taskListViewAdapter);
         taskListRecycleView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        SearchView searchView = binding.searchView;
+        searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.newTaskBtn.setOnClickListener(this::createNewTask);
         return binding.getRoot();
@@ -79,5 +94,35 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     @Override
     public void onTaskSelected(View view, int position) {
         Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position)));
+    }
+
+    private Supplier<TextWatcher> getTextWatcherSupplier() {
+        return () -> new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                tasksFiltered.clear();
+                RecyclerView taskFilterRecycle = binding.taskFilterRecycle;
+
+                tasksFiltered = tasks.stream().filter(task -> {
+
+                    if (s.length() == 0) return false;
+                    return task.getTaskName().toLowerCase().contains(s.toString().toLowerCase());
+                }).collect(Collectors.toList());
+
+                taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position))));
+
+                taskFilterRecycle.setAdapter(taskListViewAdapter);
+                taskFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        };
     }
 }
