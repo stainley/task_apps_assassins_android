@@ -43,15 +43,9 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
         textFormat(holder, position);
 
         holder.deleteTaskBtn.setOnClickListener(v -> onSubTaskCallback.onSubTaskDeleted(v, position));
-
-        holder.subTaskCkb.setOnClickListener(v -> {
-            SubTask subTask = subTasks.get(position);
-            subTask.setCompleted(holder.subTaskCkb.isChecked());
-            holder.subtaskNameTxt.setPaintFlags(holder.subtaskNameTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            subTasks.set(position, subTask);
-
-            textFormat(holder, position);
-        });
+        holder.subTaskCkb.setOnClickListener(v -> onSubTaskCallback.onSubTaskCompleted(v, position));
+        holder.deleteTaskBtn.setVisibility(subTasks.get(position).isCompleted() ? View.VISIBLE : View.INVISIBLE);
+        holder.subTaskCkb.setEnabled(!subTasks.get(position).isCompleted());
     }
 
     private void textFormat(@NonNull SubTaskViewHolder holder, int position) {
@@ -87,5 +81,6 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
 
     public interface OnSubTaskCallback {
         void onSubTaskDeleted(View view, int position);
+        void onSubTaskCompleted(View view, int position);
     }
 }

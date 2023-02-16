@@ -78,7 +78,6 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
 
     @Override
     public void onTaskSelected(View view, int position) {
-        Toast.makeText(getContext(), "CLICKED RECORD: " + tasks.get(position).getTaskName(), Toast.LENGTH_SHORT).show();
         Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position)));
     }
 }
