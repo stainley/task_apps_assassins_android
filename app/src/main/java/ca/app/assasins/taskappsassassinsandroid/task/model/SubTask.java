@@ -10,10 +10,9 @@ import java.io.Serializable;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 
-@Entity(tableName = "SUB_TASK_TBL",
-        foreignKeys = @ForeignKey(entity = Task.class, parentColumns = "TASK_ID", childColumns = "SUB_TASK_ID", onDelete = ForeignKey.CASCADE))
+@Entity(tableName = "SUB_TASK_TBL")
 public class SubTask implements Serializable {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "SUB_TASK_ID")
     private Long subTaskId;
     @ColumnInfo(name = "SUBTASK_NAME")
@@ -21,6 +20,9 @@ public class SubTask implements Serializable {
 
     @ColumnInfo(name = "TASK_PARENT_ID")
     private Long taskParentId;
+
+    @ColumnInfo(name = "SUB_TASK_COMPLETED")
+    private boolean isCompleted;
 
     @Embedded
     private Coordinate coordinate;
@@ -55,5 +57,13 @@ public class SubTask implements Serializable {
 
     public void setTaskParentId(Long taskParentId) {
         this.taskParentId = taskParentId;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public void setCompleted(boolean completed) {
+        isCompleted = completed;
     }
 }

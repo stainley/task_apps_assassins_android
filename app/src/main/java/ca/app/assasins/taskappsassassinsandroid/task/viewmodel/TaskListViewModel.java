@@ -9,8 +9,10 @@ import androidx.lifecycle.ViewModel;
 import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
+import ca.app.assasins.taskappsassassinsandroid.task.model.TaskWithSubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.repositories.TaskRepository;
 
 public class TaskListViewModel extends ViewModel {
@@ -50,6 +52,10 @@ public class TaskListViewModel extends ViewModel {
         taskRepository.saveTaskWithPictures(task, pictures);
     }
 
+    public void saveTaskWithChildren(@NonNull Task task, @NonNull List<Picture> pictures, @NonNull List<SubTask> subTasks) {
+        taskRepository.saveTaskWithChildren(task, pictures, subTasks);
+    }
+
     public void updatePictures(Task task, List<Picture> pictures) {
         taskRepository.updateTaskWithPictures(task, pictures);
     }
@@ -60,5 +66,17 @@ public class TaskListViewModel extends ViewModel {
 
     public void deletePicture(@NonNull Picture picture) {
         this.taskRepository.deletePicture(picture);
+    }
+
+    public void deleteSubTask(@NonNull SubTask subTask) {
+        this.taskRepository.deleteSubTask(subTask);
+    }
+
+    public LiveData<List<TaskWithSubTask>> fetchSubTaskByTaskId(long id) {
+        return taskRepository.fetchAllSubTaskById(id);
+    }
+
+    public void updateTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
+        this.taskRepository.updateTaskAll(task, pictures, subTasks);
     }
 }

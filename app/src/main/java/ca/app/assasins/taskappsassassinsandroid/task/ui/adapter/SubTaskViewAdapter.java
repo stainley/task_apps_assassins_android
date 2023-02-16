@@ -3,6 +3,9 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,7 +36,16 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull SubTaskViewHolder holder, int position) {
-        
+        holder.subTaskCkb.setChecked(subTasks.get(position).isCompleted());
+        holder.subtaskNameTxt.setText(subTasks.get(position).getName());
+
+        holder.deleteTaskBtn.setOnClickListener(v -> onSubTaskCallback.onSubTaskDeleted(v, position));
+
+        holder.subTaskCkb.setOnClickListener(v -> {
+            SubTask subTask = subTasks.get(position);
+            subTask.setCompleted(holder.subTaskCkb.isChecked());
+            subTasks.set(position, subTask);
+        });
     }
 
     @Override
@@ -43,9 +55,15 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
 
     static final class SubTaskViewHolder extends RecyclerView.ViewHolder {
         // Add button to delete subTask
+        private final TextView subtaskNameTxt;
+        private final CheckBox subTaskCkb;
+        private final Button deleteTaskBtn;
 
         public SubTaskViewHolder(@NonNull View itemView) {
             super(itemView);
+            subtaskNameTxt = itemView.findViewById(R.id.subtaskName);
+            subTaskCkb = itemView.findViewById(R.id.subTaskStatus);
+            deleteTaskBtn = itemView.findViewById(R.id.deleteSubTaskBtn);
         }
     }
 

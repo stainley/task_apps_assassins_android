@@ -4,7 +4,6 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -26,11 +25,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -49,10 +46,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
-import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityTaskDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
@@ -73,6 +68,8 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     private SubTaskViewAdapter subTaskViewAdapter;
     private TaskPictureRVAdapter taskPictureRVAdapter;
     private Uri tempImageUri = null;
+
+    private Calendar calendar;
 
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<SubTask> subTasks = new ArrayList<>();
@@ -143,10 +140,9 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         taskPictureRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         taskPictureRV.setAdapter(taskPictureRVAdapter);
 
-        //subtask rv/adapter
+        // SUBTASK VIEW ADAPTER
         subTaskViewAdapter = new SubTaskViewAdapter(subTasks, (view, position) -> {
-            // TODO: Delete subtask
-            //
+            taskListViewModel.deleteSubTask(subTasks.get(position));
             subTasks.remove(position);
             subTaskViewAdapter.notifyItemRemoved(position);
         });
@@ -162,11 +158,18 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         if (task != null) {
             binding.taskNameText.setText(task.getTaskName());
             binding.taskCompletionCkb.setChecked(task.isCompleted());
+            binding.startDateTask.setHint(task.getCompletionDate() != null ? new Date(task.getCompletionDate()).toString() : "");
 
             taskListViewModel.fetchPicturesByTaskId(task.getTaskId()).observe(this, taskImages -> {
                 myPictures.clear();
                 taskImages.forEach(image -> myPictures.addAll(image.pictures));
                 taskPictureRVAdapter.notifyItemRangeChanged(0, myPictures.size());
+            });
+
+            taskListViewModel.fetchSubTaskByTaskId(task.getTaskId()).observe(this, taskWithSubTasks -> {
+                subTasks.clear();
+                taskWithSubTasks.forEach(sbTask -> subTasks.addAll(sbTask.getSubTasks()));
+                subTaskViewAdapter.notifyItemRangeChanged(0, subTasks.size());
             });
         }
     }
@@ -177,8 +180,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         final int[] hour = new int[1];
         final int[] minute = new int[1];
         final Date[] date = new Date[1];
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
-
+        calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
 
         MaterialTimePicker selectTime = new MaterialTimePicker.Builder().setTitleText("Start Time").build();
 
@@ -197,19 +199,16 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             System.out.println(date[0] + " " + hour[0] + ":" + minute[0]);
         });
 
-
         MaterialDatePicker<Long> selectDate = MaterialDatePicker.Builder.datePicker().setTitleText("Select date").build();
         selectDate.setCancelable(false);
         selectDate.show(getSupportFragmentManager(), "calendar");
         selectDate.addOnPositiveButtonClickListener(selection -> date[0] = new Date(selection));
-
 
     }
 
 
     public void takePhoto() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-
 
             ContentResolver cr = getContentResolver();
             ContentValues values = new ContentValues();
@@ -257,44 +256,14 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                     Toast.makeText(this, "Couldn't be empty", Toast.LENGTH_SHORT).show();
                 } else {
                     SubTask subTask = new SubTask();
-                    subTask.setTaskParentId(task.getTaskId());
+                    subTask.setTaskParentId(task != null ? task.getTaskId() : 0);
                     subTask.setName(newEditText.getText().toString());
+                    subTask.setCompleted(binding.taskCompletionCkb.isChecked());
                     subTasks.add(subTask);
                     subTaskViewAdapter.notifyDataSetChanged();
-                    //List<Category> resultCategory = categories.stream().filter(cat -> inputText.equalsIgnoreCase(cat.getName())).collect(Collectors.toList());
 
-                    /*if (resultCategory.isEmpty()) {
-                        categoryViewModel.createCategory(new Category(inputText));
-                    } else {
-                        Toast.makeText(this, inputText + " is in our database.", Toast.LENGTH_SHORT).show();
-                    }*/
                 }
             }).setCancelable(false).show();
-
-           /* AlertDialog.Builder builder = new AlertDialog.Builder(TaskDetailActivity.this);
-            // Get the layout inflater
-            LayoutInflater inflater = getLayoutInflater();
-
-            // Inflate and set the layout for the dialog
-            // Pass null as the parent view because its going in the dialog layout
-            builder.setView(inflater.inflate(R.layout.fragment_sub_task_dialog, null))
-                    // Add action buttons
-                    .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int id) {
-                            // sign in the user ...
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            TaskDetailActivity.this.getDialog().cancel();
-                        }
-                    });
-            return builder.create();*/
-
-
-            //bottomSheetDialog.dismiss();
         });
 
 
@@ -344,27 +313,20 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCreationDate(new Date().getTime());
             task.setCompleted(binding.taskCompletionCkb.isChecked());
             task.setCategoryId(categoryId);
+            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : 0);
 
             assert taskName != null;
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
                 task.setTaskName(taskName.toString());
-
-                if (!myPictures.isEmpty()) {
-                    List<Picture> pictureList = new ArrayList<>(myPictures);
-                    taskListViewModel.savePictures(task, pictureList);
-                } else {
-                    taskListViewModel.saveTask(task);
-                }
+                taskListViewModel.saveTaskWithChildren(task, myPictures, subTasks);
             } else {
                 task.setTaskName(taskName.toString());
                 // update
                 if (!myPictures.isEmpty()) {
-                    List<Picture> pictureList = new ArrayList<>(myPictures);
-                    taskListViewModel.updatePictures(task, pictureList);
+                    taskListViewModel.updatePictures(task, myPictures);
                 } else {
-                    // Task without pictures (Pictures are optional
-                    task.setTaskName(taskName.toString());
-                    taskListViewModel.updateTask(task);
+                    //taskListViewModel.updateTask(task);
+                    taskListViewModel.updateTaskAll(task, myPictures, subTasks);
                 }
             }
 

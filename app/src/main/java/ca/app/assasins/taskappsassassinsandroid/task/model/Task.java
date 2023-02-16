@@ -33,7 +33,6 @@ public class Task implements Serializable {
     private Long completionDate;
     @Embedded
     private Coordinate coordinate;
-
     @ColumnInfo(name = "CATEGORY_ID")
     private Long categoryId;
 
