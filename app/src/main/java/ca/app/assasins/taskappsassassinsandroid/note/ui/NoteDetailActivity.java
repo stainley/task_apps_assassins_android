@@ -371,14 +371,12 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 Button startRecordAudio = customDialog.findViewById(R.id.recordingAudioBtn);
 
                 new MaterialAlertDialogBuilder(this).setView(customDialog).setTitle("Record").setMessage("Tap the mic to start recording.").setPositiveButton("Stop", (dialog, which) -> {
-                    System.out.println("STOP");
                     stopRecordAudio();
                 }).setOnCancelListener(dialog -> {
 
                 }).show();
 
                 startRecordAudio.setOnClickListener(v1 -> {
-                    Toast.makeText(getApplicationContext(), "Start RECORDING", Toast.LENGTH_SHORT).show();
                     recordAudio();
                     startRecordAudio.setBackground(getDrawable(R.drawable.ic_stop_record));
 
@@ -419,9 +417,16 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_more_action_sheet, (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
         bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(view1 -> {
             noteViewModel.deleteNote(note);
-            Toast.makeText(NoteDetailActivity.this, "Delete!!!", Toast.LENGTH_SHORT).show();
             moreActionBottomSheetDialog.dismiss();
             finish();
+        });
+
+        bottomSheetView.findViewById(R.id.show_map).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                moreActionBottomSheetDialog.dismiss();
+            }
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
         moreActionBottomSheetDialog.show();
@@ -432,6 +437,8 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
+        Toast.makeText(NoteDetailActivity.this, "Audio stopped", Toast.LENGTH_SHORT).show();
+
     }
 
     private void recordAudio() {
@@ -461,7 +468,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     @Override
     public void onDeletePicture(View view, int position) {
-        //TODO: delete photo implementation
         noteViewModel.deletePicture(myPictures.get(position));
         myPictures.remove(myPictures.get(position));
         notePictureRVAdapter.notifyItemRemoved(position);
