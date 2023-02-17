@@ -555,7 +555,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private void deleteTask(View view) {
         taskListViewModel.deleteTask(task);
-        finish();
+        //finish();
     }
 
     @Override
@@ -585,7 +585,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCategoryId(categoryId);
             Task oldTask = this.task;
 
-            if (oldTask != null || calendar != null) {
+            if (task != null || calendar != null) {
                 task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
             }
 
@@ -597,7 +597,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
             // FIXME: duplicating images
             if (oldTask != null && !oldTask.getTaskName().equals("") && oldTask.getTaskId() > 0) {
-                //taskListViewModel.updateTask(task);
+                oldTask.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
                 taskListViewModel.updateTaskAll(oldTask, myPictures, subTasks, mAudios);
                 taskListViewModel.insertAllSubTask(additionalSubTasks);
             }
