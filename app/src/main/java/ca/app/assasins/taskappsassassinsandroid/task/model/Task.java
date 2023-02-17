@@ -1,19 +1,13 @@
 package ca.app.assasins.taskappsassassinsandroid.task.model;
 
-import android.net.Uri;
-
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 
 @Entity(tableName = "TASK_TBL",

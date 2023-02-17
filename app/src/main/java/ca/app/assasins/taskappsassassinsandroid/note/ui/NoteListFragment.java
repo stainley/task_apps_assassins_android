@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -39,6 +40,7 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
@@ -63,6 +65,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     String moveToCategories;
     int categoryCount = -1;
     AutoCompleteTextView autoCompleteTextView;
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentNoteListBinding.inflate(inflater, container, false);
@@ -79,8 +82,10 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
             this.notes.clear();
             this.notes.addAll(notesResult);
+
             this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
         });
+
 
         RecyclerView noteListRecycleView = binding.noteList;
         noteRecycleAdapter = new NoteRecycleAdapter(notes, this);
@@ -165,9 +170,9 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
                 .setView(moveNoteView)
                 .setNeutralButton("Cancel", (dialog, which) -> {
 
-        }).setNegativeButton("Done", (dialog, which) -> {
+                }).setNegativeButton("Done", (dialog, which) -> {
 
-        }).setCancelable(false).show();
+                }).setCancelable(false).show();
     }
 
     @Override
@@ -182,6 +187,17 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
                         .into(view);
             }
         });
+
+    }
+
+    @Override
+    public void showAudioIcon(ImageButton audioIcon, int position) {
+
+        noteViewModel.fetchAudiosByNote(notes.get(position).getNoteId()).observe(this, noteAudios -> noteAudios.forEach(noteAudios1 -> {
+            if (noteAudios1.getAudios().size() > 0) {
+                audioIcon.setVisibility(View.VISIBLE);
+            }
+        }));
 
     }
 
