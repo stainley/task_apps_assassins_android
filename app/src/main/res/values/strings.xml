@@ -22,6 +22,4 @@
     <string name="authorities">com.example.fileprovider</string>
 
     <string name="select">Select Category</string>
-
-    <string name="google_map">AIzaSyDsjgUUFHSi1oPpNa3ntiW7Erl2Oj_6l3I</string>
 </resources>
