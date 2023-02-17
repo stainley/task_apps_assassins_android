@@ -16,6 +16,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNavigationBinding;
@@ -68,8 +69,6 @@ public class NavigationActivity extends AppCompatActivity {
         NavGraph graph = navController.getGraph();
         NavArgument argument = new NavArgument.Builder().setDefaultValue(categoryId).build();
         graph.addArgument("category", argument);
-
-
         NavigationUI.setupWithNavController(navView, navController);
     }
 
