@@ -309,7 +309,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             newNote.setNoteId(this.note != null ? this.note.getNoteId() : 0);
 
             if (!title.isEmpty() && newNote.getNoteId() == 0) {
-                //noteViewModel.saveNoteWithPictures(newNote, myPictures);
                 noteViewModel.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
             } else if (!title.isEmpty() && newNote.getNoteId() > 0) {
                 if (!myPictures.isEmpty()) {
@@ -410,6 +409,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     }
 
     private void stopRecordAudio() {
+        noteAudioRVAdapter.notifyItemRangeChanged(0, mAudios.size());
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
@@ -460,13 +460,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
     }
-
-/*    private boolean checkPermissionDevice() {
-        int write_external_storage_result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        int record_audio_result = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
-
-        return write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED;
-    }*/
 
     private void askForPermissions(ArrayList<String> permissionsList) {
         String[] newPermissionStr = new String[permissionsList.size()];
