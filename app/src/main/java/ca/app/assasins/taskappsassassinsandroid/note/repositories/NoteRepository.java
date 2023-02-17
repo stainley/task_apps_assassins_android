@@ -67,8 +67,8 @@ public class NoteRepository {
     }
 
     @Transaction
-    public void updateNoteWithPictures(Note note, List<Picture> pictures) {
-        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.updatePicture(note, pictures));
+    public void updateNoteWithPictures(Note note, List<Picture> pictures, List<Audio> audios) {
+        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.updateNoteAll(note, pictures, audios));
     }
 
     public void deletePicture(Picture picture) {
