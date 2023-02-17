@@ -12,10 +12,13 @@ import java.util.concurrent.Executors;
 
 import ca.app.assasins.taskappsassassinsandroid.category.dao.CategoryDao;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
+import ca.app.assasins.taskappsassassinsandroid.common.dao.AudioDao;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.task.dao.SubTaskDao;
 import ca.app.assasins.taskappsassassinsandroid.task.dao.TaskDao;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -24,7 +27,8 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
         Note.class,
         Task.class,
         SubTask.class,
-        Picture.class
+        Picture.class,
+        Audio.class
 }, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -45,7 +49,12 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CategoryDao categoryDao();
 
     public abstract NoteDao noteDao();
+
     public abstract TaskDao taskDao();
+
     public abstract PictureDao pictureDao();
+
+    public abstract SubTaskDao subTaskDao();
+    public abstract AudioDao audioDao();
 
 }

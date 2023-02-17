@@ -1,22 +1,24 @@
-package ca.app.assasins.taskappsassassinsandroid.category.ui;
+package ca.app.assasins.taskappsassassinsandroid.category.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -30,14 +32,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import java.util.function.Supplier;
-
 import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
-import ca.app.assasins.taskappsassassinsandroid.category.ui.adpter.CategoryRecycleAdapter;
+import ca.app.assasins.taskappsassassinsandroid.category.view.adpter.CategoryRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.common.view.NavigationActivity;
@@ -170,7 +170,22 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
     public void onRowClicked(int position) {
         SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
         categorySP.putLong("categoryId", categories.get(position).getId());
+        categorySP.putInt("categoryCount", categories.size());
         categorySP.putString("categoryName", categories.get(position).getName());
+
+        if (categories.size() > 1) {
+            String moveToCategories = "";
+            for (int i = 0; i < categories.size(); i++) {
+                if (categories.get(i).getId() != categories.get(position).getId()) {
+                    moveToCategories += categories.get(i).getName() + ",";
+                }
+            }
+            categorySP.putString("moveToCategories", moveToCategories);
+        }
+        else {
+            categorySP.putString("moveToCategories", null);
+        }
+
         categorySP.apply();
 
         Intent navigationActivity = new Intent(this, NavigationActivity.class);

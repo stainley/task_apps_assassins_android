@@ -2,54 +2,80 @@ package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import static java.util.Comparator.comparing;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
+import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
+import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragmentDirections;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 
 public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnNoteCallback {
 
     private FragmentNoteListBinding binding;
 
     private NoteViewModel noteViewModel;
+
+    private CategoryViewModel categoryViewModel;
     private Category category;
 
     private long categoryId;
-
     private List<Note> notesFiltered = new ArrayList<>();
     private final List<Note> notes = new ArrayList<>();
 
     private NoteRecycleAdapter noteRecycleAdapter;
+    ArrayAdapter<String> adapterItems;
+    String[] categories = new String[1000];
+    String moveToCategories;
+    int categoryCount = -1;
+    AutoCompleteTextView autoCompleteTextView;
+
+    boolean titleSortedByAsc = false;
+    boolean createdDateSortedByAsc = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -57,13 +83,17 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
         SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
         categoryId = categorySP.getLong("categoryId", -1);
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
 
-
+        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
         noteViewModel = new ViewModelProvider(this, new NoteViewModelFactory(requireActivity().getApplication())).get(NoteViewModel.class);
 
         noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
             this.notes.clear();
             this.notes.addAll(notesResult);
+
             this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
         });
 
@@ -77,6 +107,8 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
+        binding.sortButton.setOnClickListener(this::sortButtonClicked);
+
         return binding.getRoot();
     }
 
@@ -117,14 +149,97 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity());
     }
 
+    private void sortButtonClicked(View view) {
+        LayoutInflater inflater = getLayoutInflater();
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext(), R.style.BottomSheetDialogTheme);
+        View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
+        bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
+
+        bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
+            titleSortedByAsc = !titleSortedByAsc;
+
+            if (titleSortedByAsc) {
+                notes.sort(comparing(Note::getTitle));
+            } else {
+                notes.sort(comparing(Note::getTitle).reversed());
+            }
+            noteRecycleAdapter.notifyDataSetChanged();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
+            createdDateSortedByAsc = !createdDateSortedByAsc;
+
+            if (createdDateSortedByAsc) {
+                notes.sort(comparing(Note::getCreatedDate));
+            } else {
+                notes.sort(comparing(Note::getCreatedDate).reversed());
+            }
+            noteRecycleAdapter.notifyDataSetChanged();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
+    }
+
     @Override
     public void onNoteSelected(View view, int position) {
-        Toast.makeText(getContext(), "CLICKED RECORD: " + notes.get(position).getTitle(), Toast.LENGTH_SHORT).show();
         Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notes.get(position)));
     }
 
     @Override
-    public void onMoveNote(int position) {
+    public void onMoveNote(int position, Note note) {
+        LayoutInflater inflater = getLayoutInflater();
+        View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
+        autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
+
+        adapterItems = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown_items, categories);
+        autoCompleteTextView.setAdapter(adapterItems);
+        autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
+            String category = adapterView.getItemAtPosition(position1).toString();
+
+            categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
+                System.out.println("note " + note.getTitle());
+                note.setCategoryId(result.getId());
+                noteViewModel.updateNote(note);
+            });
+        });
+
+        new MaterialAlertDialogBuilder(getContext())
+                .setTitle("Move Note")
+                .setView(moveNoteView)
+                .setNeutralButton("Cancel", (dialog, which) -> {
+
+                }).setNegativeButton("Done", (dialog, which) -> {
+
+                }).setCancelable(false).show();
+    }
+
+    @Override
+    public void onDisplayThumbnail(ImageView view, int position) {
+
+        noteViewModel.findPictureByNoteId(notes.get(position).getNoteId()).observe(this, noteImages -> {
+            if (noteImages != null && noteImages.getPictures().size() > 0) {
+                String path = noteImages.getPictures().get(0).getPath();
+                Picasso.get().load(path)
+                        .resize(200, 200)
+                        .centerInside()
+                        .into(view);
+            }
+        });
+
+    }
+
+    @Override
+    public void showAudioIcon(ImageButton audioIcon, int position) {
+
+        noteViewModel.fetchAudiosByNote(notes.get(position).getNoteId()).observe(this, noteAudios -> noteAudios.forEach(noteAudios1 -> {
+            if (noteAudios1.getAudios().size() > 0) {
+                audioIcon.setVisibility(View.VISIBLE);
+            }
+        }));
 
     }
 
@@ -159,26 +274,31 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
                 noteRecycleAdapter = new NoteRecycleAdapter(notesFiltered, new NoteRecycleAdapter.OnNoteCallback() {
                     @Override
-                    public void onMoveNote(int position) {
-
+                    public void onNoteSelected(View view, int position) {
+                        Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notesFiltered.get(position)));
                     }
 
                     @Override
                     public void onDeleteNote(View view, int position) {
-                        Snackbar deleteSnackbar = Snackbar.make(view, "Are sure you want do delete this note?", Snackbar.LENGTH_LONG).setAnchorView(binding.createNoteBtn).setAction("Accept", v -> {
-                            noteViewModel.deleteNote(notes.get(position));
-                            notes.remove(notes.get(position));
-                            noteRecycleAdapter.notifyItemRemoved(position);
-                        });
-                        deleteSnackbar.show();
+
                     }
 
                     @Override
-                    public void onNoteSelected(View view, int position) {
-                        Toast.makeText(getContext(), "CLICKED RECORD: " + notes.get(position).getTitle(), Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notes.get(position)));
+                    public void onMoveNote(int position, Note note) {
+
+                    }
+
+                    @Override
+                    public void onDisplayThumbnail(ImageView Imageview, int position) {
+
+                    }
+
+                    @Override
+                    public void showAudioIcon(ImageButton audioIcon, int position) {
+
                     }
                 });
+
 
                 noteFilterRecycle.setAdapter(noteRecycleAdapter);
                 noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));

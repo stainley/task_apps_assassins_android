@@ -1,16 +1,20 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui.adpter;
 
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -19,9 +23,8 @@ import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 
 public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.ViewHolder> {
 
-private final OnNoteCallback onNoteCallback;
-private final List<Note> notes;
-
+    private final OnNoteCallback onNoteCallback;
+    private final List<Note> notes;
 
     public NoteRecycleAdapter(List<Note> notes, OnNoteCallback onCallback) {
         this.notes = notes;
@@ -42,6 +45,10 @@ private final List<Note> notes;
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.title.setText(notes.get(position).getTitle());
         holder.description.setText(notes.get(position).getDescription());
+
+        onNoteCallback.showAudioIcon(holder.playAudioIcon, position);
+
+        onNoteCallback.onDisplayThumbnail(holder.noteThumbnailView, position);
 
         holder.noteCard.setOnClickListener(view -> {
             this.onNoteCallback.onNoteSelected(view, position);
@@ -64,7 +71,7 @@ private final List<Note> notes;
 
                     return true;
                 case R.id.move_note_menu:
-                    this.onNoteCallback.onMoveNote(position);
+                    this.onNoteCallback.onMoveNote(position, notes.get(position));
 
                     return true;
             }
@@ -84,6 +91,9 @@ private final List<Note> notes;
 
         private final TextView description;
         private final CardView noteCard;
+        private final ImageView noteThumbnailView;
+
+        private final ImageButton playAudioIcon;
         private final ImageButton cardNoteMenu;
 
         public ViewHolder(@NonNull View itemView) {
@@ -92,8 +102,9 @@ private final List<Note> notes;
             title = itemView.findViewById(R.id.title);
             description = itemView.findViewById(R.id.description);
             noteCard = itemView.findViewById(R.id.noteCard);
+            playAudioIcon = itemView.findViewById(R.id.play_audio_icon);
             cardNoteMenu = itemView.findViewById(R.id.card_note_menu);
-
+            noteThumbnailView = itemView.findViewById(R.id.noteThumbnailView);
         }
     }
 
@@ -102,6 +113,10 @@ private final List<Note> notes;
 
         void onDeleteNote(View view, int position);
 
-        void onMoveNote(int position);
+        void onMoveNote(int position, Note note);
+
+        void onDisplayThumbnail(ImageView Imageview, int position);
+
+        void showAudioIcon(ImageButton audioIcon, int position);
     }
 }

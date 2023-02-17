@@ -10,18 +10,20 @@ import java.io.Serializable;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 
-@Entity(tableName = "SUB_TASK_TBL",
-        foreignKeys = @ForeignKey(entity = Task.class, parentColumns = "TASK_ID", childColumns = "SUB_TASK_ID", onDelete = ForeignKey.CASCADE))
+@Entity(tableName = "SUB_TASK_TBL")
 public class SubTask implements Serializable {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "SUB_TASK_ID")
     private Long subTaskId;
     @ColumnInfo(name = "SUBTASK_NAME")
     private String name;
-    @ColumnInfo(name = "COMPLETION_DATE")
-    private Long completionDate;
-    @ColumnInfo(name = "UPDATED_DATE")
-    private Long updatedDate;
+
+    @ColumnInfo(name = "TASK_PARENT_ID")
+    private Long taskParentId;
+
+    @ColumnInfo(name = "SUB_TASK_COMPLETED")
+    private boolean isCompleted;
+
     @Embedded
     private Coordinate coordinate;
 
@@ -41,27 +43,27 @@ public class SubTask implements Serializable {
         this.name = name;
     }
 
-    public Long getCompletionDate() {
-        return completionDate;
-    }
-
-    public void setCompletionDate(Long completionDate) {
-        this.completionDate = completionDate;
-    }
-
-    public Long getUpdatedDate() {
-        return updatedDate;
-    }
-
-    public void setUpdatedDate(Long updatedDate) {
-        this.updatedDate = updatedDate;
-    }
-
     public Coordinate getCoordinate() {
         return coordinate;
     }
 
     public void setCoordinate(Coordinate coordinate) {
         this.coordinate = coordinate;
+    }
+
+    public Long getTaskParentId() {
+        return taskParentId;
+    }
+
+    public void setTaskParentId(Long taskParentId) {
+        this.taskParentId = taskParentId;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public void setCompleted(boolean completed) {
+        isCompleted = completed;
     }
 }

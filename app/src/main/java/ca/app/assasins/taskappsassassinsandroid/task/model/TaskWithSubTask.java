@@ -12,7 +12,7 @@ public class TaskWithSubTask {
 
     @Relation(
             parentColumn = "TASK_ID",
-            entityColumn = "SUB_TASK_ID"
+            entityColumn = "TASK_PARENT_ID"
     )
     private List<SubTask> subTasks;
 

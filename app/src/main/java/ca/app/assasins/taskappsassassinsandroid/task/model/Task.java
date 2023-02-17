@@ -1,19 +1,13 @@
 package ca.app.assasins.taskappsassassinsandroid.task.model;
 
-import android.net.Uri;
-
 import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
-import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 
 @Entity(tableName = "TASK_TBL",
@@ -28,12 +22,11 @@ public class Task implements Serializable {
     @ColumnInfo(name = "COMPLETED")
     private boolean isCompleted;
     @ColumnInfo(name = "CREATION_DATE")
-    private Long creationDate;
+    private long creationDate;
     @ColumnInfo(name = "COMPLETION_DATE")
-    private Long completionDate;
+    private long completionDate;
     @Embedded
     private Coordinate coordinate;
-
     @ColumnInfo(name = "CATEGORY_ID")
     private Long categoryId;
 
@@ -61,19 +54,19 @@ public class Task implements Serializable {
         isCompleted = completed;
     }
 
-    public Long getCreationDate() {
+    public long getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Long creationDate) {
+    public void setCreationDate(long creationDate) {
         this.creationDate = creationDate;
     }
 
-    public Long getCompletionDate() {
+    public long getCompletionDate() {
         return completionDate;
     }
 
-    public void setCompletionDate(Long completionDate) {
+    public void setCompletionDate(long completionDate) {
         this.completionDate = completionDate;
     }
 

@@ -2,7 +2,9 @@ package ca.app.assasins.taskappsassassinsandroid.common.model;
 
 import androidx.room.ColumnInfo;
 
-public class Coordinate {
+import java.io.Serializable;
+
+public class Coordinate implements Serializable {
     @ColumnInfo(name = "LATITUDE")
     private double latitude;
     @ColumnInfo(name = "LONGITUDE")

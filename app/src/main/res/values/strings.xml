@@ -20,4 +20,6 @@
     <string name="share_with_friends">Share with Friends</string>
 
     <string name="authorities">com.example.fileprovider</string>
+
+    <string name="select">Select Category</string>
 </resources>

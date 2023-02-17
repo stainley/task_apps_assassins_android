@@ -26,12 +26,30 @@
             android:isScrollContainer="false"
             android:showDividers="middle">
 
-            <com.google.android.material.search.SearchBar
-                android:id="@+id/search_bar"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:hint="@string/search_task" />
+                android:orientation="horizontal">
+
+                <com.google.android.material.search.SearchBar
+                    android:id="@+id/search_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Search bar"
+                    android:hint="@string/search_task"
+                    android:layout_weight="90"/>
+
+                <ImageButton
+                    android:id="@+id/sortButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white"
+                    android:src="@drawable/sort"
+                    android:layout_weight="10"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center"/>
+            </LinearLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -40,15 +58,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="@string/search_task"
-            app:layout_anchor="@id/search_bar"/>
-        <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
+            app:layout_anchor="@id/search_bar">
+            <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/taskFilterRecycle"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="76dp"
-            android:padding="8dp" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/taskFilterRecycle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="76dp"
+                android:padding="8dp" />
+        </com.google.android.material.search.SearchView>
+
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

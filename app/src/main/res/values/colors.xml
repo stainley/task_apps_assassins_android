@@ -70,6 +70,7 @@
     <color name="md_theme_dark_outlineVariant">#49454E</color>
     <color name="md_theme_dark_scrim">#000000</color>
     <color name="CustomColor1">#C5E4FF</color>
-
+    <color name="colorDivider">#ECECEC</color>
+    <color name="colorPrimaryText">#212121</color>
 
 </resources>

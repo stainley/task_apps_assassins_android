@@ -1,5 +1,6 @@
 package ca.app.assasins.taskappsassassinsandroid.note.model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -15,7 +16,8 @@ import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 @Entity(tableName = "NOTE_TBL")
 public class Note implements Serializable {
     @PrimaryKey(autoGenerate = true)
-    private Long noteId;
+    @ColumnInfo(name = "NOTE_ID")
+    private long noteId;
 
     private Long categoryId;
     private String title;
@@ -25,16 +27,18 @@ public class Note implements Serializable {
 
     private Date updatedDate;
 
+
     @Embedded
     private Coordinate coordinate;
 
     public Note() {
     }
-    public Long getNoteId() {
+
+    public long getNoteId() {
         return noteId;
     }
 
-    public void setNoteId(Long noteId) {
+    public void setNoteId(long noteId) {
         this.noteId = noteId;
     }
 
