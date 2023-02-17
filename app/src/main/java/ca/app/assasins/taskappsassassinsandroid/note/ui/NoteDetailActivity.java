@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -33,6 +34,7 @@ import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -348,11 +350,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             if (!title.isEmpty() && newNote.getNoteId() == 0) {
                 noteViewModel.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
             } else if (!title.isEmpty() && newNote.getNoteId() > 0) {
-                if (!myPictures.isEmpty()) {
-                    noteViewModel.updateNoteWithPictures(newNote, myPictures);
-                } else {
-                    noteViewModel.updateNote(newNote);
-                }
+                noteViewModel.updateNoteWithPictures(newNote, myPictures, mAudios);
             }
 
             return false;
@@ -384,16 +382,32 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 View customDialog = inflater.inflate(R.layout.fragment_audio_dialog, null);
                 Button startRecordAudio = customDialog.findViewById(R.id.recordingAudioBtn);
 
-                new MaterialAlertDialogBuilder(this).setView(customDialog).setTitle("Record").setMessage("Tap the mic to start recording.").setPositiveButton("Stop", (dialog, which) -> {
-                    stopRecordAudio();
-                }).setOnCancelListener(dialog -> {
+                AlertDialog record = new MaterialAlertDialogBuilder(this)
+                        .setView(customDialog).setTitle("Record")
+                        .setMessage("Tap long press Mic to start recording.")
+                        .setCancelable(false)
+                        .setNegativeButton("Exit", (dialog, which) -> {
+                            dialog.dismiss();
+                        })
+                        .show();
 
-                }).show();
+                Boolean[] isRecording = new Boolean[1];
+                isRecording[0] = false;
+                startRecordAudio.setOnLongClickListener(v1 -> {
 
-                startRecordAudio.setOnClickListener(v1 -> {
-                    recordAudio();
-                    startRecordAudio.setBackground(getDrawable(R.drawable.ic_stop_record));
+                    if (isRecording[0]) {
+                        record.setMessage("Tap long press Mic to start recording.");
+                        stopRecordAudio();
+                        startRecordAudio.setBackground(getDrawable(R.drawable.ic_mic_24));
+                        isRecording[0] = false;
+                    } else {
+                        record.setMessage("Long press Stop button.");
+                        recordAudio();
+                        startRecordAudio.setBackground(getDrawable(R.drawable.ic_stop_record));
+                        isRecording[0] = true;
 
+                    }
+                    return false;
                 });
             } else {
                 requestPermission();
@@ -459,10 +473,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     private void recordAudio() {
 
-
         pathSave = getExternalCacheDir().getAbsolutePath() + "/" + createRandomAudioFileName(5) + "audioRecording.3gp";
-
-        Log.d("path", "onClick: " + pathSave);
 
         setUpMediaRecorder();
 
@@ -479,7 +490,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         audio.setCreationDate(new Date().getTime());
         audio.setPath(pathSave);
         mAudios.add(audio);
-        Toast.makeText(this, "Recording...", Toast.LENGTH_SHORT).show();
     }
 
     @Override
