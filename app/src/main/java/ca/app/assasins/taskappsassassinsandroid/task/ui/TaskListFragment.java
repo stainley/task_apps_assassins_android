@@ -1,7 +1,6 @@
 package ca.app.assasins.taskappsassassinsandroid.task.ui;
 
 import static android.content.Context.MODE_PRIVATE;
-
 import static java.util.Comparator.comparing;
 
 import android.content.SharedPreferences;
@@ -11,20 +10,16 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.search.SearchView;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +28,6 @@ import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
-import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
-import ca.app.assasins.taskappsassassinsandroid.note.ui.NoteListFragmentDirections;
-import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
@@ -44,11 +36,9 @@ import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel
 public class TaskListFragment extends Fragment implements TaskListViewAdapter.OnTaskListCallback {
 
     private FragmentTaskListBinding binding;
-    private TaskListViewModel taskListViewModel;
     private final List<Task> tasks = new ArrayList<>();
     private List<Task> tasksFiltered = new ArrayList<>();
     private TaskListViewAdapter taskListViewAdapter;
-    private long categoryId;
 
     boolean titleSortedByAsc = false;
     boolean createdDateSortedByAsc = false;
@@ -58,10 +48,10 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
 
         SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
-        categoryId = categorySP.getLong("categoryId", -1);
+        long categoryId = categorySP.getLong("categoryId", -1);
 
 
-        taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
+        TaskListViewModel taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
 
         taskListViewModel.fetchAllTaskByCategory(categoryId).observe(getViewLifecycleOwner(), tasksResult -> {
             this.tasks.clear();
@@ -91,7 +81,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     private void sortButtonClicked(View view) {
         LayoutInflater inflater = getLayoutInflater();
 
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext(), R.style.BottomSheetDialogTheme);
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
         View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
@@ -100,8 +90,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
 
             if (titleSortedByAsc) {
                 tasks.sort(comparing(Task::getTaskName));
-            }
-            else {
+            } else {
                 tasks.sort(comparing(Task::getTaskName).reversed());
             }
             taskListViewAdapter.notifyDataSetChanged();
@@ -113,8 +102,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
 
             if (createdDateSortedByAsc) {
                 tasks.sort(comparing(Task::getCreationDate));
-            }
-            else {
+            } else {
                 tasks.sort(comparing(Task::getCreationDate).reversed());
             }
             taskListViewAdapter.notifyDataSetChanged();
