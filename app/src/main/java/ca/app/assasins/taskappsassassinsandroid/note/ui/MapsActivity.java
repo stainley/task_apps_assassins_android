@@ -3,20 +3,25 @@ package ca.app.assasins.taskappsassassinsandroid.note.ui;
 import androidx.fragment.app.FragmentActivity;
 
 import android.os.Bundle;
+import android.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityMaps2Binding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ActivityMaps2Binding binding;
+    private Note note;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +33,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        Toolbar toolbar = binding.toolbar;
+        setActionBar(toolbar);
+        if (getActionBar() != null) getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        note = (Note) getIntent().getSerializableExtra("note");
     }
 
     /**
@@ -43,10 +55,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMinZoomPreference(13);
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng torontoCoordinate = new LatLng(43.6532, -79.3832);
+
+        if (note != null) {
+            MarkerOptions productOptions = new MarkerOptions()
+                    .title(note.getTitle())
+                    .position(new LatLng(note.getCoordinate().getLatitude(), note.getCoordinate().getLongitude()));
+
+            Marker productMarker = mMap.addMarker(productOptions);
+            assert productMarker != null;
+            productMarker.showInfoWindow();
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(note.getCoordinate().getLatitude(), note.getCoordinate().getLongitude())));
+            return;
+        }
+
+        mMap.addMarker(new MarkerOptions().position(torontoCoordinate).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(torontoCoordinate));
     }
 }

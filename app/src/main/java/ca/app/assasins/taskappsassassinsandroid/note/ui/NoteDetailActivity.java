@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -182,6 +183,18 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = this::updateLocationInfo;
 
+        // if the permission is granted, we request the update.
+        // if the permission is not granted, we request for the access.
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_CODE);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            Location lasKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lasKnownLocation != null)
+                updateLocationInfo(lasKnownLocation);
+        }
+
         // Audio record
         AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
@@ -273,6 +286,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         categoryId = categorySP.getLong("categoryId", -1);
         noteViewModel = new ViewModelProvider(new ViewModelStore(), new NoteViewModelFactory(getApplication())).get(NoteViewModel.class);
 
+        //FIXME: this returning from map
         NoteDetailActivityArgs noteDetailActivityArgs = NoteDetailActivityArgs.fromBundle(getIntent().getExtras());
         note = noteDetailActivityArgs.getOldNote();
 
@@ -326,7 +340,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             newNote.setTitle(title);
             newNote.setDescription(description);
             newNote.setCreatedDate(this.note != null ? this.note.getCreatedDate() : new Date());
-            newNote.setCoordinate(new Coordinate(latitude, longitude));
+            newNote.setCoordinate(note != null ? note.getCoordinate() : new Coordinate(latitude, longitude));
             newNote.setUpdatedDate(new Date());
             newNote.setCategoryId(categoryId);
             newNote.setNoteId(this.note != null ? this.note.getNoteId() : 0);
@@ -424,8 +438,10 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         bottomSheetView.findViewById(R.id.show_map).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
+                mapIntent.putExtra("note", note);
                 moreActionBottomSheetDialog.dismiss();
+                startActivity(mapIntent);
             }
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
