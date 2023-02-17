@@ -9,21 +9,21 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
@@ -33,7 +33,10 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
+import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
+import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
@@ -46,23 +49,31 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     private FragmentNoteListBinding binding;
 
     private NoteViewModel noteViewModel;
+
+    private CategoryViewModel categoryViewModel;
     private Category category;
 
     private long categoryId;
-
     private List<Note> notesFiltered = new ArrayList<>();
     private final List<Note> notes = new ArrayList<>();
 
     private NoteRecycleAdapter noteRecycleAdapter;
-
+    ArrayAdapter<String> adapterItems;
+    String[] categories = new String[1000];
+    String moveToCategories;
+    int categoryCount = -1;
+    AutoCompleteTextView autoCompleteTextView;
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentNoteListBinding.inflate(inflater, container, false);
 
         SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
         categoryId = categorySP.getLong("categoryId", -1);
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
 
-
+        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
         noteViewModel = new ViewModelProvider(this, new NoteViewModelFactory(requireActivity().getApplication())).get(NoteViewModel.class);
 
         noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
@@ -81,6 +92,11 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
+
+        if (categoryCount == 1) {
+
+        }
+
         return binding.getRoot();
     }
 
@@ -127,8 +143,31 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     }
 
     @Override
-    public void onMoveNote(int position) {
+    public void onMoveNote(int position, Note note) {
+        LayoutInflater inflater = getLayoutInflater();
+        View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
+        autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
 
+        adapterItems = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown_items, categories);
+        autoCompleteTextView.setAdapter(adapterItems);
+        autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
+            String category = adapterView.getItemAtPosition(position1).toString();
+
+            categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
+                System.out.println("note " + note.getTitle());
+                note.setCategoryId(result.getId());
+                noteViewModel.updateNote(note);
+            });
+        });
+
+        new MaterialAlertDialogBuilder(getContext())
+                .setTitle("Move Note")
+                .setView(moveNoteView)
+                .setNeutralButton("Cancel", (dialog, which) -> {
+
+        }).setNegativeButton("Done", (dialog, which) -> {
+
+        }).setCancelable(false).show();
     }
 
     @Override
