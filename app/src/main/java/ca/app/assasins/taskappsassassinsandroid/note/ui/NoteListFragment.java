@@ -172,24 +172,16 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
     @Override
     public void onDisplayThumbnail(ImageView view, int position) {
-        String[] imagePath = new String[1];
 
-        noteViewModel.findPictureByNoteId(notes.get(position).getNoteId()).observe(this, new Observer<NoteImages>() {
-            @Override
-            public void onChanged(NoteImages noteImages) {
-                if (noteImages != null && noteImages.getPictures().size() > 0) {
-                    String path = noteImages.getPictures().get(0).getPath();
-                    System.out.println(path);
-
-                    Picasso.get().load(path)
-                            .resize(200, 200)
-                            .centerInside()
-                            .into(view);
-                }
-
+        noteViewModel.findPictureByNoteId(notes.get(position).getNoteId()).observe(this, noteImages -> {
+            if (noteImages != null && noteImages.getPictures().size() > 0) {
+                String path = noteImages.getPictures().get(0).getPath();
+                Picasso.get().load(path)
+                        .resize(200, 200)
+                        .centerInside()
+                        .into(view);
             }
         });
-
 
     }
 

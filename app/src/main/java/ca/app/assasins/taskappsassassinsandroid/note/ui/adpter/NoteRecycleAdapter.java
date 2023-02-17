@@ -25,7 +25,6 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
     private final OnNoteCallback onNoteCallback;
     private final List<Note> notes;
 
-
     public NoteRecycleAdapter(List<Note> notes, OnNoteCallback onCallback) {
         this.notes = notes;
         this.onNoteCallback = onCallback;
