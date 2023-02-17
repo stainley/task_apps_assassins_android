@@ -1,13 +1,11 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
 import static android.content.Context.MODE_PRIVATE;
-
 import static java.util.Comparator.comparing;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +14,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -32,12 +28,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputEditText;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -50,9 +44,6 @@ import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
-import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
-import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragmentDirections;
-import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 
 public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnNoteCallback {
 
@@ -201,7 +192,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
             String category = adapterView.getItemAtPosition(position1).toString();
 
             categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
-                System.out.println("note " + note.getTitle());
                 note.setCategoryId(result.getId());
                 noteViewModel.updateNote(note);
             });
