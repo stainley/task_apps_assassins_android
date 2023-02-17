@@ -4,8 +4,12 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -53,6 +57,7 @@ import java.util.Random;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
+import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
@@ -80,8 +85,13 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private Uri tempImageUri = null;
 
     final int REQUEST_PERMISSION_CODE = 1000;
+    private double latitude;
+    private double longitude;
 
-    private final String[] permissionsStr = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+
+    private final String[] permissionsStr = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
 
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<Audio> mAudios = new ArrayList<>();
@@ -167,6 +177,23 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         notePictureRVAdapter = new NotePictureRVAdapter(myPictures, this);
         notePictureRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         notePictureRV.setAdapter(notePictureRVAdapter);
+
+
+        // location
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = this::updateLocationInfo;
+
+        // if the permission is granted, we request the update.
+        // if the permission is not granted, we request for the access.
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_CODE);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            Location lasKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (lasKnownLocation != null)
+                updateLocationInfo(lasKnownLocation);
+        }
 
         // Audio record
         AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
@@ -259,6 +286,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         categoryId = categorySP.getLong("categoryId", -1);
         noteViewModel = new ViewModelProvider(new ViewModelStore(), new NoteViewModelFactory(getApplication())).get(NoteViewModel.class);
 
+        //FIXME: this returning from map
         NoteDetailActivityArgs noteDetailActivityArgs = NoteDetailActivityArgs.fromBundle(getIntent().getExtras());
         note = noteDetailActivityArgs.getOldNote();
 
@@ -296,6 +324,11 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
     }
 
+    private void updateLocationInfo(Location location) {
+        this.latitude = location.getLatitude();
+        this.longitude = location.getLongitude();
+    }
+
     // SAVE ON BACK BUTTON
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -307,6 +340,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             newNote.setTitle(title);
             newNote.setDescription(description);
             newNote.setCreatedDate(this.note != null ? this.note.getCreatedDate() : new Date());
+            newNote.setCoordinate(note != null ? note.getCoordinate() : new Coordinate(latitude, longitude));
             newNote.setUpdatedDate(new Date());
             newNote.setCategoryId(categoryId);
             newNote.setNoteId(this.note != null ? this.note.getNoteId() : 0);
@@ -350,19 +384,13 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 View customDialog = inflater.inflate(R.layout.fragment_audio_dialog, null);
                 Button startRecordAudio = customDialog.findViewById(R.id.recordingAudioBtn);
 
-                new MaterialAlertDialogBuilder(this)
-                        .setView(customDialog)
-                        .setTitle("Record")
-                        .setMessage("Tap the mic to start recording.")
-                        .setPositiveButton("Stop", (dialog, which) -> {
-                            System.out.println("STOP");
-                            stopRecordAudio();
-                        }).setOnCancelListener(dialog -> {
+                new MaterialAlertDialogBuilder(this).setView(customDialog).setTitle("Record").setMessage("Tap the mic to start recording.").setPositiveButton("Stop", (dialog, which) -> {
+                    stopRecordAudio();
+                }).setOnCancelListener(dialog -> {
 
-                        }).show();
+                }).show();
 
                 startRecordAudio.setOnClickListener(v1 -> {
-                    Toast.makeText(getApplicationContext(), "Start RECORDING", Toast.LENGTH_SHORT).show();
                     recordAudio();
                     startRecordAudio.setBackground(getDrawable(R.drawable.ic_stop_record));
 
@@ -403,9 +431,18 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_more_action_sheet, (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
         bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(view1 -> {
             noteViewModel.deleteNote(note);
-            Toast.makeText(NoteDetailActivity.this, "Delete!!!", Toast.LENGTH_SHORT).show();
             moreActionBottomSheetDialog.dismiss();
             finish();
+        });
+
+        bottomSheetView.findViewById(R.id.show_map).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
+                mapIntent.putExtra("note", note);
+                moreActionBottomSheetDialog.dismiss();
+                startActivity(mapIntent);
+            }
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
         moreActionBottomSheetDialog.show();
@@ -416,13 +453,14 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
+        Toast.makeText(NoteDetailActivity.this, "Audio stopped", Toast.LENGTH_SHORT).show();
+
     }
 
     private void recordAudio() {
 
 
-        pathSave = getExternalCacheDir().getAbsolutePath() + "/" +
-                createRandomAudioFileName(5) + "audioRecording.3gp";
+        pathSave = getExternalCacheDir().getAbsolutePath() + "/" + createRandomAudioFileName(5) + "audioRecording.3gp";
 
         Log.d("path", "onClick: " + pathSave);
 
@@ -446,7 +484,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     @Override
     public void onDeletePicture(View view, int position) {
-        //TODO: delete photo implementation
         noteViewModel.deletePicture(myPictures.get(position));
         myPictures.remove(myPictures.get(position));
         notePictureRVAdapter.notifyItemRemoved(position);
@@ -461,7 +498,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     }
 
     private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_CODE);
     }
 
     private void askForPermissions(ArrayList<String> permissionsList) {
@@ -495,4 +532,20 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         return ContextCompat.checkSelfPermission(context, permissionStr) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private void startListening() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            System.out.println();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startListening();
+        }
+    }
 }

@@ -13,11 +13,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" /> <!-- Audio and Image permission -->
     <uses-permission android:name="android.permission.CAMERA" />
-
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
-
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
@@ -30,18 +28,27 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_map" />
+
+        <activity
+            android:name=".note.ui.MapsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maps"
+            android:parentActivityName=".common.view.NavigationActivity" />
         <activity
             android:name=".common.view.NavigationActivity"
             android:exported="false"
             android:label="@string/title_activity_navigation"
             android:parentActivityName=".category.view.CategoryActivity"
             android:theme="@style/AppTheme.ActionBar" />
-
         <activity
             android:name=".note.ui.NoteDetailActivity"
-            android:theme="@style/AppTheme.ActionBar"
             android:exported="false"
-            android:parentActivityName=".note.ui.NoteDetailActivity" />
+            android:parentActivityName=".note.ui.NoteDetailActivity"
+            android:theme="@style/AppTheme.ActionBar" />
         <activity
             android:name=".MainActivity"
             android:exported="true" />
@@ -54,12 +61,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".task.ui.TaskDetailActivity"
             android:exported="false"
             android:theme="@style/AppTheme.ActionBar" />
-
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -70,7 +75,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
     </application>
 
 </manifest>
