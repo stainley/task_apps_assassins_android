@@ -36,13 +36,17 @@ public class NoteAudioRVAdapter extends RecyclerView.Adapter<NoteAudioRVAdapter.
     }
 
     @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull NoteAudioViewHolder holder, int position) {
-        holder.playAudioBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onAudioOperationCallback.onAudioPlay(holder.scrubber, position);
-            }
-        });
+        holder.scrubber.setTag(position);
+
+        holder.playAudioBtn.setOnClickListener(v ->
+                onAudioOperationCallback.onAudioPlay(holder.scrubber, position)
+        );
 
         holder.deleteAudioBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,7 +77,7 @@ public class NoteAudioRVAdapter extends RecyclerView.Adapter<NoteAudioRVAdapter.
 
     public interface OnAudioOperationCallback {
 
-        void onAudioPlay(View view, int position);
+        void onAudioPlay(SeekBar view, int position);
 
         void onAudioStop(View view, int position);
 

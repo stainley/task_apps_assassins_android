@@ -4,8 +4,6 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
@@ -30,13 +28,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,7 +39,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.slider.Slider;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -56,15 +50,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.UUID;
-import java.util.function.Consumer;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
-import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteAudioRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NotePictureRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
@@ -79,9 +70,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     private NotePictureRVAdapter notePictureRVAdapter;
     private NoteAudioRVAdapter noteAudioRVAdapter;
-    private AudioManager audioManager;
 
-    private String randomAudioFileName = "ABCDEFGHIJKLMNOP";
     private ArrayList<String> permissionsList;
 
     private String pathSave = "";
@@ -89,13 +78,10 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private MediaPlayer mediaPlayer;
 
     private Uri tempImageUri = null;
-    private Random random;
 
     final int REQUEST_PERMISSION_CODE = 1000;
-    private String RECORDED_AUDIO_FILE = null;
 
-    private String[] permissionsStr = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
-
+    private final String[] permissionsStr = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
 
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<Audio> mAudios = new ArrayList<>();
@@ -171,26 +157,9 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        // Record to the external cache directory for visibility
-        /*RECORDED_AUDIO_FILE = getExternalCacheDir().getAbsolutePath();
-        getExternalMediaDirs();
-        RECORDED_AUDIO_FILE += "/" + UUID.randomUUID() + ".3gp";*/
-
         permissionsList = new ArrayList<>();
         permissionsList.addAll(Arrays.asList(permissionsStr));
         askForPermissions(permissionsList);
-
-        /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 5);
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_CODE);
-        }*/
 
         RecyclerView notePictureRV = binding.notePictureRV;
         // adapter picture
@@ -199,58 +168,74 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         notePictureRV.setAdapter(notePictureRVAdapter);
 
         // Audio record
-        audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
         RecyclerView noteAudioRV = binding.noteAudioRecycleView;
         noteAudioRVAdapter = new NoteAudioRVAdapter(mAudios, new NoteAudioRVAdapter.OnAudioOperationCallback() {
             @Override
-            public void onAudioPlay(View view, int position) {
-                SeekBar scrubber = null;
-                // TODO: play audio when the user click button
+            public void onAudioPlay(SeekBar seekBar, int position) {
+                System.out.println("SEEKBAR SENDED: " + (int) seekBar.getTag() + " - Position: " + position);
+                int tempPosition = (int) seekBar.getTag();
                 System.out.println("Play Audio");
+
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if (mediaPlayer != null && fromUser) {
+                            mediaPlayer.seekTo(progress);
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                });
+
                 mediaPlayer = new MediaPlayer();
                 try {
                     mediaPlayer.setDataSource(mAudios.get(position).getPath());
                     mediaPlayer.prepare();
-                    scrubber = (SeekBar) view;
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    // if the current position is equal to the duration, we are in the final. reset scrubber
+                    if (mp.getCurrentPosition() == mp.getDuration()) {
+                        seekBar.setProgress(0);
                     }
                 });
                 Handler handler = new Handler();
 
-                SeekBar finalScrubber = scrubber;
                 Runnable progress_bar = new Runnable() {
                     @Override
                     public void run() {
                         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                            assert finalScrubber != null;
-                            finalScrubber.setProgress(mediaPlayer.getCurrentPosition());
+                            synchronized (seekBar) {
+                                System.out.println("tempPosition: " + tempPosition);
+                                System.out.println("SEEKBAR POSITION: " + (int) seekBar.getTag() + " - Position: " + position);
+                                seekBar.setProgress(mediaPlayer.getCurrentPosition());
+                                handler.postDelayed(this, 1000);
+                            }
                         }
-                        handler.postDelayed(this, 1000);
-                        mediaPlayer.release();
                     }
                 };
 
                 if (!mediaPlayer.isPlaying()) {
                     mediaPlayer.start();
-                    assert scrubber != null;
-                    scrubber.setMax(mediaPlayer.getDuration());
+                    seekBar.setMax(mediaPlayer.getDuration());
                     System.out.println("AUDIO DURATION: " + mediaPlayer.getDuration());
                     handler.removeCallbacks(progress_bar);
-                    handler.postDelayed(progress_bar, 1000);
-
+                    handler.post(progress_bar);
                 }
-
-
             }
 
             @Override
@@ -260,7 +245,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
             @Override
             public void onDeleteAudio(int position) {
-
+                noteViewModel.deleteAudio(mAudios.get(position));
             }
         });
         noteAudioRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -282,7 +267,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             binding.description.setText(note.getDescription());
 
             DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh.mm aa");
-            String updatedDate = dateFormat.format(note.getUpdatedDate()).toString();
+            String updatedDate = dateFormat.format(note.getUpdatedDate());
             binding.editDateInfo.setText("Edited: " + updatedDate);
 
             noteViewModel.fetchPicturesByNoteId(note.getNoteId()).observe(this, taskImages -> {
@@ -323,11 +308,10 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             newNote.setCategoryId(categoryId);
             newNote.setNoteId(this.note != null ? this.note.getNoteId() : 0);
 
-            assert title != null;
-            if (!title.toString().isEmpty() && newNote.getNoteId() == 0) {
+            if (!title.isEmpty() && newNote.getNoteId() == 0) {
                 //noteViewModel.saveNoteWithPictures(newNote, myPictures);
                 noteViewModel.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
-            } else if (!title.toString().isEmpty() && newNote.getNoteId() > 0) {
+            } else if (!title.isEmpty() && newNote.getNoteId() > 0) {
                 if (!myPictures.isEmpty()) {
                     noteViewModel.updateNoteWithPictures(newNote, myPictures);
                 } else {
@@ -368,17 +352,11 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                         .setView(customDialog)
                         .setTitle("Record")
                         .setMessage("Tap the mic to start recording.")
-                        .setPositiveButton("Stop", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                System.out.println("STOP");
-                                stopRecordAudio();
-                            }
-                        }).setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
+                        .setPositiveButton("Stop", (dialog, which) -> {
+                            System.out.println("STOP");
+                            stopRecordAudio();
+                        }).setOnCancelListener(dialog -> {
 
-                            }
                         }).show();
 
                 startRecordAudio.setOnClickListener(v1 -> {
@@ -421,14 +399,11 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private void moreActionBtnClicked(View view) {
         final BottomSheetDialog moreActionBottomSheetDialog = new BottomSheetDialog(NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_more_action_sheet, (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
-        bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                noteViewModel.deleteNote(note);
-                Toast.makeText(NoteDetailActivity.this, "Delete!!!", Toast.LENGTH_SHORT).show();
-                moreActionBottomSheetDialog.dismiss();
-                finish();
-            }
+        bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(view1 -> {
+            noteViewModel.deleteNote(note);
+            Toast.makeText(NoteDetailActivity.this, "Delete!!!", Toast.LENGTH_SHORT).show();
+            moreActionBottomSheetDialog.dismiss();
+            finish();
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
         moreActionBottomSheetDialog.show();
@@ -443,10 +418,8 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private void recordAudio() {
 
 
-        RECORDED_AUDIO_FILE = getExternalCacheDir().getAbsolutePath() + "/" +
+        pathSave = getExternalCacheDir().getAbsolutePath() + "/" +
                 createRandomAudioFileName(5) + "audioRecording.3gp";
-
-        pathSave = RECORDED_AUDIO_FILE;
 
         Log.d("path", "onClick: " + pathSave);
 
@@ -470,10 +443,10 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     @Override
     public void onDeletePicture(View view, int position) {
-        //TODO: delete photo
-        //taskListViewModel.deletePicture(myPictures.get(position));
-        //myPictures.remove(position);
-        //taskPictureRVAdapter.notifyItemRemoved(position);
+        //TODO: delete photo implementation
+        noteViewModel.deletePicture(myPictures.get(position));
+        myPictures.remove(myPictures.get(position));
+        noteAudioRVAdapter.notifyItemRemoved(position);
     }
 
     private void setUpMediaRecorder() {
@@ -482,21 +455,18 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         mediaRecorder.setOutputFile(pathSave);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-
     }
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
     }
 
-    private boolean checkPermissionDevice() {
+/*    private boolean checkPermissionDevice() {
         int write_external_storage_result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int record_audio_result = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
 
-        boolean result = write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED;
-
-        return result;
-    }
+        return write_external_storage_result == PackageManager.PERMISSION_GRANTED && record_audio_result == PackageManager.PERMISSION_GRANTED;
+    }*/
 
     private void askForPermissions(ArrayList<String> permissionsList) {
         String[] newPermissionStr = new String[permissionsList.size()];
@@ -508,17 +478,16 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         }
     }
 
-    AlertDialog alertDialog;
-
     private void showPermissionDialog() {
 
     }
 
     public String createRandomAudioFileName(int string) {
         StringBuilder stringBuilder = new StringBuilder(string);
-        random = new Random();
+        Random random = new Random();
         int i = 0;
         while (i < string) {
+            String randomAudioFileName = "ABCDEFGHIJKLMNOP";
             stringBuilder.append(randomAudioFileName.charAt(random.nextInt(randomAudioFileName.length())));
 
             i++;

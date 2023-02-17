@@ -72,4 +72,8 @@ public class NoteViewModel extends ViewModel {
     public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
         noteRepository.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
     }
+
+    public void deleteAudio(@NonNull Audio audio) {
+
+    }
 }
