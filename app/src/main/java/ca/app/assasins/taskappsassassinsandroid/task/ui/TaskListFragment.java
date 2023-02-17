@@ -4,12 +4,15 @@ import static android.content.Context.MODE_PRIVATE;
 import static java.util.Comparator.comparing;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -19,14 +22,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
+import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
+import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.common.helper.SwipeHelper;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
@@ -43,13 +51,25 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     boolean titleSortedByAsc = false;
     boolean createdDateSortedByAsc = false;
 
+    ArrayAdapter<String> adapterItems;
+    String[] categories = new String[1000];
+    String moveToCategories;
+    int categoryCount = -1;
+    AutoCompleteTextView autoCompleteTextView;
+
+    private CategoryViewModel categoryViewModel;
+
+    private SwipeHelper swipeHelper;
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
 
         SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
         long categoryId = categorySP.getLong("categoryId", -1);
-
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
 
         TaskListViewModel taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
 
@@ -69,6 +89,63 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
 
         binding.newTaskBtn.setOnClickListener(this::createNewTask);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
+
+        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
+
+        swipeHelper = new SwipeHelper(getContext(), 300, binding.taskList) {
+            @Override
+            protected void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer) {
+                int index = viewHolder.getAdapterPosition();
+                Task task = tasks.get(index);
+
+                if (task.isCompleted()) {
+                    buffer.add(new SwipeUnderlayButton(getContext(),
+                            "Delete",
+                            R.drawable.delete,
+                            30,
+                            50,
+                            Color.parseColor("#ffffff"),
+                            SwipeDirection.LEFT,
+                            position -> {
+                                taskListViewModel.deleteTask(task);
+                                taskListViewAdapter.notifyItemRemoved(position);
+                            }));
+                }
+
+                buffer.add(new SwipeUnderlayButton(getContext(),
+                        "Update",
+                        R.drawable.move,
+                        30,
+                        50,
+                        Color.parseColor("#ffffff"),
+                        SwipeDirection.LEFT,
+                        position -> {
+                            LayoutInflater inflater = getLayoutInflater();
+                            View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
+                            autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
+
+                            adapterItems = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown_items, categories);
+                            autoCompleteTextView.setAdapter(adapterItems);
+                            autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
+                                String category = adapterView.getItemAtPosition(position1).toString();
+
+                                categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
+                                    task.setCategoryId(result.getId());
+                                    taskListViewModel.updateTask(task);
+                                });
+                            });
+
+                            new MaterialAlertDialogBuilder(getContext())
+                                    .setTitle("Move Note")
+                                    .setView(moveNoteView)
+                                    .setNeutralButton("Cancel", (dialog, which) -> {
+
+                                    }).setNegativeButton("Done", (dialog, which) -> {
+
+                                    }).setCancelable(false).show();
+                        }));
+            }
+        };
 
         return binding.getRoot();
     }

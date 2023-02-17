@@ -39,6 +39,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -440,22 +441,32 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                 View customDialog = inflater.inflate(R.layout.fragment_audio_dialog, null);
                 Button startRecordAudio = customDialog.findViewById(R.id.recordingAudioBtn);
 
-                new MaterialAlertDialogBuilder(this)
-                        .setView(customDialog)
-                        .setTitle("Record")
-                        .setMessage("Tap the mic to start recording.")
-                        .setPositiveButton("Stop", (dialog, which) -> {
-                            System.out.println("STOP");
-                            stopRecordAudio();
-                        }).setOnCancelListener(dialog -> {
+                AlertDialog record = new MaterialAlertDialogBuilder(this)
+                        .setView(customDialog).setTitle("Record")
+                        .setMessage("Tap long press Mic to start recording.")
+                        .setCancelable(false)
+                        .setNegativeButton("Exit", (dialog, which) -> {
+                            dialog.dismiss();
+                        })
+                        .show();
 
-                        }).show();
+                Boolean[] isRecording = new Boolean[1];
+                isRecording[0] = false;
+                startRecordAudio.setOnLongClickListener(v1 -> {
 
-                startRecordAudio.setOnClickListener(v1 -> {
-                    Toast.makeText(getApplicationContext(), "Start RECORDING", Toast.LENGTH_SHORT).show();
-                    recordAudio();
-                    startRecordAudio.setBackground(getDrawable(R.drawable.ic_stop_record));
+                    if (isRecording[0]) {
+                        record.setMessage("Tap long press Mic to start recording.");
+                        stopRecordAudio();
+                        startRecordAudio.setBackground(getDrawable(R.drawable.ic_mic_24));
+                        isRecording[0] = false;
+                    } else {
+                        record.setMessage("Long press Stop button.");
+                        recordAudio();
+                        startRecordAudio.setBackground(getDrawable(R.drawable.ic_stop_record));
+                        isRecording[0] = true;
 
+                    }
+                    return false;
                 });
             } else {
                 requestPermission();
@@ -544,7 +555,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private void deleteTask(View view) {
         taskListViewModel.deleteTask(task);
-        finish();
+        //finish();
     }
 
     @Override
@@ -554,6 +565,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         // if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
     }
 
+    //MESSAGE: Saving on Back
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -573,7 +585,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCategoryId(categoryId);
             Task oldTask = this.task;
 
-            if (oldTask != null || calendar != null) {
+            if (task != null || calendar != null) {
                 task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
             }
 
@@ -581,17 +593,12 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
                 task.setTaskName(taskName.toString());
                 taskListViewModel.saveTaskWithChildren(task, myPictures, subTasks, mAudios);
-            } else {
-                task.setTaskName(taskName.toString());
-                // update
-                if (!myPictures.isEmpty()) {
-                    taskListViewModel.updatePictures(task, myPictures);
-                }
-
             }
-            if (!task.getTaskName().equals("") && task != null) {
-                //taskListViewModel.updateTask(task);
-                taskListViewModel.updateTaskAll(task, myPictures, subTasks);
+
+            // FIXME: duplicating images
+            if (oldTask != null && !oldTask.getTaskName().equals("") && oldTask.getTaskId() > 0) {
+                oldTask.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
+                taskListViewModel.updateTaskAll(oldTask, myPictures, subTasks, mAudios);
                 taskListViewModel.insertAllSubTask(additionalSubTasks);
             }
 
@@ -630,7 +637,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         }
 
         allowDelete();
-        taskListViewModel.updateTaskAll(task, myPictures, subTasks);
+        taskListViewModel.updateTaskAll(task, myPictures, subTasks, mAudios);
     }
 
     public void allowDelete() {
