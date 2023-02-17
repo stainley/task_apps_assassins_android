@@ -128,8 +128,15 @@ public abstract class TaskDao implements AbstractDao<Task> {
     }
 
     @Transaction
-    public void updateAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
+    public void updateAll(Task task, List<Picture> pictures, List<SubTask> subTasks, List<Audio> audios) {
         updatePicture(task, pictures);
+
+        if (!audios.isEmpty()) {
+            audios.forEach(audio -> {
+                audio.setParentTaskId(task.getTaskId());
+                this.saveAudio(audio);
+            });
+        }
 
         if (!subTasks.isEmpty()) {
             subTasks.forEach(this::updateSubTask);
