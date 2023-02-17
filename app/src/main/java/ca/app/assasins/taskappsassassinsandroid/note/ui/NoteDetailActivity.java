@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,13 +20,17 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -43,6 +48,7 @@ import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -53,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -97,6 +104,10 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<Audio> mAudios = new ArrayList<>();
+
+    private TextToSpeech textToSpeech;
+    private AlertDialog dialogReadingNote;
+    private TextView textReadingNote;
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -456,6 +467,53 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 mapIntent.putExtra("note", note);
                 moreActionBottomSheetDialog.dismiss();
                 startActivity(mapIntent);
+            }
+        });
+
+        bottomSheetView.findViewById(R.id.read_note).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                moreActionBottomSheetDialog.dismiss();
+                LayoutInflater inflater = getLayoutInflater();
+                View readNoteView = (View) inflater.inflate(R.layout.layout_read_note, null);
+
+                AlertDialog progress = new MaterialAlertDialogBuilder(NoteDetailActivity.this)
+                        .setView(readNoteView)
+                        .setCancelable(false).show();
+
+                textToSpeech = new TextToSpeech(NoteDetailActivity.this, status -> {
+                    if (status == TextToSpeech.SUCCESS) {
+                        int result = textToSpeech.setLanguage(Locale.ENGLISH);
+
+                        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                            Toast.makeText(NoteDetailActivity.this, "Sorry, language not supported!", Toast.LENGTH_SHORT).show();
+                        } else {
+
+                            textReadingNote = readNoteView.findViewById(R.id.text_reading_text);
+                            TextView stopReadButton =  readNoteView.findViewById(R.id.stop_reading);
+
+                            String title = binding.title.getText().toString().trim();
+                            String description = binding.description.getText().toString().trim();
+
+                            readNoteView.findViewById(R.id.start_reading).setOnClickListener(view1 -> {
+                                textReadingNote.setText("Reading Note...");
+                                textToSpeech.speak(title, TextToSpeech.QUEUE_ADD, null);
+                                textToSpeech.speak(description, TextToSpeech.QUEUE_ADD, null);
+
+                                stopReadButton.setText("STOP");
+                            });
+
+                            readNoteView.findViewById(R.id.stop_reading).setOnClickListener(view1 -> {
+                                textReadingNote.setText("Do you want the NOTES APP to read the note for you?");
+                                stopReadButton.setText("CANCEL");
+                                if (textToSpeech != null) {
+                                    textToSpeech.stop();
+                                }
+                                progress.dismiss();
+                            });
+                        }
+                    }
+                });
             }
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
