@@ -4,11 +4,13 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
+
 @Entity(tableName = "AUDIO_TBL")
-public class Audio {
+public class Audio implements Serializable {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "AUDIO_ID")
-    private Long id;
+    private long id;
     @ColumnInfo(name = "PATH")
     private String path;
     @ColumnInfo(name = "CREATION_DATE")
@@ -20,11 +22,11 @@ public class Audio {
     @ColumnInfo(name = "PARENT_NOTE_ID")
     private Long parentNoteId;
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
