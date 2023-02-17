@@ -95,7 +95,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
             this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
         });
 
-
         RecyclerView noteListRecycleView = binding.noteList;
         noteRecycleAdapter = new NoteRecycleAdapter(notes, this);
         noteListRecycleView.setAdapter(noteRecycleAdapter);
@@ -107,10 +106,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
-
-        if (categoryCount == 1) {
-
-        }
 
         return binding.getRoot();
     }

@@ -2,6 +2,8 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import static java.util.Comparator.comparing;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -20,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.NoteListFragmentDirections;
@@ -45,6 +49,9 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     private List<Task> tasksFiltered = new ArrayList<>();
     private TaskListViewAdapter taskListViewAdapter;
     private long categoryId;
+
+    boolean titleSortedByAsc = false;
+    boolean createdDateSortedByAsc = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -71,12 +78,51 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.newTaskBtn.setOnClickListener(this::createNewTask);
+        binding.sortButton.setOnClickListener(this::sortButtonClicked);
+
         return binding.getRoot();
     }
 
 
     public void createNewTask(View view) {
         Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity());
+    }
+
+    private void sortButtonClicked(View view) {
+        LayoutInflater inflater = getLayoutInflater();
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext(), R.style.BottomSheetDialogTheme);
+        View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
+        bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
+
+        bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
+            titleSortedByAsc = !titleSortedByAsc;
+
+            if (titleSortedByAsc) {
+                tasks.sort(comparing(Task::getTaskName));
+            }
+            else {
+                tasks.sort(comparing(Task::getTaskName).reversed());
+            }
+            taskListViewAdapter.notifyDataSetChanged();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
+            createdDateSortedByAsc = !createdDateSortedByAsc;
+
+            if (createdDateSortedByAsc) {
+                tasks.sort(comparing(Task::getCreationDate));
+            }
+            else {
+                tasks.sort(comparing(Task::getCreationDate).reversed());
+            }
+            taskListViewAdapter.notifyDataSetChanged();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
     }
 
     @Override
