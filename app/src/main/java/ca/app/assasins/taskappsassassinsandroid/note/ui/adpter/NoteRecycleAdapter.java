@@ -1,5 +1,6 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui.adpter;
 
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -47,7 +48,6 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
         onNoteCallback.onDisplayThumbnail(holder.noteThumbnailView, position);
 
-
         holder.noteCard.setOnClickListener(view -> {
             this.onNoteCallback.onNoteSelected(view, position);
         });
@@ -91,6 +91,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
         private final CardView noteCard;
         private final ImageView noteThumbnailView;
 
+        private  final ImageButton playAudioIcon;
         private final ImageButton cardNoteMenu;
 
         public ViewHolder(@NonNull View itemView) {
@@ -99,9 +100,9 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
             title = itemView.findViewById(R.id.title);
             description = itemView.findViewById(R.id.description);
             noteCard = itemView.findViewById(R.id.noteCard);
+            playAudioIcon = itemView.findViewById(R.id.play_audio_icon);
             cardNoteMenu = itemView.findViewById(R.id.card_note_menu);
             noteThumbnailView = itemView.findViewById(R.id.noteThumbnailView);
-
         }
     }
 
