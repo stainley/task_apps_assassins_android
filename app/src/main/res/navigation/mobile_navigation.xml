@@ -11,7 +11,8 @@
         tools:layout="@layout/fragment_note_list">
         <action
             android:id="@+id/action_noteDetailActivity"
-            app:destination="@id/noteDetailActivity" />
+            app:destination="@id/noteDetailActivity"
+            app:popUpTo="@id/navigation_note" />
         <argument
             android:name="categoryID"
             android:defaultValue="-1L"
@@ -24,9 +25,9 @@
         tools:layout="@layout/activity_note_detail">
         <argument
             android:name="oldNote"
+            android:defaultValue="@null"
             app:argType="ca.app.assasins.taskappsassassinsandroid.note.model.Note"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
     </activity>
 
 
@@ -36,7 +37,8 @@
         tools:layout="@layout/fragment_task_list">
         <action
             android:id="@+id/action_taskDetailActivity"
-            app:destination="@id/taskDetailActivity" />
+            app:destination="@id/taskDetailActivity"
+            app:popUpTo="@id/navigation_task" />
         <argument
             android:name="categoryID"
             android:defaultValue="-1L"
@@ -49,9 +51,9 @@
         tools:layout="@layout/activity_task_detail">
         <argument
             android:name="oldTask"
+            android:defaultValue="@null"
             app:argType="ca.app.assasins.taskappsassassinsandroid.task.model.Task"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
     </activity>
 
 </navigation>

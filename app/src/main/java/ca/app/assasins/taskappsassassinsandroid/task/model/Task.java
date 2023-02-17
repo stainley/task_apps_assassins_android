@@ -28,9 +28,9 @@ public class Task implements Serializable {
     @ColumnInfo(name = "COMPLETED")
     private boolean isCompleted;
     @ColumnInfo(name = "CREATION_DATE")
-    private Long creationDate;
+    private long creationDate;
     @ColumnInfo(name = "COMPLETION_DATE")
-    private Long completionDate;
+    private long completionDate;
     @Embedded
     private Coordinate coordinate;
     @ColumnInfo(name = "CATEGORY_ID")
@@ -60,19 +60,19 @@ public class Task implements Serializable {
         isCompleted = completed;
     }
 
-    public Long getCreationDate() {
+    public long getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Long creationDate) {
+    public void setCreationDate(long creationDate) {
         this.creationDate = creationDate;
     }
 
-    public Long getCompletionDate() {
+    public long getCompletionDate() {
         return completionDate;
     }
 
-    public void setCompletionDate(Long completionDate) {
+    public void setCompletionDate(long completionDate) {
         this.completionDate = completionDate;
     }
 

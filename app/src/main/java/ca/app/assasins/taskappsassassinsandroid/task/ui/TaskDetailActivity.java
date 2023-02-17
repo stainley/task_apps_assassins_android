@@ -4,6 +4,7 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -22,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -32,8 +34,12 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
+import androidx.navigation.NavController;
+import androidx.navigation.NavHostController;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,7 +69,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskPictureRVAda
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
 
-public class TaskDetailActivity extends AppCompatActivity implements TaskPictureRVAdapter.OnPictureTaskCallback, SubTaskViewAdapter.OnSubTaskCallback{
+public class TaskDetailActivity extends AppCompatActivity implements TaskPictureRVAdapter.OnPictureTaskCallback, SubTaskViewAdapter.OnSubTaskCallback {
 
     private ActivityTaskDetailBinding binding;
 
@@ -161,13 +167,14 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         task = taskDetailActivityArgs.getOldTask();
         if (task != null) {
             DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh.mm aa");
-            String completionDate = dateFormat.format(task.getCompletionDate()).toString();
+
+            String completionDate = dateFormat.format(task.getCompletionDate());
             binding.editDateInfo.setVisibility(View.INVISIBLE);
 
             binding.taskNameText.setText(task.getTaskName());
             binding.taskCompletionCkb.setChecked(task.isCompleted());
             binding.taskCompletionCkb.setEnabled(!task.isCompleted());
-            binding.dueDateTask.setHint(task.getCompletionDate() != null ? completionDate : "");
+            binding.dueDateTask.setHint(task.getCompletionDate() != 0 ? completionDate : "");
 
             taskListViewModel.fetchPicturesByTaskId(task.getTaskId()).observe(this, taskImages -> {
                 myPictures.clear();
@@ -314,7 +321,11 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCreationDate(new Date().getTime());
             task.setCompleted(binding.taskCompletionCkb.isChecked());
             task.setCategoryId(categoryId);
-            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : this.task.getCompletionDate());
+            Task oldTask = this.task;
+
+            if (oldTask != null || calendar != null) {
+                task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
+            }
 
             assert taskName != null;
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
@@ -325,13 +336,16 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                 // update
                 if (!myPictures.isEmpty()) {
                     taskListViewModel.updatePictures(task, myPictures);
-                } else {
-                    //taskListViewModel.updateTask(task);
-                    taskListViewModel.updateTaskAll(task, myPictures, subTasks);
-                    taskListViewModel.insertAllSubTask(additionalSubTasks);
                 }
+
+            }
+            if (!task.getTaskName().equals("") && task != null) {
+                //taskListViewModel.updateTask(task);
+                taskListViewModel.updateTaskAll(task, myPictures, subTasks);
+                taskListViewModel.insertAllSubTask(additionalSubTasks);
             }
 
+            navigateUpTo(new Intent(this, TaskListFragment.class));
             return false;
         }
 
@@ -355,19 +369,18 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     @Override
     public void onSubTaskCompleted(View view, int position) {
-            SubTask subTask = subTasks.get(position);
+        SubTask subTask = subTasks.get(position);
 
-            if (((CheckBox) view).isChecked()){
-                subTask.setCompleted(true);
-                subTasks.get(position).setCompleted(true);
-            }
-            else {
-                subTask.setCompleted(false);
-                subTasks.get(position).setCompleted(false);
-            }
+        if (((CheckBox) view).isChecked()) {
+            subTask.setCompleted(true);
+            subTasks.get(position).setCompleted(true);
+        } else {
+            subTask.setCompleted(false);
+            subTasks.get(position).setCompleted(false);
+        }
 
-            allowDelete();
-            taskListViewModel.updateTaskAll(task, myPictures, subTasks);
+        allowDelete();
+        taskListViewModel.updateTaskAll(task, myPictures, subTasks);
     }
 
     public void allowDelete() {
@@ -375,8 +388,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
         if (subTasks.size() == 0 && task.isCompleted()) {
             deleteAllowed = true;
-        }
-        else if (subTasks.size() > 0 ) {
+        } else if (subTasks.size() > 0) {
             int totalSubtaskComplete = 0;
 
             for (int i = 0; i < subTasks.size(); i++) {
@@ -390,8 +402,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                 deleteAllowed = true;
                 binding.taskCompletionCkb.setChecked(task.isCompleted());
                 binding.taskCompletionCkb.setEnabled(false);
-            }
-            else {
+            } else {
                 task.setCompleted(false);
                 deleteAllowed = false;
                 binding.taskCompletionCkb.setChecked(task.isCompleted());
@@ -403,8 +414,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             binding.moreActionBtn.setImageDrawable(getResources().getDrawable(R.drawable.delete));
             binding.moreActionBtn.setOnClickListener(this::deleteTask);
             binding.moreActionBtn.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             binding.moreActionBtn.setVisibility(View.INVISIBLE);
         }
     }
