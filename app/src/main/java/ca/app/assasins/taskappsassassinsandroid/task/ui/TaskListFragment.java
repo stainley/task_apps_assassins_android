@@ -116,7 +116,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                 taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position))));
 
                 taskFilterRecycle.setAdapter(taskListViewAdapter);
-                taskFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
+                taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
             }
 
             @Override
