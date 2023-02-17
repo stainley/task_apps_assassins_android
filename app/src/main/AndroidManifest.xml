@@ -58,7 +58,6 @@
         <activity
             android:name=".task.ui.TaskDetailActivity"
             android:exported="false"
-            android:parentActivityName=".common.view.NavigationActivity"
             android:theme="@style/AppTheme.ActionBar" />
 
 
