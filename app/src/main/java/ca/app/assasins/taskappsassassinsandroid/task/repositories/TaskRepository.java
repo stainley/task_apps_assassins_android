@@ -87,8 +87,8 @@ public class TaskRepository {
         return taskDao.getMySubTaskById(id);
     }
 
-    public void updateTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
-        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.updateAll(task, pictures, subTasks));
+    public void updateTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks, List<Audio> audios) {
+        AppDatabase.databaseWriterExecutor.execute(() -> taskDao.updateAll(task, pictures, subTasks, audios));
     }
 
     public void deleteSubTask(SubTask subTask) {

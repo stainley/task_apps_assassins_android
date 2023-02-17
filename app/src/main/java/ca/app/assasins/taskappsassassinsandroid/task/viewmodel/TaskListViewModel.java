@@ -83,8 +83,8 @@ public class TaskListViewModel extends ViewModel {
         return taskRepository.fetchAllSubTaskById(id);
     }
 
-    public void updateTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
-        this.taskRepository.updateTaskAll(task, pictures, subTasks);
+    public void updateTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks, List<Audio> audios) {
+        this.taskRepository.updateTaskAll(task, pictures, subTasks, audios);
     }
 
     public LiveData<List<TaskAudios>> fetchAudiosByTask(long taskId) {
