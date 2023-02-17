@@ -2,9 +2,12 @@ package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
 import static android.content.Context.MODE_PRIVATE;
 
+import static java.util.Comparator.comparing;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,24 +16,28 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -40,11 +47,10 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
-import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
-import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 
 public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnNoteCallback {
 
@@ -65,6 +71,9 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     String moveToCategories;
     int categoryCount = -1;
     AutoCompleteTextView autoCompleteTextView;
+
+    boolean titleSortedByAsc = false;
+    boolean createdDateSortedByAsc = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -97,6 +106,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
+        binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
         if (categoryCount == 1) {
 
@@ -140,6 +150,43 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
     private void createNewNote(View view) {
         Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity());
+    }
+
+    private void sortButtonClicked(View view) {
+        LayoutInflater inflater = getLayoutInflater();
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext(), R.style.BottomSheetDialogTheme);
+        View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
+        bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
+
+        bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
+            titleSortedByAsc = !titleSortedByAsc;
+
+            if (titleSortedByAsc) {
+                notes.sort(comparing(Note::getTitle));
+            }
+            else {
+                notes.sort(comparing(Note::getTitle).reversed());
+            }
+            noteRecycleAdapter.notifyDataSetChanged();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
+            createdDateSortedByAsc = !createdDateSortedByAsc;
+
+            if (createdDateSortedByAsc) {
+                notes.sort(comparing(Note::getCreatedDate));
+            }
+            else {
+                notes.sort(comparing(Note::getCreatedDate).reversed());
+            }
+            noteRecycleAdapter.notifyDataSetChanged();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
     }
 
     @Override
