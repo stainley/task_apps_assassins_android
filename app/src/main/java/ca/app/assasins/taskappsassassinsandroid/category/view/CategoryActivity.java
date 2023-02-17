@@ -15,7 +15,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -29,9 +28,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import java.util.function.Supplier;
-
 import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
@@ -169,7 +166,22 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
     public void onRowClicked(int position) {
         SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
         categorySP.putLong("categoryId", categories.get(position).getId());
+        categorySP.putInt("categoryCount", categories.size());
         categorySP.putString("categoryName", categories.get(position).getName());
+
+        if (categories.size() > 1) {
+            String moveToCategories = "";
+            for (int i = 0; i < categories.size(); i++) {
+                if (categories.get(i).getId() != categories.get(position).getId()) {
+                    moveToCategories += categories.get(i).getName() + ",";
+                }
+            }
+            categorySP.putString("moveToCategories", moveToCategories);
+        }
+        else {
+            categorySP.putString("moveToCategories", null);
+        }
+
         categorySP.apply();
 
         Intent navigationActivity = new Intent(this, NavigationActivity.class);

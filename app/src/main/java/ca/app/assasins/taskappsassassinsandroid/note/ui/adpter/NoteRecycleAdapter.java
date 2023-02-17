@@ -70,7 +70,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
                     return true;
                 case R.id.move_note_menu:
-                    this.onNoteCallback.onMoveNote(position);
+                    this.onNoteCallback.onMoveNote(position, notes.get(position));
 
                     return true;
             }
@@ -111,7 +111,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
         void onDeleteNote(View view, int position);
 
-        void onMoveNote(int position);
+        void onMoveNote(int position, Note note);
 
         void onDisplayThumbnail(ImageView Imageview, int position);
     }
