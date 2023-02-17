@@ -98,19 +98,11 @@
             android:background="@android:color/transparent"
             app:srcCompat="@drawable/outline_add_box" />
 
-        <ImageButton
-            android:id="@+id/select_color_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="10"
-            android:background="@android:color/transparent"
-            app:srcCompat="@drawable/color_lens" />
-
         <TextView
             android:id="@+id/edit_date_info"
             android:layout_width="wrap_content"
             android:layout_height="34dp"
-            android:layout_weight="70"
+            android:layout_weight="80"
             android:background="@android:color/transparent"
             android:gravity="center"
             android:text="Edited " />
