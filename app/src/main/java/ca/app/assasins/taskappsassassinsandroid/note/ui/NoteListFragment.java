@@ -51,6 +51,8 @@ import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapte
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragmentDirections;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 
 public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnNoteCallback {
 
@@ -159,8 +161,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
             if (titleSortedByAsc) {
                 notes.sort(comparing(Note::getTitle));
-            }
-            else {
+            } else {
                 notes.sort(comparing(Note::getTitle).reversed());
             }
             noteRecycleAdapter.notifyDataSetChanged();
@@ -172,8 +173,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
             if (createdDateSortedByAsc) {
                 notes.sort(comparing(Note::getCreatedDate));
-            }
-            else {
+            } else {
                 notes.sort(comparing(Note::getCreatedDate).reversed());
             }
             noteRecycleAdapter.notifyDataSetChanged();
@@ -272,7 +272,33 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
                             note.getDescription().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                noteRecycleAdapter = new NoteRecycleAdapter(notesFiltered, NoteListFragment.this);
+                noteRecycleAdapter = new NoteRecycleAdapter(notesFiltered, new NoteRecycleAdapter.OnNoteCallback() {
+                    @Override
+                    public void onNoteSelected(View view, int position) {
+                        Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notesFiltered.get(position)));
+                    }
+
+                    @Override
+                    public void onDeleteNote(View view, int position) {
+
+                    }
+
+                    @Override
+                    public void onMoveNote(int position, Note note) {
+
+                    }
+
+                    @Override
+                    public void onDisplayThumbnail(ImageView Imageview, int position) {
+
+                    }
+
+                    @Override
+                    public void showAudioIcon(ImageButton audioIcon, int position) {
+
+                    }
+                });
+
 
                 noteFilterRecycle.setAdapter(noteRecycleAdapter);
                 noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
