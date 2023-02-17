@@ -156,6 +156,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
+        setTitle("Note");
 
         permissionsList = new ArrayList<>();
         permissionsList.addAll(Arrays.asList(permissionsStr));
@@ -246,6 +247,8 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             @Override
             public void onDeleteAudio(int position) {
                 noteViewModel.deleteAudio(mAudios.get(position));
+                mAudios.remove(position);
+                noteAudioRVAdapter.notifyItemRemoved(position);
             }
         });
         noteAudioRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
@@ -446,7 +449,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         //TODO: delete photo implementation
         noteViewModel.deletePicture(myPictures.get(position));
         myPictures.remove(myPictures.get(position));
-        noteAudioRVAdapter.notifyItemRemoved(position);
+        notePictureRVAdapter.notifyItemRemoved(position);
     }
 
     private void setUpMediaRecorder() {

@@ -74,6 +74,6 @@ public class NoteViewModel extends ViewModel {
     }
 
     public void deleteAudio(@NonNull Audio audio) {
-
+        noteRepository.deleteAudio(audio);
     }
 }

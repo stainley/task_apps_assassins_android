@@ -17,15 +17,15 @@ public interface AudioDao extends AbstractDao<Audio> {
 
     @Insert
     @Override
-    void save(Audio type);
+    void save(Audio audio);
 
     @Delete
     @Override
-    void delete(Audio type);
+    void delete(Audio audio);
 
     @Update
     @Override
-    void update(Audio type);
+    void update(Audio audio);
 
     @Query("SELECT * FROM AUDIO_TBL")
     @Override
