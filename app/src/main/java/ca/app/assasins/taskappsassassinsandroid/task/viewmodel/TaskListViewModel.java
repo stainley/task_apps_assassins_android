@@ -8,9 +8,12 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
+import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
+import ca.app.assasins.taskappsassassinsandroid.task.model.TaskAudios;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskWithSubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.repositories.TaskRepository;
@@ -52,8 +55,8 @@ public class TaskListViewModel extends ViewModel {
         taskRepository.saveTaskWithPictures(task, pictures);
     }
 
-    public void saveTaskWithChildren(@NonNull Task task, @NonNull List<Picture> pictures, @NonNull List<SubTask> subTasks) {
-        taskRepository.saveTaskWithChildren(task, pictures, subTasks);
+    public void saveTaskWithChildren(@NonNull Task task, @NonNull List<Picture> pictures, @NonNull List<SubTask> subTasks, List<Audio> mAudios) {
+        taskRepository.saveTaskWithChildren(task, pictures, subTasks, mAudios);
     }
 
     public void updatePictures(Task task, List<Picture> pictures) {
@@ -82,5 +85,13 @@ public class TaskListViewModel extends ViewModel {
 
     public void updateTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
         this.taskRepository.updateTaskAll(task, pictures, subTasks);
+    }
+
+    public LiveData<List<TaskAudios>> fetchAudiosByTask(long taskId) {
+        return taskRepository.fetchAudiosByTaskId(taskId);
+    }
+
+    public void deleteAudio(@NonNull Audio audio) {
+        this.taskRepository.deleteAudio(audio);
     }
 }

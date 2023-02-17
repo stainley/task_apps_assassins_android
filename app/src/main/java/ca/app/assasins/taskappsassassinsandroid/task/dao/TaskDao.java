@@ -16,8 +16,10 @@ import java.util.Optional;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
+import ca.app.assasins.taskappsassassinsandroid.task.model.TaskAudios;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskWithSubTask;
 
@@ -65,6 +67,13 @@ public abstract class TaskDao implements AbstractDao<Task> {
     public abstract LiveData<List<TaskWithSubTask>> getMySubTaskById(long id);
 
     @Transaction
+    @Query("SELECT * FROM TASK_TBL WHERE TASK_ID = :id")
+    public abstract LiveData<List<TaskAudios>> getAllAudiosByTaskId(long id);
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    public abstract void saveAudio(Audio audio);
+
+    @Transaction
     public Boolean addPicture(Task task, List<Picture> pictures) {
         final long taskId = saveTask(task);
         pictures.forEach(picture -> {
@@ -88,7 +97,7 @@ public abstract class TaskDao implements AbstractDao<Task> {
     public abstract void updateSubTask(SubTask subTasks);
 
     @Transaction
-    public void saveTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks) {
+    public void saveTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks, List<Audio> mAudios) {
         final long taskId = saveTask(task);
         if (!pictures.isEmpty()) {
             pictures.forEach(picture -> {
@@ -100,6 +109,13 @@ public abstract class TaskDao implements AbstractDao<Task> {
             subTasks.forEach(subTask -> {
                 subTask.setTaskParentId(taskId);
                 saveSubTask(subTask);
+            });
+        }
+
+        if (!mAudios.isEmpty()) {
+            mAudios.forEach(audio -> {
+                audio.setParentTaskId(taskId);
+                saveAudio(audio);
             });
         }
     }
