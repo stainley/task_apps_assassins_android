@@ -8,6 +8,7 @@ import androidx.room.Transaction;
 
 import java.util.List;
 
+import ca.app.assasins.taskappsassassinsandroid.common.dao.AudioDao;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
 import ca.app.assasins.taskappsassassinsandroid.common.db.AppDatabase;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
@@ -23,11 +24,13 @@ public class NoteRepository {
 
     private final NoteDao noteDao;
     private final PictureDao pictureDao;
+    private final AudioDao audioDao;
 
     public NoteRepository(Application application) {
         AppDatabase db = AppDatabase.getInstance(application);
         noteDao = db.noteDao();
         pictureDao = db.pictureDao();
+        audioDao = db.audioDao();
     }
 
     public void save(@NonNull Note note) {
@@ -79,5 +82,10 @@ public class NoteRepository {
     @Transaction
     public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
         AppDatabase.databaseWriterExecutor.execute(() -> noteDao.saveNoteAll(newNote, myPictures, mAudios));
+    }
+
+    @Transaction
+    public void deleteAudio(Audio audio) {
+        AppDatabase.databaseWriterExecutor.execute(() -> audioDao.delete(audio));
     }
 }
