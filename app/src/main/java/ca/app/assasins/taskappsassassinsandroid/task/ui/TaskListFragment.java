@@ -159,7 +159,8 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                     return task.getTaskName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position))));
+                taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
+                //taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, TaskListFragment.this);
 
                 taskFilterRecycle.setAdapter(taskListViewAdapter);
                 taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
