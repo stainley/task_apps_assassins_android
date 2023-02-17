@@ -49,8 +49,8 @@ public class NoteViewModel extends ViewModel {
         noteRepository.saveNoteWithPictures(note, pictures);
     }
 
-    public void updateNoteWithPictures(Note note, List<Picture> pictures) {
-        noteRepository.updateNoteWithPictures(note, pictures);
+    public void updateNoteWithPictures(Note note, List<Picture> pictures, List<Audio> audios) {
+        noteRepository.updateNoteWithPictures(note, pictures, audios);
     }
 
     public LiveData<List<NoteImages>> fetchPicturesByNoteId(long noteId) {

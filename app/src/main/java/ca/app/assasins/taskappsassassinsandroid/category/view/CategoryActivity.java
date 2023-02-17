@@ -13,11 +13,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
@@ -85,31 +87,39 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
     private void renameCategory(CategoryActivity context, List<Category> categoriesFiltered, int position, Context ApplicationContext, CategoryRecycleAdapter myAdapter, Context ApplicationContext1) {
         TextInputEditText newEditText = new TextInputEditText(context);
         newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+        newEditText.setSingleLine();
+        newEditText.setPadding(50, 0, 50, 32);
         newEditText.setText(categoriesFiltered.get(position).getName());
         newEditText.setHint("Rename Category");
 
-        new MaterialAlertDialogBuilder(context).setTitle("Rename Category").setMessage("Would you like to rename this category?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
 
-        }).setNegativeButton("Rename", (dialog, which) -> {
+        new MaterialAlertDialogBuilder(context)
+                .setTitle("Rename Category")
+                .setView(newEditText)
+                .setMessage("Would you like to rename this category?")
+                .setIcon(getDrawable(R.drawable.note))
+                .setNeutralButton("Cancel", (dialog, which) -> {
+                }).setNegativeButton("Rename", (dialog, which) -> {
 
-            String inputText = Objects.requireNonNull(newEditText.getText()).toString();
-            if (inputText.equals("")) {
-                Toast.makeText(ApplicationContext, "Couldn't be empty", Toast.LENGTH_SHORT).show();
-            } else {
+                    String inputText = Objects.requireNonNull(newEditText.getText()).toString();
+                    if (inputText.equals("")) {
+                        Toast.makeText(ApplicationContext, "Couldn't be empty", Toast.LENGTH_SHORT).show();
+                    } else {
 
-                List<Category> resultCategory = categoriesFiltered.stream().filter(cat -> inputText.equalsIgnoreCase(cat.getName())).collect(Collectors.toList());
+                        List<Category> resultCategory = categoriesFiltered.stream().filter(cat -> inputText.equalsIgnoreCase(cat.getName())).collect(Collectors.toList());
 
-                if (resultCategory.isEmpty()) {
-                    Category category = categoriesFiltered.get(position);
-                    category.setName(inputText);
-                    categoryViewModel.updateCategory(category);
-                    myAdapter.notifyItemChanged(position);
+                        if (resultCategory.isEmpty()) {
+                            Category category = categoriesFiltered.get(position);
+                            category.setName(inputText);
+                            categoryViewModel.updateCategory(category);
+                            myAdapter.notifyItemChanged(position);
 
-                } else {
-                    Toast.makeText(ApplicationContext1, inputText + " is in our database.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }).setCancelable(false).show();
+                        } else {
+                            Toast.makeText(ApplicationContext1, inputText + " is in our database.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).setCancelable(false).show();
+
     }
 
     private void deleteCategory(View view, List<Category> categoriesFiltered, int position, CategoryRecycleAdapter myAdapter) {
@@ -129,26 +139,30 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
     public void newCategory(View view) {
         TextInputEditText newEditText = new TextInputEditText(this);
         newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+        newEditText.setSingleLine();
+        newEditText.setPadding(50, 0, 50, 32);
         newEditText.setHint("Category Name");
 
-        new MaterialAlertDialogBuilder(this).setTitle("New Category").setMessage("Would you like to create new category?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
+        new MaterialAlertDialogBuilder(this).setTitle("New Category").setMessage("Would you like to create new category?").setIcon(getDrawable(R.drawable.note))
+                .setView(newEditText)
+                .setNeutralButton("Cancel", (dialog, which) -> {
 
-        }).setPositiveButton("Accept", (dialog, which) -> {
+                }).setPositiveButton("Accept", (dialog, which) -> {
 
-            String inputText = Objects.requireNonNull(newEditText.getText()).toString();
-            if (inputText.equals("")) {
-                Toast.makeText(this, "Couldn't be empty", Toast.LENGTH_SHORT).show();
-            } else {
+                    String inputText = Objects.requireNonNull(newEditText.getText()).toString();
+                    if (inputText.equals("")) {
+                        Toast.makeText(this, "Couldn't be empty", Toast.LENGTH_SHORT).show();
+                    } else {
 
-                List<Category> resultCategory = categories.stream().filter(cat -> inputText.equalsIgnoreCase(cat.getName())).collect(Collectors.toList());
+                        List<Category> resultCategory = categories.stream().filter(cat -> inputText.equalsIgnoreCase(cat.getName())).collect(Collectors.toList());
 
-                if (resultCategory.isEmpty()) {
-                    categoryViewModel.createCategory(new Category(inputText));
-                } else {
-                    Toast.makeText(this, inputText + " is in our database.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }).setCancelable(false).show();
+                        if (resultCategory.isEmpty()) {
+                            categoryViewModel.createCategory(new Category(inputText));
+                        } else {
+                            Toast.makeText(this, inputText + " is in our database.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).setCancelable(false).show();
     }
 
     /***
@@ -181,8 +195,7 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
                 }
             }
             categorySP.putString("moveToCategories", moveToCategories);
-        }
-        else {
+        } else {
             categorySP.putString("moveToCategories", null);
         }
 

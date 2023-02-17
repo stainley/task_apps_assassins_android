@@ -35,8 +35,10 @@ public abstract class NoteDao implements AbstractDao<Note> {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract void savePicture(Picture picture);
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract void saveAudio(Audio audio);
+
     @Delete
     @Override
     public abstract void delete(Note type);
@@ -121,4 +123,17 @@ public abstract class NoteDao implements AbstractDao<Note> {
     }
 
 
+    @Transaction
+    public void updateNoteAll(Note note, List<Picture> pictures, List<Audio> audios) {
+        update(note);
+        pictures.forEach(picture -> {
+            picture.setParentNoteId(note.getNoteId());
+            savePicture(picture);
+        });
+
+        audios.forEach(audio -> {
+            audio.setParentNoteId(note.getNoteId());
+            saveAudio(audio);
+        });
+    }
 }
