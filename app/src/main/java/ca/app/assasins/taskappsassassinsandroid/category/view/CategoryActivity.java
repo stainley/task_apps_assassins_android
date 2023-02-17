@@ -87,6 +87,7 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
         newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
         newEditText.setText(categoriesFiltered.get(position).getName());
         newEditText.setHint("Rename Category");
+        newEditText.setPadding(75, newEditText.getPaddingTop(), newEditText.getPaddingRight(), newEditText.getPaddingBottom());
 
         new MaterialAlertDialogBuilder(context).setTitle("Rename Category").setMessage("Would you like to rename this category?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
 
@@ -130,6 +131,8 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
         TextInputEditText newEditText = new TextInputEditText(this);
         newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
         newEditText.setHint("Category Name");
+        newEditText.setPadding(75, newEditText.getPaddingTop(), newEditText.getPaddingRight(), newEditText.getPaddingBottom());
+
 
         new MaterialAlertDialogBuilder(this).setTitle("New Category").setMessage("Would you like to create new category?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
 
