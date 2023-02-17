@@ -404,14 +404,14 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         bottomSheetView.findViewById(R.id.addSubTaskBtn).setVisibility(View.VISIBLE);
         bottomSheetView.findViewById(R.id.addSubTaskBtn).setOnClickListener(v2 -> {
 
-            // TODO: Add SubTask Dialog Menu
-
             TextInputEditText newEditText = new TextInputEditText(this);
+            newEditText.setSingleLine();
+            newEditText.setPadding(50, 0, 50, 32);
             newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
-            newEditText.setHint("Add subtask");
+            newEditText.setHint("New Sub Task");
 
             new MaterialAlertDialogBuilder(this).setTitle("New Sub Task").setMessage("Would you like to add a subtask?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
-
+                bottomSheetDialog.dismiss();
             }).setPositiveButton("Add", (dialog, which) -> {
 
                 String inputText = Objects.requireNonNull(newEditText.getText()).toString();
