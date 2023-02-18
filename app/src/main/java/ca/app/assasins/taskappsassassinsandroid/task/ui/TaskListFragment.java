@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -44,7 +45,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel
 public class TaskListFragment extends Fragment implements TaskListViewAdapter.OnTaskListCallback {
 
     private FragmentTaskListBinding binding;
-    private final List<Task> tasks = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
     private List<Task> tasksFiltered = new ArrayList<>();
     private TaskListViewAdapter taskListViewAdapter;
 
@@ -61,36 +62,34 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
 
     private SwipeHelper swipeHelper;
 
+    private TaskListViewModel taskListViewModel;
+    private TaskListViewAdapter taskListViewAdapterFiltered;
+    long categoryId;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
+        categoryId = categorySP.getLong("categoryId", -1);
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
+    }
+
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
 
-        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
-        long categoryId = categorySP.getLong("categoryId", -1);
-        categoryCount = categorySP.getInt("categoryCount", -1);
-        moveToCategories = categorySP.getString("moveToCategories", "");
-        categories = moveToCategories.split(",");
-
-        TaskListViewModel taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
-
-        taskListViewModel.fetchAllTaskByCategory(categoryId).observe(getViewLifecycleOwner(), tasksResult -> {
-            this.tasks.clear();
-            this.tasks.addAll(tasksResult);
-            this.taskListViewAdapter.notifyItemChanged(tasksResult.size());
-        });
-
         RecyclerView taskListRecycleView = binding.taskList;
         taskListViewAdapter = new TaskListViewAdapter(tasks, this);
+
         taskListRecycleView.setAdapter(taskListViewAdapter);
         taskListRecycleView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        SearchView searchView = binding.searchView;
-        searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.newTaskBtn.setOnClickListener(this::createNewTask);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
-        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
 
         swipeHelper = new SwipeHelper(getContext(), 300, binding.taskList) {
             @Override
@@ -148,6 +147,22 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         };
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
+        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
+
+        taskListViewModel.fetchAllTaskByCategory(categoryId).observe(requireActivity(), tasksResult -> {
+            this.tasks.clear();
+            this.tasks.addAll(tasksResult);
+            this.taskListViewAdapter.notifyDataSetChanged();
+        });
+
+        binding.searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
     }
 
 
@@ -217,23 +232,22 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 tasksFiltered.clear();
                 RecyclerView taskFilterRecycle = binding.taskFilterRecycle;
+                taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
 
                 tasksFiltered = tasks.stream().filter(task -> {
-
                     if (s.length() == 0) return false;
                     return task.getTaskName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
-                //taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, TaskListFragment.this);
+                System.out.println("taskFiltered: " + tasksFiltered.size());
+                taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
 
-                taskFilterRecycle.setAdapter(taskListViewAdapter);
-                taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
+                taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                taskListViewAdapterFiltered.notifyDataSetChanged();
             }
         };
     }
