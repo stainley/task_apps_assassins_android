@@ -23,6 +23,10 @@ import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNavigationBi
 
 public class NavigationActivity extends AppCompatActivity {
 
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
