@@ -65,7 +65,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     int categoryCount = -1;
     AutoCompleteTextView autoCompleteTextView;
 
-    boolean titleSortedByAsc = true;
+    boolean titleSortedByAsc = false;
     boolean createdDateSortedByAsc = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -149,43 +149,45 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
         bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
 
-
             if (titleSortedByAsc) {
                 titleSortedByAsc = false;
-                noteViewModel.fetchAllNoteDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    this.notes.clear();
-                    this.notes.addAll(notesResult);
-
-                    this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
-                    this.noteRecycleAdapter.notifyDataSetChanged();
+                noteViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
                 });
             } else {
                 titleSortedByAsc = true;
-                noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    this.notes.clear();
-                    this.notes.addAll(notesResult);
-
-                    this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
-                    this.noteRecycleAdapter.notifyDataSetChanged();
+                noteViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
                 });
             }
             bottomSheetDialog.dismiss();
         });
 
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
-            createdDateSortedByAsc = !createdDateSortedByAsc;
-
             if (createdDateSortedByAsc) {
-                notes.sort(comparing(Note::getCreatedDate));
+                createdDateSortedByAsc = false;
+                noteViewModel.fetchAllNotesOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             } else {
-                notes.sort(comparing(Note::getCreatedDate).reversed());
+                createdDateSortedByAsc = true;
+                noteViewModel.fetchAllNotesOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             }
-            noteRecycleAdapter.notifyDataSetChanged();
             bottomSheetDialog.dismiss();
         });
 
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
+    }
+
+    public void refreshNotes(List<Note> result) {
+        this.notes.clear();
+        this.notes.addAll(result);
+
+        this.noteRecycleAdapter.notifyItemChanged(result.size());
+        this.noteRecycleAdapter.notifyDataSetChanged();
     }
 
     @Override

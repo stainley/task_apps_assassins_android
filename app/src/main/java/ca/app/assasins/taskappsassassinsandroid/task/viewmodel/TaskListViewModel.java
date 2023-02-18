@@ -10,6 +10,7 @@ import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -44,6 +45,22 @@ public class TaskListViewModel extends ViewModel {
 
     public LiveData<List<Task>> fetchAllTaskByCategory(Long categoryId) {
         return taskRepository.fetchAllTaskByCategory(categoryId);
+    }
+
+    public LiveData<List<Task>> fetchAllAscByCategory(Long categoryId) {
+        return taskRepository.fetchAllAscByCategory(categoryId);
+    }
+
+    public LiveData<List<Task>> fetchAllDescByCategory(Long categoryId) {
+        return taskRepository.fetchAllDescByCategory(categoryId);
+    }
+
+    public LiveData<List<Task>> fetchAllTasksOrderByDateAsc(Long categoryId) {
+        return taskRepository.fetchAllTasksOrderByDateAsc(categoryId);
+    }
+
+    public LiveData<List<Task>> fetchAllTasksOrderByDateDesc(Long categoryId) {
+        return taskRepository.fetchAllTasksOrderByDateDesc(categoryId);
     }
 
     /***

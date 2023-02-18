@@ -14,6 +14,7 @@ import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
 import ca.app.assasins.taskappsassassinsandroid.common.db.AppDatabase;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.task.dao.SubTaskDao;
 import ca.app.assasins.taskappsassassinsandroid.task.dao.TaskDao;
@@ -59,6 +60,21 @@ public class TaskRepository {
         return taskDao.fetchAllByCategory(categoryId);
     }
 
+    public LiveData<List<Task>> fetchAllAscByCategory(Long categoryId) {
+        return taskDao.fetchAllAscByCategory(categoryId);
+    }
+
+    public LiveData<List<Task>> fetchAllDescByCategory(Long categoryId) {
+        return taskDao.fetchAllDescByCategory(categoryId);
+    }
+
+    public LiveData<List<Task>> fetchAllTasksOrderByDateAsc(Long categoryId) {
+        return taskDao.fetchAllTasksOrderByDateAsc(categoryId);
+    }
+
+    public LiveData<List<Task>> fetchAllTasksOrderByDateDesc(Long categoryId) {
+        return taskDao.fetchAllTasksOrderByDateDesc(categoryId);
+    }
 
     public LiveData<List<TaskImages>> fetchPicturesByTaskId(long taskId) {
         return taskDao.getAllImagesByTaskId(taskId);

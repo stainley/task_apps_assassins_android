@@ -35,6 +35,7 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.common.helper.SwipeHelper;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
@@ -174,31 +175,46 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
         bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
-            titleSortedByAsc = !titleSortedByAsc;
 
             if (titleSortedByAsc) {
-                tasks.sort(comparing(Task::getTaskName));
+                titleSortedByAsc = false;
+                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             } else {
-                tasks.sort(comparing(Task::getTaskName).reversed());
+                titleSortedByAsc = true;
+                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             }
-            taskListViewAdapter.notifyDataSetChanged();
             bottomSheetDialog.dismiss();
         });
 
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
-            createdDateSortedByAsc = !createdDateSortedByAsc;
-
             if (createdDateSortedByAsc) {
-                tasks.sort(comparing(Task::getCreationDate));
+                createdDateSortedByAsc = false;
+                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             } else {
-                tasks.sort(comparing(Task::getCreationDate).reversed());
+                createdDateSortedByAsc = true;
+                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             }
-            taskListViewAdapter.notifyDataSetChanged();
             bottomSheetDialog.dismiss();
         });
 
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
+    }
+
+    public void refreshNotes(List<Task> result) {
+        this.tasks.clear();
+        this.tasks.addAll(result);
+
+        this.taskListViewAdapter.notifyItemChanged(result.size());
+        this.taskListViewAdapter.notifyDataSetChanged();
     }
 
     @Override

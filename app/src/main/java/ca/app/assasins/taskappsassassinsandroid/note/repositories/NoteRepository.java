@@ -53,8 +53,20 @@ public class NoteRepository {
         return noteDao.fetchAllByCategory(categoryId);
     }
 
-    public LiveData<List<Note>> fetchAllNoteDescByCategory(Long categoryId) {
+    public LiveData<List<Note>> fetchAllAscByCategory(Long categoryId) {
+        return noteDao.fetchAllAscByCategory(categoryId);
+    }
+
+    public LiveData<List<Note>> fetchAllDescByCategory(Long categoryId) {
         return noteDao.fetchAllDescByCategory(categoryId);
+    }
+
+    public LiveData<List<Note>> fetchAllNotesOrderByDateAsc(Long categoryId) {
+        return noteDao.fetchAllNotesOrderByDateAsc(categoryId);
+    }
+
+    public LiveData<List<Note>> fetchAllNotesOrderByDateDesc(Long categoryId) {
+        return noteDao.fetchAllNotesOrderByDateDesc(categoryId);
     }
 
     public LiveData<List<NoteImages>> fetchPicturesByNoteId(long noteId) {
