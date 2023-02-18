@@ -94,6 +94,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
         SearchView searchView = binding.searchView;
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
+        searchView.inflateMenu(R.menu.search_bar_menu);
 
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
