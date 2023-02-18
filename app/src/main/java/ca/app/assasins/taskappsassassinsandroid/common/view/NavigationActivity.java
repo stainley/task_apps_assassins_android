@@ -5,25 +5,25 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.NavGraph;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.search.SearchBar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +31,13 @@ import java.util.Map;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNavigationBinding;
-import ca.app.assasins.taskappsassassinsandroid.note.ui.NoteDetailActivity;
+import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
+import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 
 public class NavigationActivity extends AppCompatActivity {
+    private static final String TAG = NavigationActivity.class.getName();
 
+    private MaterialToolbar noteAppBar;
     private ArrayList<String> permissionsList;
     private final String[] permissionsStr = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
 
@@ -68,6 +71,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         ActivityNavigationBinding binding = ActivityNavigationBinding.inflate(getLayoutInflater());
 
+
         setContentView(binding.getRoot());
 
         SharedPreferences categorySP = getSharedPreferences("category_sp", MODE_PRIVATE);
@@ -75,16 +79,12 @@ public class NavigationActivity extends AppCompatActivity {
         long categoryId = categorySP.getLong("categoryId", -1);
         setTitle(categoryName);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         permissionsList = new ArrayList<>();
         permissionsList.addAll(Arrays.asList(permissionsStr));
         askForPermissions(permissionsList);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
+
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -95,12 +95,13 @@ public class NavigationActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_navigation);
         Bundle bundle = new Bundle();
         bundle.putLong("categoryId", categoryId);
+
         navController.addOnDestinationChangedListener((navControl, navDestination, bundleResult) -> {
 
             if (navDestination.getId() == R.id.navigation_note) {
                 NavArgument argumentNote = new NavArgument.Builder().setDefaultValue(categoryId).build();
                 navDestination.addArgument("categoryId", argumentNote);
-            } else {
+            } else if (navDestination.getId() == R.id.navigation_task) {
                 NavArgument argumentTask = new NavArgument.Builder().setDefaultValue(categoryId).build();
                 navDestination.addArgument("categoryId", argumentTask);
             }
@@ -128,5 +129,6 @@ public class NavigationActivity extends AppCompatActivity {
             permissionsLauncher.launch(newPermissionStr);
         }
     }
+
 
 }

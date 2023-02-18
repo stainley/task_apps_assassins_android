@@ -1,8 +1,8 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
 import static android.content.Context.MODE_PRIVATE;
-import static java.util.Comparator.comparing;
 
+import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toolbar;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -36,7 +37,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
-import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
@@ -52,7 +52,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     private NoteViewModel noteViewModel;
 
     private CategoryViewModel categoryViewModel;
-    private Category category;
 
     private long categoryId;
     private List<Note> notesFiltered = new ArrayList<>();
@@ -68,49 +67,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     boolean titleSortedByAsc = false;
     boolean createdDateSortedByAsc = false;
 
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-        binding = FragmentNoteListBinding.inflate(inflater, container, false);
-
-        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
-        categoryId = categorySP.getLong("categoryId", -1);
-        categoryCount = categorySP.getInt("categoryCount", -1);
-        moveToCategories = categorySP.getString("moveToCategories", "");
-        categories = moveToCategories.split(",");
-
-        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
-        noteViewModel = new ViewModelProvider(this, new NoteViewModelFactory(requireActivity().getApplication())).get(NoteViewModel.class);
-
-        noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-            this.notes.clear();
-            this.notes.addAll(notesResult);
-
-            this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
-        });
-
-        RecyclerView noteListRecycleView = binding.noteList;
-        noteRecycleAdapter = new NoteRecycleAdapter(notes, this);
-        noteListRecycleView.setAdapter(noteRecycleAdapter);
-        noteListRecycleView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-
-        SearchView searchView = binding.searchView;
-
-        searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
-
-        binding.createNoteBtn.setOnClickListener(this::createNewNote);
-        binding.sortButton.setOnClickListener(this::sortButtonClicked);
-
-        return binding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        Bundle arguments = getArguments();
-        assert arguments != null;
-        category = (Category) arguments.getSerializable("category");
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -123,6 +79,56 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
     }
+
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        binding = FragmentNoteListBinding.inflate(inflater, container, false);
+
+        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
+        noteViewModel = new ViewModelProvider(this, new NoteViewModelFactory(requireActivity().getApplication())).get(NoteViewModel.class);
+
+        RecyclerView noteListRecycleView = binding.noteList;
+        noteRecycleAdapter = new NoteRecycleAdapter(notes, this);
+        noteListRecycleView.setAdapter(noteRecycleAdapter);
+        noteListRecycleView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+        SearchView searchView = binding.searchView;
+        searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
+
+        binding.createNoteBtn.setOnClickListener(this::createNewNote);
+        binding.sortButton.setOnClickListener(this::sortButtonClicked);
+
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
+        categoryId = categorySP.getLong("categoryId", -1);
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
+
+        binding.titleCategory.setText(categorySP.getString("categoryName", ""));
+
+        noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+            this.notes.clear();
+            this.notes.addAll(notesResult);
+
+            this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
+        });
+
+        Toolbar noteAppBar = binding.noteAppBar;
+        requireActivity().setActionBar(noteAppBar);
+
+        ActionBar actionBar = requireActivity().getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        noteAppBar.setNavigationOnClickListener(v -> requireActivity().finish());
+    }
+
 
     @Override
     public void onDestroyView() {
@@ -143,7 +149,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     private void sortButtonClicked(View view) {
         LayoutInflater inflater = getLayoutInflater();
 
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext(), R.style.BottomSheetDialogTheme);
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireActivity(), R.style.BottomSheetDialogTheme);
         View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
@@ -201,7 +207,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
         autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
 
-        adapterItems = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown_items, categories);
+        adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
         autoCompleteTextView.setAdapter(adapterItems);
         autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
             String category = adapterView.getItemAtPosition(position1).toString();
@@ -212,7 +218,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
             });
         });
 
-        new MaterialAlertDialogBuilder(getContext())
+        new MaterialAlertDialogBuilder(requireActivity())
                 .setTitle("Move Note")
                 .setView(moveNoteView)
                 .setNeutralButton("Cancel", (dialog, which) -> {

@@ -182,13 +182,13 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
         categorySP.putString("categoryName", categories.get(position).getName());
 
         if (categories.size() > 1) {
-            String moveToCategories = "";
+            StringBuilder moveToCategories = new StringBuilder();
             for (int i = 0; i < categories.size(); i++) {
-                if (categories.get(i).getId() != categories.get(position).getId()) {
-                    moveToCategories += categories.get(i).getName() + ",";
+                if (!Objects.equals(categories.get(i).getId(), categories.get(position).getId())) {
+                    moveToCategories.append(categories.get(i).getName()).append(",");
                 }
             }
-            categorySP.putString("moveToCategories", moveToCategories);
+            categorySP.putString("moveToCategories", moveToCategories.toString());
         } else {
             categorySP.putString("moveToCategories", null);
         }

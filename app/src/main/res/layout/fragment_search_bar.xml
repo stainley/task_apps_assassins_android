@@ -1,37 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".task.ui.TaskListFragment">
+    android:layout_height="match_parent">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/searchAppBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:nestedScrollingEnabled="false">
 
-        <TextView
-            android:id="@+id/titleCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="76dp"
-            android:layout_marginEnd="16dp"
-            android:text="Category Title"
-            android:textSize="26sp"
-            android:textStyle="bold" />
-
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/taskList"
+            android:id="@+id/noteList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="120dp"
+            android:layout_marginTop="76dp"
             android:padding="8dp" />
 
-        <Toolbar
-            android:id="@+id/taskAppBar"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/noteAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:isScrollContainer="false"
@@ -49,45 +38,45 @@
                     android:layout_margin="8dp"
                     android:layout_weight="90"
                     android:contentDescription="Search bar"
-                    android:hint="@string/search_task" />
+                    android:hint="@string/search_note" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/sortButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/sort" />
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="10"
+                    android:background="@color/white"
+                    android:src="@drawable/sort" />
             </LinearLayout>
 
-        </Toolbar>
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <com.google.android.material.search.SearchView
             android:id="@+id/search_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="@string/search_task"
+            android:hint="@string/search_note"
             app:layout_anchor="@id/search_bar">
             <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/taskFilterRecycle"
+                android:id="@+id/noteFilterRecycle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="76dp"
                 android:padding="8dp" />
         </com.google.android.material.search.SearchView>
-
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/newTaskBtn"
+        android:id="@+id/createNoteBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
-        android:contentDescription="@string/new_task"
+        android:contentDescription="@string/new_note"
         android:src="@android:drawable/ic_input_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
