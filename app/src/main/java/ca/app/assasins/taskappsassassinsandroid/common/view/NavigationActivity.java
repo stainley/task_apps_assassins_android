@@ -1,12 +1,19 @@
 package ca.app.assasins.taskappsassassinsandroid.common.view;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
@@ -18,13 +25,41 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNavigationBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.ui.NoteDetailActivity;
 
 public class NavigationActivity extends AppCompatActivity {
 
+    private ArrayList<String> permissionsList;
+    private final String[] permissionsStr = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
 
 
+    ActivityResultLauncher<String[]> permissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), new ActivityResultCallback<Map<String, Boolean>>() {
+        @Override
+        public void onActivityResult(Map<String, Boolean> result) {
+            ArrayList<Boolean> list = new ArrayList<>(result.values());
+            permissionsList = new ArrayList<>();
+            int permissionsCount = 0;
+            for (int i = 0; i < list.size(); i++) {
+                if (shouldShowRequestPermissionRationale(permissionsStr[i])) {
+                    permissionsList.add(permissionsStr[i]);
+                } else if (!hasPermission(NavigationActivity.this, permissionsStr[i])) {
+                    permissionsCount++;
+                }
+            }
+            if (permissionsList.size() > 0) {
+                //Some permissions are denied and can be asked again.
+                askForPermissions(permissionsList);
+            } else if (permissionsCount > 0) {
+                //Show alert dialog
+            }
+        }
+    });
 
 
     @Override
@@ -44,6 +79,10 @@ public class NavigationActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        permissionsList = new ArrayList<>();
+        permissionsList.addAll(Arrays.asList(permissionsStr));
+        askForPermissions(permissionsList);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
 
@@ -74,6 +113,20 @@ public class NavigationActivity extends AppCompatActivity {
         NavArgument argument = new NavArgument.Builder().setDefaultValue(categoryId).build();
         graph.addArgument("category", argument);
         NavigationUI.setupWithNavController(navView, navController);
+    }
+
+    private boolean hasPermission(Context context, String permissionStr) {
+        return ContextCompat.checkSelfPermission(context, permissionStr) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void askForPermissions(ArrayList<String> permissionsList) {
+        String[] newPermissionStr = new String[permissionsList.size()];
+        for (int i = 0; i < newPermissionStr.length; i++) {
+            newPermissionStr[i] = permissionsList.get(i);
+        }
+        if (newPermissionStr.length > 0) {
+            permissionsLauncher.launch(newPermissionStr);
+        }
     }
 
 }
