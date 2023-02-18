@@ -38,7 +38,7 @@ public class TaskListViewAdapter extends RecyclerView.Adapter<TaskListViewAdapte
     public void onBindViewHolder(@NonNull TaskListAdapter holder, int position) {
         holder.taskTitleLabel.setText(tasks.get(position).getTaskName());
         holder.taskTitleLabel.setChecked(tasks.get(position).isCompleted());
-        if (holder.taskTitleLabel.isChecked()) {
+        if (tasks.get(position).isCompleted()) {
             holder.taskTitleLabel.setCheckMarkDrawable(R.drawable.ic_check_24);
         }
 

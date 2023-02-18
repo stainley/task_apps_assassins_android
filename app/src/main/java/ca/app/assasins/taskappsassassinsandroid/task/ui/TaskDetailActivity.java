@@ -275,6 +275,15 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             binding.taskCompletionCkb.setEnabled(!task.isCompleted());
             binding.dueDateTask.setHint(task.getCompletionDate() != 0 ? completionDate : "");
 
+            binding.taskCompletionCkb.setOnClickListener(v -> {
+                if (((CheckBox) v).isChecked()) {
+                    task.setCompleted(true);
+                } else {
+                    task.setCompleted(false);
+                }
+                taskListViewModel.updateTaskAll(task, myPictures, subTasks, mAudios);
+            });
+
             taskListViewModel.fetchPicturesByTaskId(task.getTaskId()).observe(this, taskImages -> {
                 myPictures.clear();
                 taskImages.forEach(image -> myPictures.addAll(image.pictures));
@@ -295,7 +304,16 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
             });
 
-            allowDelete();
+            if (task.isCompleted()) {
+                binding.moreActionBtn.setImageDrawable(getResources().getDrawable(R.drawable.delete));
+                binding.moreActionBtn.setOnClickListener(this::deleteTask);
+                binding.moreActionBtn.setVisibility(View.VISIBLE);
+            } else {
+                binding.moreActionBtn.setVisibility(View.INVISIBLE);
+            }
+        }
+        else {
+            binding.taskCompletionCkb.setEnabled(false);
         }
     }
 
@@ -505,7 +523,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private void deleteTask(View view) {
         taskListViewModel.deleteTask(task);
-        //finish();
+        finish();
     }
 
     @Override
@@ -584,43 +602,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             subTasks.get(position).setCompleted(false);
         }
 
-        allowDelete();
         taskListViewModel.updateTaskAll(task, myPictures, subTasks, mAudios);
-    }
-
-    public void allowDelete() {
-        boolean deleteAllowed = false;
-
-        if (subTasks.size() == 0 && task.isCompleted()) {
-            deleteAllowed = true;
-        } else if (subTasks.size() > 0) {
-            int totalSubtaskComplete = 0;
-
-            for (int i = 0; i < subTasks.size(); i++) {
-                if (subTasks.get(i).isCompleted()) {
-                    totalSubtaskComplete++;
-                }
-            }
-
-            if (totalSubtaskComplete == subTasks.size()) {
-                task.setCompleted(true);
-                deleteAllowed = true;
-                binding.taskCompletionCkb.setChecked(task.isCompleted());
-                binding.taskCompletionCkb.setEnabled(false);
-            } else {
-                task.setCompleted(false);
-                deleteAllowed = false;
-                binding.taskCompletionCkb.setChecked(task.isCompleted());
-                binding.taskCompletionCkb.setEnabled(true);
-            }
-        }
-
-        if (deleteAllowed) {
-            binding.moreActionBtn.setImageDrawable(getResources().getDrawable(R.drawable.delete));
-            binding.moreActionBtn.setOnClickListener(this::deleteTask);
-            binding.moreActionBtn.setVisibility(View.VISIBLE);
-        } else {
-            binding.moreActionBtn.setVisibility(View.INVISIBLE);
-        }
     }
 }
