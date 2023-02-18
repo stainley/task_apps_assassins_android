@@ -61,6 +61,18 @@ public abstract class NoteDao implements AbstractDao<Note> {
     @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId")
     public abstract LiveData<List<Note>> fetchAllByCategory(Long categoryId);
 
+    @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId ORDER BY title ASC")
+    public abstract LiveData<List<Note>> fetchAllAscByCategory(Long categoryId);
+
+    @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId ORDER BY title DESC")
+    public abstract LiveData<List<Note>> fetchAllDescByCategory(Long categoryId);
+
+    @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId ORDER BY createdDate ASC")
+    public abstract LiveData<List<Note>> fetchAllNotesOrderByDateAsc(Long categoryId);
+
+    @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId ORDER BY createdDate DESC")
+    public abstract LiveData<List<Note>> fetchAllNotesOrderByDateDesc(Long categoryId);
+
     @Transaction
     @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :id")
     public abstract LiveData<List<NoteImages>> getAllImagesByNoteId(long id);

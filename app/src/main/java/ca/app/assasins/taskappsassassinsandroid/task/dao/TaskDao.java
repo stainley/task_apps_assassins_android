@@ -16,6 +16,7 @@ import java.util.Optional;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -57,6 +58,18 @@ public abstract class TaskDao implements AbstractDao<Task> {
 
     @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId")
     public abstract LiveData<List<Task>> fetchAllByCategory(Long categoryId);
+
+    @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId ORDER BY TASK_NAME ASC")
+    public abstract LiveData<List<Task>> fetchAllAscByCategory(Long categoryId);
+
+    @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId ORDER BY TASK_NAME DESC")
+    public abstract LiveData<List<Task>> fetchAllDescByCategory(Long categoryId);
+
+    @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId ORDER BY CREATION_DATE ASC")
+    public abstract LiveData<List<Task>> fetchAllTasksOrderByDateAsc(Long categoryId);
+
+    @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId ORDER BY CREATION_DATE DESC")
+    public abstract LiveData<List<Task>> fetchAllTasksOrderByDateDesc(Long categoryId);
 
     @Transaction
     @Query("SELECT * FROM TASK_TBL WHERE TASK_ID = :id")

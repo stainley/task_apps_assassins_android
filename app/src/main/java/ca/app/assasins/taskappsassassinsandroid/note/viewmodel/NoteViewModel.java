@@ -41,6 +41,22 @@ public class NoteViewModel extends ViewModel {
         return noteRepository.fetchAllNoteByCategory(categoryId);
     }
 
+    public LiveData<List<Note>> fetchAllAscByCategory(Long categoryId) {
+        return noteRepository.fetchAllAscByCategory(categoryId);
+    }
+
+    public LiveData<List<Note>> fetchAllDescByCategory(Long categoryId) {
+        return noteRepository.fetchAllDescByCategory(categoryId);
+    }
+
+    public LiveData<List<Note>> fetchAllNotesOrderByDateAsc(Long categoryId) {
+        return noteRepository.fetchAllNotesOrderByDateAsc(categoryId);
+    }
+
+    public LiveData<List<Note>> fetchAllNotesOrderByDateDesc(Long categoryId) {
+        return noteRepository.fetchAllNotesOrderByDateDesc(categoryId);
+    }
+
     public void deleteNote(@NonNull Note note) {
         noteRepository.delete(note);
     }

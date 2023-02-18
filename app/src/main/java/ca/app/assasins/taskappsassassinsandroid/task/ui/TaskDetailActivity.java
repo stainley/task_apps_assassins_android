@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -28,10 +26,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -43,12 +39,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
-import androidx.navigation.NavController;
-import androidx.navigation.NavHostController;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -66,7 +58,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.TimeZone;
@@ -75,8 +66,6 @@ import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityTaskDetailBinding;
-import ca.app.assasins.taskappsassassinsandroid.note.ui.NoteDetailActivity;
-import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteAudioRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.SubTaskViewAdapter;
@@ -111,9 +100,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<SubTask> subTasks = new ArrayList<>();
     private final List<SubTask> additionalSubTasks = new ArrayList<>();
-
-    private ArrayList<String> permissionsList;
-    private final String[] permissionsStr = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -150,30 +136,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             }
         }
     });
-
-    ActivityResultLauncher<String[]> permissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), new ActivityResultCallback<Map<String, Boolean>>() {
-        @Override
-        public void onActivityResult(Map<String, Boolean> result) {
-            ArrayList<Boolean> list = new ArrayList<>(result.values());
-            permissionsList = new ArrayList<>();
-            int permissionsCount = 0;
-            for (int i = 0; i < list.size(); i++) {
-                if (shouldShowRequestPermissionRationale(permissionsStr[i])) {
-                    permissionsList.add(permissionsStr[i]);
-                } else if (!hasPermission(TaskDetailActivity.this, permissionsStr[i])) {
-                    permissionsCount++;
-                }
-            }
-            if (permissionsList.size() > 0) {
-                //Some permissions are denied and can be asked again.
-                askForPermissions(permissionsList);
-            } else if (permissionsCount > 0) {
-                //Show alert dialog
-                showPermissionDialog();
-            }
-        }
-    });
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -313,6 +275,15 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             binding.taskCompletionCkb.setEnabled(!task.isCompleted());
             binding.dueDateTask.setHint(task.getCompletionDate() != 0 ? completionDate : "");
 
+            binding.taskCompletionCkb.setOnClickListener(v -> {
+                if (((CheckBox) v).isChecked()) {
+                    task.setCompleted(true);
+                } else {
+                    task.setCompleted(false);
+                }
+                taskListViewModel.updateTaskAll(task, myPictures, subTasks, mAudios);
+            });
+
             taskListViewModel.fetchPicturesByTaskId(task.getTaskId()).observe(this, taskImages -> {
                 myPictures.clear();
                 taskImages.forEach(image -> myPictures.addAll(image.pictures));
@@ -333,7 +304,16 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
             });
 
-            allowDelete();
+            if (task.isCompleted()) {
+                binding.moreActionBtn.setImageDrawable(getResources().getDrawable(R.drawable.delete));
+                binding.moreActionBtn.setOnClickListener(this::deleteTask);
+                binding.moreActionBtn.setVisibility(View.VISIBLE);
+            } else {
+                binding.moreActionBtn.setVisibility(View.INVISIBLE);
+            }
+        }
+        else {
+            binding.taskCompletionCkb.setEnabled(false);
         }
     }
 
@@ -446,6 +426,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                         .setMessage("Tap long press Mic to start recording.")
                         .setCancelable(false)
                         .setNegativeButton("Exit", (dialog, which) -> {
+                            stopRecordAudio();
                             dialog.dismiss();
                         })
                         .show();
@@ -531,10 +512,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         return stringBuilder.toString();
     }
 
-    private void showPermissionDialog() {
-
-    }
-
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
     }
@@ -543,26 +520,15 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         return ContextCompat.checkSelfPermission(context, permissionStr) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void askForPermissions(ArrayList<String> permissionsList) {
-        String[] newPermissionStr = new String[permissionsList.size()];
-        for (int i = 0; i < newPermissionStr.length; i++) {
-            newPermissionStr[i] = permissionsList.get(i);
-        }
-        if (newPermissionStr.length > 0) {
-            permissionsLauncher.launch(newPermissionStr);
-        }
-    }
 
     private void deleteTask(View view) {
         taskListViewModel.deleteTask(task);
-        //finish();
+        finish();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        // if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
     }
 
     //MESSAGE: Saving on Back
@@ -636,43 +602,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             subTasks.get(position).setCompleted(false);
         }
 
-        allowDelete();
         taskListViewModel.updateTaskAll(task, myPictures, subTasks, mAudios);
-    }
-
-    public void allowDelete() {
-        boolean deleteAllowed = false;
-
-        if (subTasks.size() == 0 && task.isCompleted()) {
-            deleteAllowed = true;
-        } else if (subTasks.size() > 0) {
-            int totalSubtaskComplete = 0;
-
-            for (int i = 0; i < subTasks.size(); i++) {
-                if (subTasks.get(i).isCompleted()) {
-                    totalSubtaskComplete++;
-                }
-            }
-
-            if (totalSubtaskComplete == subTasks.size()) {
-                task.setCompleted(true);
-                deleteAllowed = true;
-                binding.taskCompletionCkb.setChecked(task.isCompleted());
-                binding.taskCompletionCkb.setEnabled(false);
-            } else {
-                task.setCompleted(false);
-                deleteAllowed = false;
-                binding.taskCompletionCkb.setChecked(task.isCompleted());
-                binding.taskCompletionCkb.setEnabled(true);
-            }
-        }
-
-        if (deleteAllowed) {
-            binding.moreActionBtn.setImageDrawable(getResources().getDrawable(R.drawable.delete));
-            binding.moreActionBtn.setOnClickListener(this::deleteTask);
-            binding.moreActionBtn.setVisibility(View.VISIBLE);
-        } else {
-            binding.moreActionBtn.setVisibility(View.INVISIBLE);
-        }
     }
 }

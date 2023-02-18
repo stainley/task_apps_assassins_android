@@ -1,8 +1,8 @@
 package ca.app.assasins.taskappsassassinsandroid.task.ui;
 
 import static android.content.Context.MODE_PRIVATE;
-import static java.util.Comparator.comparing;
 
+import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,8 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -23,9 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.search.SearchView;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -59,47 +59,32 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
 
     private CategoryViewModel categoryViewModel;
 
-    private SwipeHelper swipeHelper;
+    private TaskListViewModel taskListViewModel;
+    private TaskListViewAdapter taskListViewAdapterFiltered;
+    long categoryId;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
 
-        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
-        long categoryId = categorySP.getLong("categoryId", -1);
-        categoryCount = categorySP.getInt("categoryCount", -1);
-        moveToCategories = categorySP.getString("moveToCategories", "");
-        categories = moveToCategories.split(",");
-
-        TaskListViewModel taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
-
-        taskListViewModel.fetchAllTaskByCategory(categoryId).observe(getViewLifecycleOwner(), tasksResult -> {
-            this.tasks.clear();
-            this.tasks.addAll(tasksResult);
-            this.taskListViewAdapter.notifyItemChanged(tasksResult.size());
-        });
-
         RecyclerView taskListRecycleView = binding.taskList;
         taskListViewAdapter = new TaskListViewAdapter(tasks, this);
+
         taskListRecycleView.setAdapter(taskListViewAdapter);
         taskListRecycleView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        SearchView searchView = binding.searchView;
-        searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.newTaskBtn.setOnClickListener(this::createNewTask);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
-        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
 
-        swipeHelper = new SwipeHelper(getContext(), 300, binding.taskList) {
+        new SwipeHelper(getContext(), 300, binding.taskList) {
             @Override
             protected void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer) {
                 int index = viewHolder.getAdapterPosition();
                 Task task = tasks.get(index);
 
                 if (task.isCompleted()) {
-                    buffer.add(new SwipeUnderlayButton(getContext(),
+                    buffer.add(new SwipeUnderlayButton(requireActivity(),
                             "Delete",
                             R.drawable.delete,
                             30,
@@ -112,7 +97,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                             }));
                 }
 
-                buffer.add(new SwipeUnderlayButton(getContext(),
+                buffer.add(new SwipeUnderlayButton(requireActivity(),
                         "Update",
                         R.drawable.move,
                         30,
@@ -124,7 +109,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                             View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
                             autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
 
-                            adapterItems = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown_items, categories);
+                            adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
                             autoCompleteTextView.setAdapter(adapterItems);
                             autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
                                 String category = adapterView.getItemAtPosition(position1).toString();
@@ -135,7 +120,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                                 });
                             });
 
-                            new MaterialAlertDialogBuilder(getContext())
+                            new MaterialAlertDialogBuilder(requireActivity())
                                     .setTitle("Move Note")
                                     .setView(moveNoteView)
                                     .setNeutralButton("Cancel", (dialog, which) -> {
@@ -148,6 +133,40 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         };
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
+        categoryId = categorySP.getLong("categoryId", -1);
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
+
+        binding.titleCategory.setText(categorySP.getString("categoryName", ""));
+
+        Toolbar taskToolbar = binding.taskAppBar;
+        requireActivity().setActionBar(taskToolbar);
+
+        ActionBar actionBar = requireActivity().getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+
+        taskToolbar.setNavigationOnClickListener(v -> requireActivity().finish());
+
+
+        taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
+        categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
+
+        taskListViewModel.fetchAllTaskByCategory(categoryId).observe(requireActivity(), tasksResult -> {
+            this.tasks.clear();
+            this.tasks.addAll(tasksResult);
+            this.taskListViewAdapter.notifyDataSetChanged();
+        });
+
+        binding.searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
     }
 
 
@@ -163,31 +182,46 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
         bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
-            titleSortedByAsc = !titleSortedByAsc;
 
             if (titleSortedByAsc) {
-                tasks.sort(comparing(Task::getTaskName));
+                titleSortedByAsc = false;
+                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             } else {
-                tasks.sort(comparing(Task::getTaskName).reversed());
+                titleSortedByAsc = true;
+                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             }
-            taskListViewAdapter.notifyDataSetChanged();
             bottomSheetDialog.dismiss();
         });
 
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
-            createdDateSortedByAsc = !createdDateSortedByAsc;
-
             if (createdDateSortedByAsc) {
-                tasks.sort(comparing(Task::getCreationDate));
+                createdDateSortedByAsc = false;
+                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             } else {
-                tasks.sort(comparing(Task::getCreationDate).reversed());
+                createdDateSortedByAsc = true;
+                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    refreshNotes(notesResult);
+                });
             }
-            taskListViewAdapter.notifyDataSetChanged();
             bottomSheetDialog.dismiss();
         });
 
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
+    }
+
+    public void refreshNotes(List<Task> result) {
+        this.tasks.clear();
+        this.tasks.addAll(result);
+
+        this.taskListViewAdapter.notifyItemChanged(result.size());
+        this.taskListViewAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -217,23 +251,22 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 tasksFiltered.clear();
                 RecyclerView taskFilterRecycle = binding.taskFilterRecycle;
+                taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
 
                 tasksFiltered = tasks.stream().filter(task -> {
-
                     if (s.length() == 0) return false;
                     return task.getTaskName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
-                //taskListViewAdapter = new TaskListViewAdapter(tasksFiltered, TaskListFragment.this);
+                System.out.println("taskFiltered: " + tasksFiltered.size());
+                taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
 
-                taskFilterRecycle.setAdapter(taskListViewAdapter);
-                taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
+                taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                taskListViewAdapterFiltered.notifyDataSetChanged();
             }
         };
     }

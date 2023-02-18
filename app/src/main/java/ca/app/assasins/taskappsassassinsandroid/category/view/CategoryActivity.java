@@ -3,23 +3,17 @@ package ca.app.assasins.taskappsassassinsandroid.category.view;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
@@ -191,13 +185,13 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
         categorySP.putString("categoryName", categories.get(position).getName());
 
         if (categories.size() > 1) {
-            String moveToCategories = "";
+            StringBuilder moveToCategories = new StringBuilder();
             for (int i = 0; i < categories.size(); i++) {
-                if (categories.get(i).getId() != categories.get(position).getId()) {
-                    moveToCategories += categories.get(i).getName() + ",";
+                if (!Objects.equals(categories.get(i).getId(), categories.get(position).getId())) {
+                    moveToCategories.append(categories.get(i).getName()).append(",");
                 }
             }
-            categorySP.putString("moveToCategories", moveToCategories);
+            categorySP.putString("moveToCategories", moveToCategories.toString());
         } else {
             categorySP.putString("moveToCategories", null);
         }
