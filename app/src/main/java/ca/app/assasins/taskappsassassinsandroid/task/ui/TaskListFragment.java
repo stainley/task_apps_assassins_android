@@ -3,6 +3,7 @@ package ca.app.assasins.taskappsassassinsandroid.task.ui;
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Comparator.comparing;
 
+import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,7 +45,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel
 public class TaskListFragment extends Fragment implements TaskListViewAdapter.OnTaskListCallback {
 
     private FragmentTaskListBinding binding;
-    private List<Task> tasks = new ArrayList<>();
+    private final List<Task> tasks = new ArrayList<>();
     private List<Task> tasksFiltered = new ArrayList<>();
     private TaskListViewAdapter taskListViewAdapter;
 
@@ -62,17 +64,6 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     private TaskListViewAdapter taskListViewAdapterFiltered;
     long categoryId;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
-        categoryId = categorySP.getLong("categoryId", -1);
-        categoryCount = categorySP.getInt("categoryCount", -1);
-        moveToCategories = categorySP.getString("moveToCategories", "");
-        categories = moveToCategories.split(",");
-    }
-
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
@@ -87,7 +78,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
 
-        SwipeHelper swipeHelper = new SwipeHelper(getContext(), 300, binding.taskList) {
+        new SwipeHelper(getContext(), 300, binding.taskList) {
             @Override
             protected void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer) {
                 int index = viewHolder.getAdapterPosition();
@@ -119,7 +110,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                             View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
                             autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
 
-                            adapterItems = new ArrayAdapter<String>(getContext(), R.layout.categories_dropdown_items, categories);
+                            adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
                             autoCompleteTextView.setAdapter(adapterItems);
                             autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
                                 String category = adapterView.getItemAtPosition(position1).toString();
@@ -148,6 +139,24 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
+        categoryId = categorySP.getLong("categoryId", -1);
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
+
+        binding.titleCategory.setText(categorySP.getString("categoryName", ""));
+
+        Toolbar taskToolbar = binding.taskAppBar;
+        requireActivity().setActionBar(taskToolbar);
+
+        ActionBar actionBar = requireActivity().getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+
+        taskToolbar.setNavigationOnClickListener(v -> requireActivity().finish());
+
 
         taskListViewModel = new ViewModelProvider(this, new TaskListViewModelFactory(requireActivity().getApplication())).get(TaskListViewModel.class);
         categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);

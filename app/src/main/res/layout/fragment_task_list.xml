@@ -12,14 +12,25 @@
         android:layout_height="match_parent"
         android:nestedScrollingEnabled="false">
 
+        <TextView
+            android:id="@+id/titleCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="76dp"
+            android:layout_marginEnd="16dp"
+            android:text="Category Title"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/taskList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="76dp"
+            android:layout_marginTop="120dp"
             android:padding="8dp" />
 
-        <com.google.android.material.appbar.AppBarLayout
+        <Toolbar
             android:id="@+id/taskAppBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,22 +47,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
+                    android:layout_weight="90"
                     android:contentDescription="Search bar"
-                    android:hint="@string/search_task"
-                    android:layout_weight="90"/>
+                    android:hint="@string/search_task" />
 
-                <ImageButton
+                <Button
                     android:id="@+id/sortButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@color/white"
-                    android:src="@drawable/sort"
-                    android:layout_weight="10"
-                    android:layout_marginTop="10dp"
-                    android:layout_gravity="center"/>
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/sort" />
             </LinearLayout>
 
-        </com.google.android.material.appbar.AppBarLayout>
+        </Toolbar>
 
         <com.google.android.material.search.SearchView
             android:id="@+id/search_view"
