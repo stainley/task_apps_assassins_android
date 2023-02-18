@@ -87,21 +87,8 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
         binding = FragmentNoteListBinding.inflate(inflater, container, false);
 
-        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
-        categoryId = categorySP.getLong("categoryId", -1);
-        categoryCount = categorySP.getInt("categoryCount", -1);
-        moveToCategories = categorySP.getString("moveToCategories", "");
-        categories = moveToCategories.split(",");
-
         categoryViewModel = new ViewModelProvider(this, new CategoryViewModelFactory(requireActivity().getApplication())).get(CategoryViewModel.class);
         noteViewModel = new ViewModelProvider(this, new NoteViewModelFactory(requireActivity().getApplication())).get(NoteViewModel.class);
-
-        noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-            this.notes.clear();
-            this.notes.addAll(notesResult);
-
-            this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
-        });
 
         RecyclerView noteListRecycleView = binding.noteList;
         noteRecycleAdapter = new NoteRecycleAdapter(notes, this);
@@ -109,7 +96,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         noteListRecycleView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         SearchView searchView = binding.searchView;
-
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
@@ -125,6 +111,21 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         Bundle arguments = getArguments();
         assert arguments != null;
         category = (Category) arguments.getSerializable("category");
+
+        SharedPreferences categorySP = requireActivity().getSharedPreferences("category_sp", MODE_PRIVATE);
+        categoryId = categorySP.getLong("categoryId", -1);
+        categoryCount = categorySP.getInt("categoryCount", -1);
+        moveToCategories = categorySP.getString("moveToCategories", "");
+        categories = moveToCategories.split(",");
+
+        binding.titleNote.setText(categorySP.getString("categoryName", ""));
+
+        noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+            this.notes.clear();
+            this.notes.addAll(notesResult);
+
+            this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
+        });
 
         Toolbar noteAppBar = binding.noteAppBar;
         requireActivity().setActionBar(noteAppBar);
