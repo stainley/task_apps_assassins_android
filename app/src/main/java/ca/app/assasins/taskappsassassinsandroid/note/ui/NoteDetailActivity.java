@@ -364,6 +364,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                         .setMessage("Tap long press Mic to start recording.")
                         .setCancelable(false)
                         .setNegativeButton("Exit", (dialog, which) -> {
+                            stopRecordAudio();
                             dialog.dismiss();
                         })
                         .show();
