@@ -8,17 +8,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.activity.OnBackPressedCallback;
@@ -30,11 +26,8 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
@@ -49,7 +42,6 @@ import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
-import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentSearchBarBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
@@ -135,18 +127,14 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         category = (Category) arguments.getSerializable("category");
 
         Toolbar noteAppBar = binding.noteAppBar;
-        //noteAppBar.setNavigationIcon(requireActivity().getDrawable(R.drawable.baseline_arrow_back_24));
         requireActivity().setActionBar(noteAppBar);
 
         ActionBar actionBar = requireActivity().getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        noteAppBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Navigation.findNavController(noteAppBar).navigateUp();
-                requireActivity().onBackPressed();
-            }
+        noteAppBar.setNavigationOnClickListener(v -> {
+            Navigation.findNavController(noteAppBar).navigateUp();
+            requireActivity().onBackPressed();
         });
     }
 
