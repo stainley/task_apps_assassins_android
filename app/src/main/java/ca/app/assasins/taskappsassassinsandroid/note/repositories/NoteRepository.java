@@ -53,6 +53,10 @@ public class NoteRepository {
         return noteDao.fetchAllByCategory(categoryId);
     }
 
+    public LiveData<List<Note>> fetchAllNoteDescByCategory(Long categoryId) {
+        return noteDao.fetchAllDescByCategory(categoryId);
+    }
+
     public LiveData<List<NoteImages>> fetchPicturesByNoteId(long noteId) {
         return noteDao.getAllImagesByNoteId(noteId);
     }

@@ -65,7 +65,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
     int categoryCount = -1;
     AutoCompleteTextView autoCompleteTextView;
 
-    boolean titleSortedByAsc = false;
+    boolean titleSortedByAsc = true;
     boolean createdDateSortedByAsc = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -148,14 +148,27 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
         bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
-            titleSortedByAsc = !titleSortedByAsc;
+
 
             if (titleSortedByAsc) {
-                notes.sort(comparing(Note::getTitle));
+                titleSortedByAsc = false;
+                noteViewModel.fetchAllNoteDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    this.notes.clear();
+                    this.notes.addAll(notesResult);
+
+                    this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
+                    this.noteRecycleAdapter.notifyDataSetChanged();
+                });
             } else {
-                notes.sort(comparing(Note::getTitle).reversed());
+                titleSortedByAsc = true;
+                noteViewModel.fetchAllNoteByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
+                    this.notes.clear();
+                    this.notes.addAll(notesResult);
+
+                    this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
+                    this.noteRecycleAdapter.notifyDataSetChanged();
+                });
             }
-            noteRecycleAdapter.notifyDataSetChanged();
             bottomSheetDialog.dismiss();
         });
 
