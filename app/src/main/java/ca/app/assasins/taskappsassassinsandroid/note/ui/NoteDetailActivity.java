@@ -4,11 +4,9 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -21,12 +19,10 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -38,6 +34,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -48,7 +45,6 @@ import androidx.lifecycle.ViewModelStore;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -56,11 +52,9 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
@@ -81,26 +75,17 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private long categoryId;
     private Note note;
     private NoteViewModel noteViewModel;
-
     private NotePictureRVAdapter notePictureRVAdapter;
     private NoteAudioRVAdapter noteAudioRVAdapter;
-
-    private ArrayList<String> permissionsList;
-
     private String pathSave = "";
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
-
     private Uri tempImageUri = null;
-
     final int REQUEST_PERMISSION_CODE = 1000;
     private double latitude;
     private double longitude;
-
     private LocationManager locationManager;
     private LocationListener locationListener;
-
-    private final String[] permissionsStr = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
 
     private final List<Picture> myPictures = new ArrayList<>();
     private final List<Audio> mAudios = new ArrayList<>();
@@ -145,29 +130,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         }
     });
 
-    ActivityResultLauncher<String[]> permissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), new ActivityResultCallback<Map<String, Boolean>>() {
-        @Override
-        public void onActivityResult(Map<String, Boolean> result) {
-            ArrayList<Boolean> list = new ArrayList<>(result.values());
-            permissionsList = new ArrayList<>();
-            int permissionsCount = 0;
-            for (int i = 0; i < list.size(); i++) {
-                if (shouldShowRequestPermissionRationale(permissionsStr[i])) {
-                    permissionsList.add(permissionsStr[i]);
-                } else if (!hasPermission(NoteDetailActivity.this, permissionsStr[i])) {
-                    permissionsCount++;
-                }
-            }
-            if (permissionsList.size() > 0) {
-                //Some permissions are denied and can be asked again.
-                askForPermissions(permissionsList);
-            } else if (permissionsCount > 0) {
-                //Show alert dialog
-                showPermissionDialog();
-            }
-        }
-    });
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,10 +142,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             supportActionBar.setDisplayHomeAsUpEnabled(true);
         }
         setTitle("Note");
-
-        permissionsList = new ArrayList<>();
-        permissionsList.addAll(Arrays.asList(permissionsStr));
-        askForPermissions(permissionsList);
 
         RecyclerView notePictureRV = binding.notePictureRV;
         // adapter picture
@@ -337,6 +295,14 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
+        return super.onCreateView(name, context, attrs);
+
+
+    }
+
     private void updateLocationInfo(Location location) {
         this.latitude = location.getLatitude();
         this.longitude = location.getLongitude();
@@ -398,6 +364,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                         .setMessage("Tap long press Mic to start recording.")
                         .setCancelable(false)
                         .setNegativeButton("Exit", (dialog, which) -> {
+                            stopRecordAudio();
                             dialog.dismiss();
                         })
                         .show();
@@ -490,7 +457,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                         } else {
 
                             textReadingNote = readNoteView.findViewById(R.id.text_reading_text);
-                            TextView stopReadButton =  readNoteView.findViewById(R.id.stop_reading);
+                            TextView stopReadButton = readNoteView.findViewById(R.id.stop_reading);
 
                             String title = binding.title.getText().toString().trim();
                             String description = binding.description.getText().toString().trim();
@@ -567,20 +534,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_CODE);
-    }
-
-    private void askForPermissions(ArrayList<String> permissionsList) {
-        String[] newPermissionStr = new String[permissionsList.size()];
-        for (int i = 0; i < newPermissionStr.length; i++) {
-            newPermissionStr[i] = permissionsList.get(i);
-        }
-        if (newPermissionStr.length > 0) {
-            permissionsLauncher.launch(newPermissionStr);
-        }
-    }
-
-    private void showPermissionDialog() {
-
     }
 
     public String createRandomAudioFileName(int string) {

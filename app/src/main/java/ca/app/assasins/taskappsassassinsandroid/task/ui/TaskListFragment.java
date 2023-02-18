@@ -24,9 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.search.SearchView;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -60,8 +58,6 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
 
     private CategoryViewModel categoryViewModel;
 
-    private SwipeHelper swipeHelper;
-
     private TaskListViewModel taskListViewModel;
     private TaskListViewAdapter taskListViewAdapterFiltered;
     long categoryId;
@@ -91,14 +87,14 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
 
-        swipeHelper = new SwipeHelper(getContext(), 300, binding.taskList) {
+        SwipeHelper swipeHelper = new SwipeHelper(getContext(), 300, binding.taskList) {
             @Override
             protected void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer) {
                 int index = viewHolder.getAdapterPosition();
                 Task task = tasks.get(index);
 
                 if (task.isCompleted()) {
-                    buffer.add(new SwipeUnderlayButton(getContext(),
+                    buffer.add(new SwipeUnderlayButton(requireActivity(),
                             "Delete",
                             R.drawable.delete,
                             30,
@@ -111,7 +107,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                             }));
                 }
 
-                buffer.add(new SwipeUnderlayButton(getContext(),
+                buffer.add(new SwipeUnderlayButton(requireActivity(),
                         "Update",
                         R.drawable.move,
                         30,
@@ -134,7 +130,7 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                                 });
                             });
 
-                            new MaterialAlertDialogBuilder(getContext())
+                            new MaterialAlertDialogBuilder(requireActivity())
                                     .setTitle("Move Note")
                                     .setView(moveNoteView)
                                     .setNeutralButton("Cancel", (dialog, which) -> {
