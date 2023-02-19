@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -72,8 +73,14 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
 
         SearchView searchView = binding.searchView;
 
+        //searchView.inflateMenu(R.menu.category_menu);
+
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
         searchView.setOnMenuItemClickListener(this);
+        MenuBuilder menuBuilder = new MenuBuilder(this);
+
+        binding.searchBar.inflateMenu(R.menu.search_bar_menu);
+
 
     }
 

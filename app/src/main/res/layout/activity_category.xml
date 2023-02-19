@@ -38,6 +38,15 @@
             android:layout_height="match_parent"
             android:hint="Search your category"
             app:layout_anchor="@id/search_bar">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/empty_category_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Empty Category"
+                app:icon="@drawable/mic" />
             <!-- Search suggestions/results go here (ScrollView, RecyclerView, etc.). -->
 
             <androidx.recyclerview.widget.RecyclerView
@@ -45,12 +54,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="76dp"
-                android:padding="8dp" />
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/categoryLis"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            <!-- <androidx.recyclerview.widget.RecyclerView
+                 android:id="@+id/categoryLis"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent" />-->
         </com.google.android.material.search.SearchView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
