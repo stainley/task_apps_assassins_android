@@ -8,15 +8,12 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,7 +37,7 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.common.view.NavigationActivity;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityCategoryBinding;
 
-public class CategoryActivity extends AppCompatActivity implements CategoryRecycleAdapter.OnCategoryCallback, Toolbar.OnMenuItemClickListener {
+public class CategoryActivity extends AppCompatActivity {
 
     ActivityCategoryBinding binding;
     private CategoryViewModel categoryViewModel;
@@ -67,20 +64,13 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
             this.categories.addAll(result);
             adapter.notifyDataSetChanged();
         });
-        adapter = new CategoryRecycleAdapter(categories, this);
+        adapter = new CategoryRecycleAdapter(categories, getOnCallbackCategory(categories));
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
         SearchView searchView = binding.searchView;
 
-        //searchView.inflateMenu(R.menu.category_menu);
-
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
-        searchView.setOnMenuItemClickListener(this);
-        MenuBuilder menuBuilder = new MenuBuilder(this);
-
-        binding.searchBar.inflateMenu(R.menu.search_bar_menu);
-
 
     }
 
@@ -166,53 +156,6 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
                 }).setCancelable(false).show();
     }
 
-    /***
-     * Rename from one category to another category
-     * @param position Category position
-     */
-    @Override
-    public void onRenameCategory(int position) {
-
-        renameCategory(this, categories, position, this, adapter, this);
-    }
-
-    @Override
-    public void onDeleteCategory(View view, int position) {
-        deleteCategory(view, categories, position, adapter);
-    }
-
-    @Override
-    public void onRowClicked(int position) {
-        SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
-        categorySP.putLong("categoryId", categories.get(position).getId());
-        categorySP.putInt("categoryCount", categories.size());
-        categorySP.putString("categoryName", categories.get(position).getName());
-
-        if (categories.size() > 1) {
-            StringBuilder moveToCategories = new StringBuilder();
-            for (int i = 0; i < categories.size(); i++) {
-                if (!Objects.equals(categories.get(i).getId(), categories.get(position).getId())) {
-                    moveToCategories.append(categories.get(i).getName()).append(",");
-                }
-            }
-            categorySP.putString("moveToCategories", moveToCategories.toString());
-        } else {
-            categorySP.putString("moveToCategories", null);
-        }
-
-        categorySP.apply();
-
-        Intent navigationActivity = new Intent(this, NavigationActivity.class);
-        startActivity(navigationActivity);
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-
-        return false;
-    }
-
-
     @NonNull
     private Supplier<TextWatcher> getTextWatcherSupplier() {
         return () -> new TextWatcher() {
@@ -232,28 +175,7 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
                     return category.getName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                myAdapter = new CategoryRecycleAdapter(categoriesFiltered, new CategoryRecycleAdapter.OnCategoryCallback() {
-                    @Override
-                    public void onRenameCategory(int position) {
-                        renameCategory(CategoryActivity.this, categoriesFiltered, position, getApplicationContext(), myAdapter, getApplicationContext());
-                    }
-
-                    @Override
-                    public void onDeleteCategory(View view, int position) {
-                        deleteCategory(view, categoriesFiltered, position, myAdapter);
-                    }
-
-                    @Override
-                    public void onRowClicked(int position) {
-                        SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
-                        categorySP.putLong("categoryId", categories.get(position).getId());
-                        categorySP.putString("categoryName", categories.get(position).getName());
-                        categorySP.apply();
-
-                        Intent navigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
-                        startActivity(navigationActivity);
-                    }
-                });
+                myAdapter = new CategoryRecycleAdapter(categoriesFiltered, getOnCallbackCategory(categoriesFiltered));
 
                 categoryFilterRecycle.setAdapter(myAdapter);
                 categoryFilterRecycle.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
@@ -261,6 +183,48 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
 
             @Override
             public void afterTextChanged(Editable s) {
+
+            }
+        };
+    }
+
+    @NonNull
+    private CategoryRecycleAdapter.OnCategoryCallback getOnCallbackCategory(List<Category> categories) {
+        return new CategoryRecycleAdapter.OnCategoryCallback() {
+            @Override
+            public void onRenameCategory(int position) {
+                renameCategory(CategoryActivity.this, categories, position, getApplicationContext(), myAdapter, getApplicationContext());
+            }
+
+            @Override
+            public void onDeleteCategory(View view, int position) {
+                deleteCategory(view, categories, position, myAdapter);
+            }
+
+            @Override
+            public void onRowClicked(int position) {
+
+                SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
+                categorySP.putLong("categoryId", categories.get(position).getId());
+                categorySP.putInt("categoryCount", categories.size());
+                categorySP.putString("categoryName", categories.get(position).getName());
+
+                if (categories.size() > 1) {
+                    StringBuilder moveToCategories = new StringBuilder();
+                    for (int i = 0; i < categories.size(); i++) {
+                        if (!Objects.equals(categories.get(i).getId(), categories.get(position).getId())) {
+                            moveToCategories.append(categories.get(i).getName()).append(",");
+                        }
+                    }
+                    categorySP.putString("moveToCategories", moveToCategories.toString());
+                } else {
+                    categorySP.putString("moveToCategories", null);
+                }
+
+                categorySP.apply();
+
+                Intent navigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
+                startActivity(navigationActivity);
 
             }
         };
