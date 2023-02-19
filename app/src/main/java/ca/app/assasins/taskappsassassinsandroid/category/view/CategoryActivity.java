@@ -9,6 +9,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -19,11 +20,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -93,6 +96,19 @@ public class CategoryActivity extends AppCompatActivity {
             displaySpeechRecognizer();
             return true;
         });
+
+        SearchBar searchBarCategory = binding.searchBar;
+        searchBarCategory.inflateMenu(R.menu.category_search_menu);
+        searchBarCategory.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.login_menu_btn) {
+                    Toast.makeText(getApplicationContext(), "Login with Google Account", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+        });
+
     }
 
 
