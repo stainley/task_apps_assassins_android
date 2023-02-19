@@ -3,6 +3,7 @@ plugins {
     id "io.gitlab.arturbosch.detekt" version "1.22.0"
     id 'androidx.navigation.safeargs'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -85,6 +86,9 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.5.3'
 
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.google.firebase:firebase-auth:21.1.0'
+    implementation 'com.google.android.gms:play-services-auth:20.4.1'
+    implementation 'com.google.firebase:firebase-database:20.1.0'
 
     testImplementation 'org.robolectric:robolectric:4.9.2'
     testImplementation 'junit:junit:4.13.2'
