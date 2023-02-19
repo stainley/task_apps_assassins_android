@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -11,6 +12,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,8 +49,20 @@ public class CategoryActivity extends AppCompatActivity {
     private final List<Category> categories = new ArrayList<>();
     private List<Category> categoriesFiltered = new ArrayList<>();
     private CategoryRecycleAdapter adapter;
-
     private CategoryRecycleAdapter myAdapter;
+    private SearchView searchView;
+
+    private final ActivityResultLauncher<Intent> textToSpeakLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                List<String> results = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                String spokenText = results.get(0);
+                searchView.getEditText().setText(spokenText);
+            }
+        }
+    });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,10 +85,14 @@ public class CategoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
-        SearchView searchView = binding.searchView;
-
+        searchView = binding.searchView;
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
 
+        searchView.inflateMenu(R.menu.search_bar_menu);
+        searchView.setOnMenuItemClickListener(item -> {
+            displaySpeechRecognizer();
+            return true;
+        });
     }
 
 
@@ -228,6 +249,14 @@ public class CategoryActivity extends AppCompatActivity {
 
             }
         };
+    }
+
+    private void displaySpeechRecognizer() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        // This starts the activity and populates the intent with the speech text.
+        //startActivityForResult(intent, SPEECH_REQUEST_CODE);
+        textToSpeakLauncher.launch(intent);
     }
 
 }
