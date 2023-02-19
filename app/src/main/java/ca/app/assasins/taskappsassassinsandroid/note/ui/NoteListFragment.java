@@ -8,24 +8,28 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
@@ -41,6 +45,7 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
@@ -95,9 +100,49 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         SearchView searchView = binding.searchView;
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
         searchView.inflateMenu(R.menu.search_bar_menu);
+        // TODO: add implementation for tap mic to search
+        searchView.setOnMenuItemClickListener(item -> {
+
+            Toast.makeText(getContext(), "Add implementation for voice for search", Toast.LENGTH_SHORT).show();
+            return true;
+        });
 
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
+
+        MaterialButton noteWithAudioBtn = binding.noteWithAudioBtn;
+        MaterialButton noteWithImagesBtn = binding.noteWithImagesBtn;
+        noteWithAudioBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchView.setHint("Note with audio");
+
+                // TODO: search on the DB with audio
+                RecyclerView noteFilterRecycle = binding.noteFilterRecycle;
+                noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+                List<Note> noteWithAudio = new ArrayList<>();
+                noteRecycleAdapter = new NoteRecycleAdapter(noteWithAudio, NoteListFragment.this);
+                noteViewModel.fetchAllNotesWithAudio(categoryId).observe(getViewLifecycleOwner(), new Observer<List<NoteAudios>>() {
+                    @Override
+                    public void onChanged(List<NoteAudios> noteAudios) {
+                        ///noteWithAudio.addAll(noteAudios.stream().filter(noteAudios1 -> noteAudios1.getAudios().size() > 0).collect(Collectors.toList()));
+                        //System.out.println(noteAudios.size());
+
+                        noteAudios.forEach(n -> {
+                            if (n.getAudios().size() > 0)
+                                noteWithAudio.add(n.getNote());
+                        });
+
+
+                    }
+                });
+                noteFilterRecycle.setAdapter(noteRecycleAdapter);
+                noteRecycleAdapter.notifyDataSetChanged();
+
+            }
+        });
+
 
         return binding.getRoot();
     }
@@ -219,14 +264,11 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
             });
         });
 
-        new MaterialAlertDialogBuilder(requireActivity())
-                .setTitle("Move Note")
-                .setView(moveNoteView)
-                .setNeutralButton("Cancel", (dialog, which) -> {
+        new MaterialAlertDialogBuilder(requireActivity()).setTitle("Move Note").setView(moveNoteView).setNeutralButton("Cancel", (dialog, which) -> {
 
-                }).setNegativeButton("Done", (dialog, which) -> {
+        }).setNegativeButton("Done", (dialog, which) -> {
 
-                }).setCancelable(false).show();
+        }).setCancelable(false).show();
     }
 
     @Override
@@ -235,10 +277,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         noteViewModel.findPictureByNoteId(notes.get(position).getNoteId()).observe(this, noteImages -> {
             if (noteImages != null && noteImages.getPictures().size() > 0) {
                 String path = noteImages.getPictures().get(0).getPath();
-                Picasso.get().load(path)
-                        .resize(200, 200)
-                        .centerInside()
-                        .into(view);
+                Picasso.get().load(path).resize(200, 200).centerInside().into(view);
             }
         });
 
@@ -275,13 +314,12 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 notesFiltered.clear();
                 RecyclerView noteFilterRecycle = binding.noteFilterRecycle;
+                noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
                 // filter category that contain x value
                 notesFiltered = notes.stream().filter(note -> {
-
                     if (s.length() == 0) return false;
-                    return note.getTitle().toLowerCase().contains(s.toString().toLowerCase()) ||
-                            note.getDescription().toLowerCase().contains(s.toString().toLowerCase());
+                    return note.getTitle().toLowerCase().contains(s.toString().toLowerCase()) || note.getDescription().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
                 noteRecycleAdapter = new NoteRecycleAdapter(notesFiltered, new NoteRecycleAdapter.OnNoteCallback() {
@@ -313,7 +351,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
 
 
                 noteFilterRecycle.setAdapter(noteRecycleAdapter);
-                noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
             }
 
             @Override

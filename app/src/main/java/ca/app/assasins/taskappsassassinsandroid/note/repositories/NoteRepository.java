@@ -104,4 +104,8 @@ public class NoteRepository {
     public void deleteAudio(Audio audio) {
         AppDatabase.databaseWriterExecutor.execute(() -> audioDao.delete(audio));
     }
+
+    public LiveData<List<NoteAudios>> fetAllNoteWithAudio(long categoryId) {
+        return noteDao.getAllNotesWithAudio(categoryId);
+    }
 }
