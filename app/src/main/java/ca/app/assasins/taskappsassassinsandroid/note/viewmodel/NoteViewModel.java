@@ -92,4 +92,8 @@ public class NoteViewModel extends ViewModel {
     public void deleteAudio(@NonNull Audio audio) {
         noteRepository.deleteAudio(audio);
     }
+
+    public LiveData<List<NoteAudios>> fetchAllNotesWithAudio(long categoryId) {
+        return noteRepository.fetAllNoteWithAudio(categoryId);
+    }
 }
