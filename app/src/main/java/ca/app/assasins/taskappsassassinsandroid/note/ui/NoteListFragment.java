@@ -1,10 +1,13 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -18,10 +21,13 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -44,7 +50,6 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
-import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
@@ -70,7 +75,19 @@ public class NoteListFragment extends Fragment {
 
     boolean titleSortedByAsc = false;
     boolean createdDateSortedByAsc = false;
+    private SearchView searchView;
 
+    private final ActivityResultLauncher<Intent> textToSpeakLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                List<String> results = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                String spokenText = results.get(0);
+                searchView.getEditText().setText(spokenText);
+            }
+        }
+    });
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -96,13 +113,12 @@ public class NoteListFragment extends Fragment {
         noteListRecycleView.setAdapter(noteRecycleAdapter);
         noteListRecycleView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        SearchView searchView = binding.searchView;
+        searchView = binding.searchView;
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
-        searchView.inflateMenu(R.menu.search_bar_menu);
-        // TODO: add implementation for tap mic to search
-        searchView.setOnMenuItemClickListener(item -> {
 
-            Toast.makeText(getContext(), "Add implementation for voice for search", Toast.LENGTH_SHORT).show();
+        searchView.inflateMenu(R.menu.search_bar_menu);
+        searchView.setOnMenuItemClickListener(item -> {
+            displaySpeechRecognizer();
             return true;
         });
 
@@ -229,6 +245,8 @@ public class NoteListFragment extends Fragment {
     }
 
     private Supplier<TextWatcher> getTextWatcherSupplier() {
+        RecyclerView noteFilterRecycle = binding.noteFilterRecycle;
+
         return () -> new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -237,7 +255,6 @@ public class NoteListFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 notesFiltered.clear();
-                RecyclerView noteFilterRecycle = binding.noteFilterRecycle;
                 noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
                 // filter category that contain x value
@@ -247,12 +264,11 @@ public class NoteListFragment extends Fragment {
                 }).collect(Collectors.toList());
 
                 noteRecycleAdapter = new NoteRecycleAdapter(notesFiltered, getOnCallbackAdapter(notesFiltered));
-                noteFilterRecycle.setAdapter(noteRecycleAdapter);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                noteFilterRecycle.setAdapter(noteRecycleAdapter);
             }
         };
     }
@@ -318,5 +334,14 @@ public class NoteListFragment extends Fragment {
                 }));
             }
         };
+    }
+
+    // Create an intent that can start the Speech Recognizer activity
+    private void displaySpeechRecognizer() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        // This starts the activity and populates the intent with the speech text.
+        //startActivityForResult(intent, SPEECH_REQUEST_CODE);
+        textToSpeakLauncher.launch(intent);
     }
 }

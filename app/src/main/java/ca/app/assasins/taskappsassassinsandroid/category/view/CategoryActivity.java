@@ -4,19 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,15 +42,27 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.common.view.NavigationActivity;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityCategoryBinding;
 
-public class CategoryActivity extends AppCompatActivity implements CategoryRecycleAdapter.OnCategoryCallback, Toolbar.OnMenuItemClickListener {
+public class CategoryActivity extends AppCompatActivity {
 
     ActivityCategoryBinding binding;
     private CategoryViewModel categoryViewModel;
     private final List<Category> categories = new ArrayList<>();
     private List<Category> categoriesFiltered = new ArrayList<>();
     private CategoryRecycleAdapter adapter;
-
     private CategoryRecycleAdapter myAdapter;
+    private SearchView searchView;
+
+    private final ActivityResultLauncher<Intent> textToSpeakLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                List<String> results = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                String spokenText = results.get(0);
+                searchView.getEditText().setText(spokenText);
+            }
+        }
+    });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,21 +81,18 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
             this.categories.addAll(result);
             adapter.notifyDataSetChanged();
         });
-        adapter = new CategoryRecycleAdapter(categories, this);
+        adapter = new CategoryRecycleAdapter(categories, getOnCallbackCategory(categories));
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
-        SearchView searchView = binding.searchView;
-
-        //searchView.inflateMenu(R.menu.category_menu);
-
+        searchView = binding.searchView;
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
-        searchView.setOnMenuItemClickListener(this);
-        MenuBuilder menuBuilder = new MenuBuilder(this);
 
-        binding.searchBar.inflateMenu(R.menu.search_bar_menu);
-
-
+        searchView.inflateMenu(R.menu.search_bar_menu);
+        searchView.setOnMenuItemClickListener(item -> {
+            displaySpeechRecognizer();
+            return true;
+        });
     }
 
 
@@ -166,53 +177,6 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
                 }).setCancelable(false).show();
     }
 
-    /***
-     * Rename from one category to another category
-     * @param position Category position
-     */
-    @Override
-    public void onRenameCategory(int position) {
-
-        renameCategory(this, categories, position, this, adapter, this);
-    }
-
-    @Override
-    public void onDeleteCategory(View view, int position) {
-        deleteCategory(view, categories, position, adapter);
-    }
-
-    @Override
-    public void onRowClicked(int position) {
-        SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
-        categorySP.putLong("categoryId", categories.get(position).getId());
-        categorySP.putInt("categoryCount", categories.size());
-        categorySP.putString("categoryName", categories.get(position).getName());
-
-        if (categories.size() > 1) {
-            StringBuilder moveToCategories = new StringBuilder();
-            for (int i = 0; i < categories.size(); i++) {
-                if (!Objects.equals(categories.get(i).getId(), categories.get(position).getId())) {
-                    moveToCategories.append(categories.get(i).getName()).append(",");
-                }
-            }
-            categorySP.putString("moveToCategories", moveToCategories.toString());
-        } else {
-            categorySP.putString("moveToCategories", null);
-        }
-
-        categorySP.apply();
-
-        Intent navigationActivity = new Intent(this, NavigationActivity.class);
-        startActivity(navigationActivity);
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-
-        return false;
-    }
-
-
     @NonNull
     private Supplier<TextWatcher> getTextWatcherSupplier() {
         return () -> new TextWatcher() {
@@ -232,28 +196,7 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
                     return category.getName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                myAdapter = new CategoryRecycleAdapter(categoriesFiltered, new CategoryRecycleAdapter.OnCategoryCallback() {
-                    @Override
-                    public void onRenameCategory(int position) {
-                        renameCategory(CategoryActivity.this, categoriesFiltered, position, getApplicationContext(), myAdapter, getApplicationContext());
-                    }
-
-                    @Override
-                    public void onDeleteCategory(View view, int position) {
-                        deleteCategory(view, categoriesFiltered, position, myAdapter);
-                    }
-
-                    @Override
-                    public void onRowClicked(int position) {
-                        SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
-                        categorySP.putLong("categoryId", categories.get(position).getId());
-                        categorySP.putString("categoryName", categories.get(position).getName());
-                        categorySP.apply();
-
-                        Intent navigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
-                        startActivity(navigationActivity);
-                    }
-                });
+                myAdapter = new CategoryRecycleAdapter(categoriesFiltered, getOnCallbackCategory(categoriesFiltered));
 
                 categoryFilterRecycle.setAdapter(myAdapter);
                 categoryFilterRecycle.setLayoutManager(new GridLayoutManager(getApplicationContext(), 2));
@@ -264,6 +207,56 @@ public class CategoryActivity extends AppCompatActivity implements CategoryRecyc
 
             }
         };
+    }
+
+    @NonNull
+    private CategoryRecycleAdapter.OnCategoryCallback getOnCallbackCategory(List<Category> categories) {
+        return new CategoryRecycleAdapter.OnCategoryCallback() {
+            @Override
+            public void onRenameCategory(int position) {
+                renameCategory(CategoryActivity.this, categories, position, getApplicationContext(), myAdapter, getApplicationContext());
+            }
+
+            @Override
+            public void onDeleteCategory(View view, int position) {
+                deleteCategory(view, categories, position, myAdapter);
+            }
+
+            @Override
+            public void onRowClicked(int position) {
+
+                SharedPreferences.Editor categorySP = getSharedPreferences("category_sp", MODE_PRIVATE).edit();
+                categorySP.putLong("categoryId", categories.get(position).getId());
+                categorySP.putInt("categoryCount", categories.size());
+                categorySP.putString("categoryName", categories.get(position).getName());
+
+                if (categories.size() > 1) {
+                    StringBuilder moveToCategories = new StringBuilder();
+                    for (int i = 0; i < categories.size(); i++) {
+                        if (!Objects.equals(categories.get(i).getId(), categories.get(position).getId())) {
+                            moveToCategories.append(categories.get(i).getName()).append(",");
+                        }
+                    }
+                    categorySP.putString("moveToCategories", moveToCategories.toString());
+                } else {
+                    categorySP.putString("moveToCategories", null);
+                }
+
+                categorySP.apply();
+
+                Intent navigationActivity = new Intent(getApplicationContext(), NavigationActivity.class);
+                startActivity(navigationActivity);
+
+            }
+        };
+    }
+
+    private void displaySpeechRecognizer() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        // This starts the activity and populates the intent with the speech text.
+        //startActivityForResult(intent, SPEECH_REQUEST_CODE);
+        textToSpeakLauncher.launch(intent);
     }
 
 }
