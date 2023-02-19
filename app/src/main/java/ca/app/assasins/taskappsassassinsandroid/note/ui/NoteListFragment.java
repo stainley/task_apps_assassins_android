@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -50,7 +49,7 @@ import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapte
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
 
-public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnNoteCallback {
+public class NoteListFragment extends Fragment {
 
     private FragmentNoteListBinding binding;
 
@@ -93,7 +92,7 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         noteViewModel = new ViewModelProvider(this, new NoteViewModelFactory(requireActivity().getApplication())).get(NoteViewModel.class);
 
         RecyclerView noteListRecycleView = binding.noteList;
-        noteRecycleAdapter = new NoteRecycleAdapter(notes, this);
+        noteRecycleAdapter = new NoteRecycleAdapter(notes, getOnCallbackAdapter(notes));
         noteListRecycleView.setAdapter(noteRecycleAdapter);
         noteListRecycleView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
@@ -116,33 +115,20 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
             @Override
             public void onClick(View v) {
                 searchView.setHint("Note with audio");
-
                 // TODO: search on the DB with audio
                 RecyclerView noteFilterRecycle = binding.noteFilterRecycle;
                 noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
                 List<Note> noteWithAudio = new ArrayList<>();
-                noteRecycleAdapter = new NoteRecycleAdapter(noteWithAudio, NoteListFragment.this);
-                noteViewModel.fetchAllNotesWithAudio(categoryId).observe(getViewLifecycleOwner(), new Observer<List<NoteAudios>>() {
-                    @Override
-                    public void onChanged(List<NoteAudios> noteAudios) {
-                        ///noteWithAudio.addAll(noteAudios.stream().filter(noteAudios1 -> noteAudios1.getAudios().size() > 0).collect(Collectors.toList()));
-                        //System.out.println(noteAudios.size());
-
-                        noteAudios.forEach(n -> {
-                            if (n.getAudios().size() > 0)
-                                noteWithAudio.add(n.getNote());
-                        });
-
-
-                    }
-                });
+                noteRecycleAdapter = new NoteRecycleAdapter(noteWithAudio, getOnCallbackAdapter(noteWithAudio));
+                noteViewModel.fetchAllNotesWithAudio(categoryId).observe(getViewLifecycleOwner(), noteAudios -> noteAudios.forEach(n -> {
+                    if (n.getAudios().size() > 0)
+                        noteWithAudio.add(n.getNote());
+                }));
                 noteFilterRecycle.setAdapter(noteRecycleAdapter);
                 noteRecycleAdapter.notifyDataSetChanged();
-
             }
         });
-
 
         return binding.getRoot();
     }
@@ -242,68 +228,6 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
         this.noteRecycleAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onNoteSelected(View view, int position) {
-        Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notes.get(position)));
-    }
-
-    @Override
-    public void onMoveNote(int position, Note note) {
-        LayoutInflater inflater = getLayoutInflater();
-        View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
-        autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
-
-        adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
-        autoCompleteTextView.setAdapter(adapterItems);
-        autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
-            String category = adapterView.getItemAtPosition(position1).toString();
-
-            categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
-                note.setCategoryId(result.getId());
-                noteViewModel.updateNote(note);
-            });
-        });
-
-        new MaterialAlertDialogBuilder(requireActivity()).setTitle("Move Note").setView(moveNoteView).setNeutralButton("Cancel", (dialog, which) -> {
-
-        }).setNegativeButton("Done", (dialog, which) -> {
-
-        }).setCancelable(false).show();
-    }
-
-    @Override
-    public void onDisplayThumbnail(ImageView view, int position) {
-
-        noteViewModel.findPictureByNoteId(notes.get(position).getNoteId()).observe(this, noteImages -> {
-            if (noteImages != null && noteImages.getPictures().size() > 0) {
-                String path = noteImages.getPictures().get(0).getPath();
-                Picasso.get().load(path).resize(200, 200).centerInside().into(view);
-            }
-        });
-
-    }
-
-    @Override
-    public void showAudioIcon(ImageButton audioIcon, int position) {
-
-        noteViewModel.fetchAudiosByNote(notes.get(position).getNoteId()).observe(this, noteAudios -> noteAudios.forEach(noteAudios1 -> {
-            if (noteAudios1.getAudios().size() > 0) {
-                audioIcon.setVisibility(View.VISIBLE);
-            }
-        }));
-
-    }
-
-    @Override
-    public void onDeleteNote(View view, int position) {
-        Snackbar deleteSnackbar = Snackbar.make(view, "Are sure you want do delete this note?", Snackbar.LENGTH_LONG).setAnchorView(binding.createNoteBtn).setAction("Accept", v -> {
-            noteViewModel.deleteNote(notes.get(position));
-            notes.remove(notes.get(position));
-            noteRecycleAdapter.notifyItemRemoved(position);
-        });
-        deleteSnackbar.show();
-    }
-
     private Supplier<TextWatcher> getTextWatcherSupplier() {
         return () -> new TextWatcher() {
             @Override
@@ -322,40 +246,76 @@ public class NoteListFragment extends Fragment implements NoteRecycleAdapter.OnN
                     return note.getTitle().toLowerCase().contains(s.toString().toLowerCase()) || note.getDescription().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                noteRecycleAdapter = new NoteRecycleAdapter(notesFiltered, new NoteRecycleAdapter.OnNoteCallback() {
-                    @Override
-                    public void onNoteSelected(View view, int position) {
-                        Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notesFiltered.get(position)));
-                    }
-
-                    @Override
-                    public void onDeleteNote(View view, int position) {
-
-                    }
-
-                    @Override
-                    public void onMoveNote(int position, Note note) {
-
-                    }
-
-                    @Override
-                    public void onDisplayThumbnail(ImageView Imageview, int position) {
-
-                    }
-
-                    @Override
-                    public void showAudioIcon(ImageButton audioIcon, int position) {
-
-                    }
-                });
-
-
+                noteRecycleAdapter = new NoteRecycleAdapter(notesFiltered, getOnCallbackAdapter(notesFiltered));
                 noteFilterRecycle.setAdapter(noteRecycleAdapter);
             }
 
             @Override
             public void afterTextChanged(Editable s) {
 
+            }
+        };
+    }
+
+    @NonNull
+    private NoteRecycleAdapter.OnNoteCallback getOnCallbackAdapter(List<Note> notes) {
+        return new NoteRecycleAdapter.OnNoteCallback() {
+            @Override
+            public void onNoteSelected(View view, int position) {
+                Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notes.get(position)));
+            }
+
+            @Override
+            public void onDeleteNote(View view, int position) {
+                Snackbar deleteSnackbar = Snackbar.make(view, "Are sure you want do delete this note?", Snackbar.LENGTH_LONG).setAnchorView(binding.createNoteBtn).setAction("Accept", v -> {
+                    noteViewModel.deleteNote(notes.get(position));
+                    notes.remove(notes.get(position));
+                    noteRecycleAdapter.notifyItemRemoved(position);
+                });
+                deleteSnackbar.show();
+            }
+
+            @Override
+            public void onMoveNote(int position, Note note) {
+                LayoutInflater inflater = getLayoutInflater();
+                View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
+                autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
+
+                adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
+                autoCompleteTextView.setAdapter(adapterItems);
+                autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
+                    String category = adapterView.getItemAtPosition(position1).toString();
+
+                    categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
+                        note.setCategoryId(result.getId());
+                        noteViewModel.updateNote(note);
+                    });
+                });
+
+                new MaterialAlertDialogBuilder(requireActivity()).setTitle("Move Note").setView(moveNoteView).setNeutralButton("Cancel", (dialog, which) -> {
+
+                }).setNegativeButton("Done", (dialog, which) -> {
+
+                }).setCancelable(false).show();
+            }
+
+            @Override
+            public void onDisplayThumbnail(ImageView Imageview, int position) {
+                noteViewModel.findPictureByNoteId(notes.get(position).getNoteId()).observe(getViewLifecycleOwner(), noteImages -> {
+                    if (noteImages != null && noteImages.getPictures().size() > 0) {
+                        String path = noteImages.getPictures().get(0).getPath();
+                        Picasso.get().load(path).resize(200, 200).centerInside().into(Imageview);
+                    }
+                });
+            }
+
+            @Override
+            public void showAudioIcon(ImageButton audioIcon, int position) {
+                noteViewModel.fetchAudiosByNote(notes.get(position).getNoteId()).observe(getViewLifecycleOwner(), noteAudios -> noteAudios.forEach(noteAudios1 -> {
+                    if (noteAudios1.getAudios().size() > 0) {
+                        audioIcon.setVisibility(View.VISIBLE);
+                    }
+                }));
             }
         };
     }
