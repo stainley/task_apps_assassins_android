@@ -378,7 +378,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     private void addBtnClicked(View view) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_add_image_audio_sheet, findViewById(R.id.bottomSheetContainer));
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_note_functionality_sheet, findViewById(R.id.bottomSheetContainer));
         bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(view12 -> {
             Toast.makeText(NoteDetailActivity.this, "Take a photo!!!", Toast.LENGTH_SHORT).show();
             takePhoto();
