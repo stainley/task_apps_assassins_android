@@ -551,9 +551,10 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCategoryId(categoryId);
             Task oldTask = this.task;
 
-            if (task != null || calendar != null) {
-                task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
+            if (this.task != null || calendar != null) {
+                task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : this.task.getCompletionDate());
             }
+
 
             assert taskName != null;
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
