@@ -24,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -176,10 +175,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         taskAudioRVAdapter = new TaskAudioRVAdapter(mAudios, new TaskAudioRVAdapter.OnAudioOperationCallback() {
             @Override
             public void onAudioPlay(SeekBar seekBar, int position) {
-                System.out.println("SEEKBAR SENDED: " + (int) seekBar.getTag() + " - Position: " + position);
-                int tempPosition = (int) seekBar.getTag();
-                System.out.println("Play Audio");
-
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -221,8 +216,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                     public void run() {
                         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                             synchronized (seekBar) {
-                                System.out.println("tempPosition: " + tempPosition);
-                                System.out.println("SEEKBAR POSITION: " + (int) seekBar.getTag() + " - Position: " + position);
                                 seekBar.setProgress(mediaPlayer.getCurrentPosition());
                                 handler.postDelayed(this, 1000);
                             }
@@ -233,7 +226,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                 if (!mediaPlayer.isPlaying()) {
                     mediaPlayer.start();
                     seekBar.setMax(mediaPlayer.getDuration());
-                    System.out.println("AUDIO DURATION: " + mediaPlayer.getDuration());
                     handler.removeCallbacks(progress_bar);
                     handler.post(progress_bar);
                 }
@@ -276,11 +268,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             binding.dueDateTask.setHint(task.getCompletionDate() != 0 ? completionDate : "No Due Date");
 
             binding.taskCompletionCkb.setOnClickListener(v -> {
-                if (((CheckBox) v).isChecked()) {
-                    task.setCompleted(true);
-                } else {
-                    task.setCompleted(false);
-                }
+                task.setCompleted(((CheckBox) v).isChecked());
                 taskListViewModel.updateTaskAll(task, myPictures, subTasks, mAudios);
             });
 
@@ -311,13 +299,11 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             } else {
                 binding.moreActionBtn.setVisibility(View.INVISIBLE);
             }
-        }
-        else {
+        } else {
             binding.taskCompletionCkb.setEnabled(false);
         }
     }
 
-    //TODO: Save into DB
     public void dueDateTask(View view) {
 
         final int[] hour = new int[1];
@@ -333,6 +319,9 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         selectTime.addOnPositiveButtonClickListener(v -> {
             hour[0] = selectTime.getHour();
             minute[0] = selectTime.getMinute();
+            if (date[0] == null) {
+                return;
+            }
             calendar.setTime(date[0]);
             calendar.add(Calendar.HOUR_OF_DAY, selectTime.getHour() + 5);
             calendar.add(Calendar.MINUTE, selectTime.getMinute());
@@ -371,7 +360,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private void addBtnClicked(View view) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_add_image_audio_sheet, (LinearLayout) findViewById(R.id.bottomSheetContainer));
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_add_image_audio_sheet, findViewById(R.id.bottomSheetContainer));
         bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(view1 -> {
             takePhoto();
             bottomSheetDialog.dismiss();
@@ -391,31 +380,34 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             newEditText.setInputType(InputType.TYPE_CLASS_TEXT);
             newEditText.setHint("New Sub Task");
 
-            new MaterialAlertDialogBuilder(this).setTitle("New Sub Task").setMessage("Would you like to add a subtask?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
-                bottomSheetDialog.dismiss();
-            }).setPositiveButton("Add", (dialog, which) -> {
+            new MaterialAlertDialogBuilder(this).setTitle("New Sub Task")
+                    .setMessage("Would you like to add a subtask?")
+                    .setIcon(getDrawable(R.drawable.note))
+                    .setView(newEditText)
+                    .setNeutralButton("Cancel", (dialog, which) -> bottomSheetDialog.dismiss())
+                    .setPositiveButton("Add", (dialog, which) -> {
 
-                String inputText = Objects.requireNonNull(newEditText.getText()).toString();
-                if (inputText.equals("")) {
-                    Toast.makeText(this, "Couldn't be empty", Toast.LENGTH_SHORT).show();
-                } else {
-                    SubTask subTask = new SubTask();
-                    subTask.setTaskParentId(task != null ? task.getTaskId() : 0);
-                    subTask.setName(newEditText.getText().toString());
-                    subTask.setCompleted(binding.taskCompletionCkb.isChecked());
-                    subTasks.add(subTask);
-                    if (task != null) {
-                        additionalSubTasks.add(subTask);
-                    }
-                    subTaskViewAdapter.notifyDataSetChanged();
-                    bottomSheetDialog.dismiss();
-                }
-            }).setCancelable(false).show();
+                        String inputText = Objects.requireNonNull(newEditText.getText()).toString();
+                        if (inputText.equals("")) {
+                            Toast.makeText(this, "Couldn't be empty", Toast.LENGTH_SHORT).show();
+                        } else {
+                            SubTask subTask = new SubTask();
+                            subTask.setTaskParentId(task != null ? task.getTaskId() : 0);
+                            subTask.setName(newEditText.getText().toString());
+                            subTask.setCompleted(binding.taskCompletionCkb.isChecked());
+                            subTasks.add(subTask);
+                            if (task != null) {
+                                additionalSubTasks.add(subTask);
+                            }
+                            subTaskViewAdapter.notifyDataSetChanged();
+                            bottomSheetDialog.dismiss();
+                        }
+                    }).setCancelable(false).show();
         });
 
         bottomSheetView.findViewById(R.id.record_audio_btn).setOnClickListener(v -> {
 
-            if (hasPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO)) {
+            if (hasPermission(getApplicationContext())) {
                 LayoutInflater inflater = getLayoutInflater();
 
                 View customDialog = inflater.inflate(R.layout.fragment_audio_dialog, null);
@@ -516,8 +508,8 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
     }
 
-    private boolean hasPermission(Context context, String permissionStr) {
-        return ContextCompat.checkSelfPermission(context, permissionStr) == PackageManager.PERMISSION_GRANTED;
+    private boolean hasPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
 
@@ -549,21 +541,23 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCreationDate(new Date().getTime());
             task.setCompleted(binding.taskCompletionCkb.isChecked());
             task.setCategoryId(categoryId);
+            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : task.getCompletionDate());
             Task oldTask = this.task;
 
-            if (this.task != null || calendar != null) {
-                task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : this.task.getCompletionDate());
-            }
 
-
+            // Save new task
             assert taskName != null;
-            if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
+            if (!taskName.toString().isEmpty() && task.getTaskId() == 0 && task.getCompletionDate() > 0) {
                 task.setTaskName(taskName.toString());
                 taskListViewModel.saveTaskWithChildren(task, myPictures, subTasks, mAudios);
+            } else if ((task.getCompletionDate() == 0 && !taskName.toString().isEmpty()) && oldTask == null) {
+                Toast.makeText(this, "Due date is required", Toast.LENGTH_SHORT).show();
             }
 
-            // FIXME: duplicating images
+            // Update old task
             if (oldTask != null && !oldTask.getTaskName().equals("") && oldTask.getTaskId() > 0) {
+                String oldTaskName = Objects.requireNonNull(binding.taskNameText.getText()).toString();
+                oldTask.setTaskName(!oldTaskName.isEmpty() ? oldTaskName : oldTask.getTaskName());
                 oldTask.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
                 taskListViewModel.updateTaskAll(oldTask, myPictures, subTasks, mAudios);
                 taskListViewModel.insertAllSubTask(additionalSubTasks);

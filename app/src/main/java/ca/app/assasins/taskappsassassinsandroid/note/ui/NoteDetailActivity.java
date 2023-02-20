@@ -364,7 +364,9 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                         .setMessage("Tap long press Mic to start recording.")
                         .setCancelable(false)
                         .setNegativeButton("Exit", (dialog, which) -> {
-                            stopRecordAudio();
+                            if (mediaRecorder != null) {
+                                stopRecordAudio();
+                            }
                             dialog.dismiss();
                         })
                         .show();
@@ -492,6 +494,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
+        mediaRecorder = null;
         Toast.makeText(NoteDetailActivity.this, "Audio stopped", Toast.LENGTH_SHORT).show();
 
     }
