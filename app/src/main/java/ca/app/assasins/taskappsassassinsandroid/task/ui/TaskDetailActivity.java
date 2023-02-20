@@ -273,7 +273,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             binding.taskNameText.setText(task.getTaskName());
             binding.taskCompletionCkb.setChecked(task.isCompleted());
             binding.taskCompletionCkb.setEnabled(!task.isCompleted());
-            binding.dueDateTask.setHint(task.getCompletionDate() != 0 ? completionDate : "");
+            binding.dueDateTask.setHint(task.getCompletionDate() != 0 ? completionDate : "No Due Date");
 
             binding.taskCompletionCkb.setOnClickListener(v -> {
                 if (((CheckBox) v).isChecked()) {
