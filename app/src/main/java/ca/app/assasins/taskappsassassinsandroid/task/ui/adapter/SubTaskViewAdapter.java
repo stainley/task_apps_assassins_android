@@ -38,6 +38,7 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull SubTaskViewHolder holder, int position) {
+
         holder.subTaskCkb.setChecked(subTasks.get(position).isCompleted());
         holder.deleteTaskBtn.setOnClickListener(v -> onSubTaskCallback.onSubTaskDeleted(v, position));
         holder.subTaskCkb.setOnClickListener(v -> onSubTaskCallback.onSubTaskCompleted(v, position));
