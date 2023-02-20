@@ -13,9 +13,12 @@ import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
 import ca.app.assasins.taskappsassassinsandroid.common.db.AppDatabase;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.note.dao.ColorDao;
 import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteColors;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -26,11 +29,14 @@ public class NoteRepository {
     private final PictureDao pictureDao;
     private final AudioDao audioDao;
 
+    private final ColorDao colorDao;
+
     public NoteRepository(Application application) {
         AppDatabase db = AppDatabase.getInstance(application);
         noteDao = db.noteDao();
         pictureDao = db.pictureDao();
         audioDao = db.audioDao();
+        colorDao = db.colorDao();
     }
 
     public void save(@NonNull Note note) {
@@ -77,14 +83,18 @@ public class NoteRepository {
         return noteDao.getAllAudiosByNoteId(noteId);
     }
 
+    public LiveData<List<NoteColors>> fetchColorsByNoteId(long noteId) {
+        return noteDao.getAllColorsByNoteId(noteId);
+    }
+
     public void saveNoteWithPictures(Note note, List<Picture> pictures) {
         AppDatabase.databaseWriterExecutor.execute(() -> noteDao.saveNoteAll(note, pictures));
 
     }
 
     @Transaction
-    public void updateNoteWithPictures(Note note, List<Picture> pictures, List<Audio> audios) {
-        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.updateNoteAll(note, pictures, audios));
+    public void updateNoteWithPictures(Note note, List<Picture> pictures, List<Audio> audios, Color color) {
+        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.updateNoteAll(note, pictures, audios, color));
     }
 
     public void deletePicture(Picture picture) {
@@ -96,8 +106,8 @@ public class NoteRepository {
     }
 
     @Transaction
-    public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
-        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.saveNoteAll(newNote, myPictures, mAudios));
+    public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios, Color color) {
+        AppDatabase.databaseWriterExecutor.execute(() -> noteDao.saveNoteAll(newNote, myPictures, mAudios, color));
     }
 
     @Transaction
@@ -107,5 +117,9 @@ public class NoteRepository {
 
     public LiveData<List<NoteAudios>> fetAllNoteWithAudio(long categoryId) {
         return noteDao.getAllNotesWithAudio(categoryId);
+    }
+
+    public void updateNoteColor(Color color) {
+        AppDatabase.databaseWriterExecutor.execute(() -> colorDao.update(color));
     }
 }

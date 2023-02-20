@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -60,6 +61,7 @@ import java.util.Random;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
@@ -91,8 +93,9 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private final List<Audio> mAudios = new ArrayList<>();
 
     private TextToSpeech textToSpeech;
-    private AlertDialog dialogReadingNote;
     private TextView textReadingNote;
+    private Color selectedNoteColor;
+    private String selectedColorName = "colorDefaultNoteColor";
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -286,6 +289,15 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
             });
 
+            noteViewModel.fetchColorsByNoteId(note.getNoteId()).observe(this, noteColors -> {
+                List<Color> colors = new ArrayList<Color>();
+
+                noteColors.forEach(resultColors -> colors.addAll(resultColors.getColors()));
+                selectedNoteColor = colors.get(0);
+
+                binding.noteDetailView.setBackgroundColor(getSourceColor(selectedNoteColor.getColor()));
+            });
+
         } else {
             binding.moreActionBtn.setVisibility(View.INVISIBLE);
             binding.editDateInfo.setVisibility(View.INVISIBLE);
@@ -293,6 +305,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
         binding.addBtn.setOnClickListener(this::addBtnClicked);
         binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
+        binding.colorPickerBtn.setOnClickListener(this::colorPickerBtnClicked);
     }
 
     @Nullable
@@ -314,6 +327,13 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         if (item.getItemId() == android.R.id.home) {
             String title = Objects.requireNonNull(binding.title.getText()).toString();
             String description = Objects.requireNonNull(binding.description.getText()).toString();
+            Color color = new Color();
+            color.setColor(this.selectedNoteColor != null ? this.selectedNoteColor.getColor() : selectedColorName);
+            color.setId(this.selectedNoteColor != null ? this.selectedNoteColor.getId() : 0);
+
+            if (note != null) {
+                color.setParentNoteId(note.getNoteId());
+            }
 
             Note newNote = new Note();
             newNote.setTitle(title);
@@ -325,9 +345,13 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             newNote.setNoteId(this.note != null ? this.note.getNoteId() : 0);
 
             if (!title.isEmpty() && newNote.getNoteId() == 0) {
-                noteViewModel.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
+                noteViewModel.saveNoteWithPicturesAudios(newNote, myPictures, mAudios, color);
             } else if (!title.isEmpty() && newNote.getNoteId() > 0) {
-                noteViewModel.updateNoteWithPictures(newNote, myPictures, mAudios);
+                noteViewModel.updateNoteWithPictures(newNote, myPictures, mAudios, color);
+            }
+
+            if (color.getId() != 0) {
+                noteViewModel.updateColor(color);
             }
 
             return false;
@@ -418,6 +442,162 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             selectPictureLauncher.launch(new PickVisualMediaRequest());
         }
+    }
+
+    private void colorPickerBtnClicked(View view) {
+        final BottomSheetDialog colorPickerBottomSheetDialog = new BottomSheetDialog(NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_color_picker, findViewById(R.id.colorPickerBottomSheetLayout));
+
+        colorPickerBottomSheetDialog.setContentView(bottomSheetView);
+        colorPickerBottomSheetDialog.show();
+
+        final ImageView checkColor1 = bottomSheetView.findViewById(R.id.check_color1);
+        final ImageView checkColor2 = bottomSheetView.findViewById(R.id.check_color2);
+        final ImageView checkColor3 = bottomSheetView.findViewById(R.id.check_color3);
+        final ImageView checkColor4 = bottomSheetView.findViewById(R.id.check_color4);
+        final ImageView checkColor5 = bottomSheetView.findViewById(R.id.check_color5);
+        final ImageView checkColor6 = bottomSheetView.findViewById(R.id.check_color6);
+        final ImageView checkColor7 = bottomSheetView.findViewById(R.id.check_color7);
+        final ImageView checkColor8 = bottomSheetView.findViewById(R.id.check_color8);
+
+        bottomSheetView.findViewById(R.id.view_color1).setOnClickListener(v -> {
+            checkColor1.setImageResource(R.drawable.ic_check);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorDefaultNoteColor));
+            selectedColorName = "colorDefaultNoteColor";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorDefaultNoteColor");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color2).setOnClickListener(v -> {
+            checkColor1.setImageResource(0);
+            checkColor2.setImageResource(R.drawable.ic_check);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote2));
+            selectedColorName = "colorNote2";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorNote2");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color3).setOnClickListener(v -> {
+            checkColor1.setImageResource(0);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(R.drawable.ic_check);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote3));
+            selectedColorName = "colorNote3";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorNote3");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color4).setOnClickListener(v -> {
+            checkColor1.setImageResource(0);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(R.drawable.ic_check);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote4));
+            selectedColorName = "colorNote4";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorNote4");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color5).setOnClickListener(v -> {
+            checkColor1.setImageResource(0);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(R.drawable.ic_check);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote5));
+            selectedColorName = "colorNote5";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorNote5");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color6).setOnClickListener(v -> {
+            checkColor1.setImageResource(0);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(R.drawable.ic_check);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote6));
+            selectedColorName = "colorNote6";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorNote6");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color7).setOnClickListener(v -> {
+            checkColor1.setImageResource(0);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(R.drawable.ic_check);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote7));
+            selectedColorName = "colorNote7";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorNote7");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color8).setOnClickListener(v -> {
+            checkColor1.setImageResource(0);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote8));
+            selectedColorName = "colorNote8";
+            if (selectedNoteColor != null)
+                selectedNoteColor.setColor("colorNote8");
+        });
+
+//        if (alreadyAvailableNote != null && alreadyAvailableNote.getColor() != null && !alreadyAvailableNote.getColor().trim().isEmpty()) {
+//            if (alreadyAvailableNote.getColor().equals("#FFB400")) {
+//                layoutMiscellaneous.findViewById(R.id.view_color2).performClick();
+//            } else if (alreadyAvailableNote.getColor().equals("#3B81FF")) {
+//                layoutMiscellaneous.findViewById(R.id.view_color3).performClick();
+//            } else if (alreadyAvailableNote.getColor().equals("#FF4E4E")) {
+//                layoutMiscellaneous.findViewById(R.id.view_color4).performClick();
+//            } else if (alreadyAvailableNote.getColor().equals("#13A662")) {
+//                layoutMiscellaneous.findViewById(R.id.view_color5).performClick();
+//            } else if (alreadyAvailableNote.getColor().equals("#FF388E")) {
+//                layoutMiscellaneous.findViewById(R.id.view_color6).performClick();
+//            } else if (alreadyAvailableNote.getColor().equals("#118E9C")) {
+//                layoutMiscellaneous.findViewById(R.id.view_color7).performClick();
+//            } else if (alreadyAvailableNote.getColor().equals("#FF822E")) {
+//                layoutMiscellaneous.findViewById(R.id.view_color8).performClick();
+//            }
+//        }
+
     }
 
     private void moreActionBtnClicked(View view) {
@@ -550,6 +730,28 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             i++;
         }
         return stringBuilder.toString();
+    }
+
+    public int getSourceColor(String colorName) {
+        switch (colorName) {
+            default:
+            case "colorDefaultNoteColor":
+                return binding.noteDetailView.getResources().getColor(R.color.colorDefaultNoteColor);
+            case "colorNote2":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote2);
+            case "colorNote3":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote3);
+            case "colorNote4":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote4);
+            case "colorNote5":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote5);
+            case "colorNote6":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote6);
+            case "colorNote7":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote7);
+            case "colorNote8":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote8);
+        }
     }
 
     private boolean hasPermission(Context context, String permissionStr) {

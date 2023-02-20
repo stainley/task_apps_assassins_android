@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".note.ui.NoteDetailActivity">
+    tools:context=".note.ui.NoteDetailActivity"
+    android:id="@+id/noteDetailView">
 
     <LinearLayout
         android:id="@+id/imageView"
@@ -97,6 +98,14 @@
             android:layout_weight="10"
             android:background="@android:color/transparent"
             app:srcCompat="@drawable/outline_add_box" />
+
+        <ImageButton
+            android:id="@+id/color_picker_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/color_lens" />
 
         <TextView
             android:id="@+id/edit_date_info"

@@ -14,13 +14,12 @@ import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteColors;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
-import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
-import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
-import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 
 @Dao
 public abstract class NoteDao implements AbstractDao<Note> {
@@ -38,6 +37,9 @@ public abstract class NoteDao implements AbstractDao<Note> {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     public abstract void saveAudio(Audio audio);
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    public abstract void saveColor(Color color);
 
     @Delete
     @Override
@@ -82,6 +84,10 @@ public abstract class NoteDao implements AbstractDao<Note> {
     public abstract LiveData<List<NoteAudios>> getAllAudiosByNoteId(long id);
 
     @Transaction
+    @Query("SELECT * FROM NOTE_TBL WHERE NOTE_ID = :id")
+    public abstract LiveData<List<NoteColors>> getAllColorsByNoteId(long id);
+
+    @Transaction
     @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId")
     public abstract LiveData<List<NoteAudios>> getAllNotesWithAudio(long categoryId);
 
@@ -121,7 +127,7 @@ public abstract class NoteDao implements AbstractDao<Note> {
     public abstract LiveData<NoteImages> getLasNotePicture(long noteId);
 
     @Transaction
-    public void saveNoteAll(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
+    public void saveNoteAll(Note newNote, List<Picture> myPictures, List<Audio> mAudios, Color color) {
         final long noteId = saveNote(newNote);
 
         if (!myPictures.isEmpty()) {
@@ -136,11 +142,15 @@ public abstract class NoteDao implements AbstractDao<Note> {
                 saveAudio(audio);
             });
         }
+        if (color != null) {
+            color.setParentNoteId(noteId);
+            saveColor(color);
+        }
     }
 
 
     @Transaction
-    public void updateNoteAll(Note note, List<Picture> pictures, List<Audio> audios) {
+    public void updateNoteAll(Note note, List<Picture> pictures, List<Audio> audios, Color color) {
         update(note);
         pictures.forEach(picture -> {
             picture.setParentNoteId(note.getNoteId());
@@ -151,5 +161,10 @@ public abstract class NoteDao implements AbstractDao<Note> {
             audio.setParentNoteId(note.getNoteId());
             saveAudio(audio);
         });
+
+        if (color != null) {
+            color.setParentNoteId(note.getNoteId());
+            saveColor(color);
+        }
     }
 }
