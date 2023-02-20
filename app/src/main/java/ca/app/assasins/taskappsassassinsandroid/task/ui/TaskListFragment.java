@@ -251,12 +251,13 @@ public class TaskListFragment extends Fragment {
 
             @Override
             public void getSubtaskCount(TextView subtaskView, int position) {
+                subtaskView.setText("0 subtasks");
                 taskListViewModel.fetchSubTaskByTaskId(tasks.get(position).getTaskId()).observe(getViewLifecycleOwner(), tasks -> {
-                    if (tasks.get(0) != null && tasks.get(0).getSubTasks().size() > 0) {
-                        int totalSubTask = tasks.get(0).getSubTasks().size();
-                        subtaskView.setText(totalSubTask + " subtasks");
-                    } else {
-                        subtaskView.setText("0 subtasks");
+                    if (tasks.size() > 0) {
+                        if (tasks.get(0) != null && tasks.get(0).getSubTasks().size() > 0) {
+                            int totalSubTask = tasks.get(0).getSubTasks().size();
+                            subtaskView.setText(totalSubTask + " subtasks");
+                        }
                     }
                 });
             }
