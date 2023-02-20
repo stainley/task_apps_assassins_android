@@ -87,6 +87,14 @@ public abstract class TaskDao implements AbstractDao<Task> {
     public abstract void saveAudio(Audio audio);
 
     @Transaction
+    @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId")
+    public abstract LiveData<List<TaskImages>> getAllTaskWithImages(long categoryId);
+
+    @Transaction
+    @Query("SELECT * FROM TASK_TBL WHERE CATEGORY_ID = :categoryId")
+    public abstract LiveData<List<TaskAudios>> getAllTaskWithAudios(long categoryId);
+
+    @Transaction
     public Boolean addPicture(Task task, List<Picture> pictures) {
         final long taskId = saveTask(task);
         pictures.forEach(picture -> {
@@ -133,8 +141,6 @@ public abstract class TaskDao implements AbstractDao<Task> {
         }
     }
 
-
-    //TODO: to be implement saving audios to the task
     @Transaction
     public void addAudio(Task type, List<Audio> audios) {
 
@@ -155,4 +161,6 @@ public abstract class TaskDao implements AbstractDao<Task> {
             subTasks.forEach(this::updateSubTask);
         }
     }
+
+
 }

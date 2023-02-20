@@ -123,4 +123,13 @@ public class TaskRepository {
     public LiveData<List<TaskAudios>> fetchAudiosByTaskId(long taskId) {
         return taskDao.getAllAudiosByTaskId(taskId);
     }
+
+    public LiveData<List<TaskImages>> fetchAllTaskWithImages(long categoryId) {
+        return taskDao.getAllTaskWithImages(categoryId);
+    }
+
+    public LiveData<List<TaskAudios>> fetchAllTaskWithAudio(long categoryId) {
+        return taskDao.getAllTaskWithAudios(categoryId);
+
+    }
 }
