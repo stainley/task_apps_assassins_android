@@ -63,7 +63,7 @@
                     android:background="?android:attr/selectableItemBackground"
                     android:drawableLeft="@drawable/ic_due_time_24"
                     android:fontFamily="@font/roboto_medium"
-                    android:hint="No due date"
+                    android:hint="* No due date"
                     android:textAlignment="textStart" />
 
                 <com.google.android.material.divider.MaterialDivider

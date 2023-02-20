@@ -316,7 +316,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         }
     }
 
-    //TODO: Save into DB
     public void dueDateTask(View view) {
 
         final int[] hour = new int[1];
@@ -332,6 +331,9 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         selectTime.addOnPositiveButtonClickListener(v -> {
             hour[0] = selectTime.getHour();
             minute[0] = selectTime.getMinute();
+            if (date[0] == null) {
+                return;
+            }
             calendar.setTime(date[0]);
             calendar.add(Calendar.HOUR_OF_DAY, selectTime.getHour() + 5);
             calendar.add(Calendar.MINUTE, selectTime.getMinute());
