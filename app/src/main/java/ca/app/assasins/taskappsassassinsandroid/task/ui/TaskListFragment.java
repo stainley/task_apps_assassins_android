@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -134,7 +135,7 @@ public class TaskListFragment extends Fragment {
                         R.drawable.move,
                         30,
                         50,
-                        Color.parseColor("#ffffff"),
+                        R.color.md_theme_light_onTertiaryContainer,
                         SwipeDirection.LEFT,
                         position -> {
                             LayoutInflater inflater = getLayoutInflater();
@@ -307,6 +308,7 @@ public class TaskListFragment extends Fragment {
             @Override
             public void onTaskSelected(View view, int position) {
                 Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position)));
+                new Handler().postDelayed(() -> searchView.hide(), 1000);
             }
 
             @Override
