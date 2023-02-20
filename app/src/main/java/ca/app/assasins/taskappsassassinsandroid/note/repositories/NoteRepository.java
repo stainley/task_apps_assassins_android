@@ -108,4 +108,8 @@ public class NoteRepository {
     public LiveData<List<NoteAudios>> fetAllNoteWithAudio(long categoryId) {
         return noteDao.getAllNotesWithAudio(categoryId);
     }
+
+    public LiveData<List<NoteImages>> fetchAllNoteWithImage(long categoryId) {
+        return noteDao.getAllNotesWithImage(categoryId);
+    }
 }

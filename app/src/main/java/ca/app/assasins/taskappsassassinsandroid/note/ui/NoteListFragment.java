@@ -7,6 +7,8 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.common.helper.MediaType;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
@@ -67,6 +70,7 @@ public class NoteListFragment extends Fragment {
     private final List<Note> notes = new ArrayList<>();
 
     private NoteRecycleAdapter noteRecycleAdapter;
+    private NoteRecycleAdapter noteRecycleAdapterFiltered;
     ArrayAdapter<String> adapterItems;
     String[] categories = new String[1000];
     String moveToCategories;
@@ -125,29 +129,12 @@ public class NoteListFragment extends Fragment {
         binding.createNoteBtn.setOnClickListener(this::createNewNote);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
-        MaterialButton noteWithAudioBtn = binding.noteWithAudioBtn;
-        MaterialButton noteWithImagesBtn = binding.noteWithImagesBtn;
-        noteWithAudioBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchView.setHint("Note with audio");
-                // TODO: search on the DB with audio
-                RecyclerView noteFilterRecycle = binding.noteFilterRecycle;
-                noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
-
-                List<Note> noteWithAudio = new ArrayList<>();
-                noteRecycleAdapter = new NoteRecycleAdapter(noteWithAudio, getOnCallbackAdapter(noteWithAudio));
-                noteViewModel.fetchAllNotesWithAudio(categoryId).observe(getViewLifecycleOwner(), noteAudios -> noteAudios.forEach(n -> {
-                    if (n.getAudios().size() > 0)
-                        noteWithAudio.add(n.getNote());
-                }));
-                noteFilterRecycle.setAdapter(noteRecycleAdapter);
-                noteRecycleAdapter.notifyDataSetChanged();
-            }
-        });
+        binding.noteWithAudioBtn.setOnClickListener(this::filterNoteWithAudio);
+        binding.noteWithImagesBtn.setOnClickListener(this::filterNoteWithImage);
 
         return binding.getRoot();
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -193,6 +180,47 @@ public class NoteListFragment extends Fragment {
     private void createNewNote(View view) {
         Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity());
     }
+
+    private void filterNoteWithImage(View view) {
+
+        searchView.setHint("Note with image");
+        filterNotes(MediaType.PICTURE);
+
+    }
+
+    private void filterNoteWithAudio(View view) {
+        searchView.setHint("Note with audio");
+        filterNotes(MediaType.AUDIO);
+    }
+
+    private void filterNotes(MediaType mediaType) {
+        RecyclerView noteFilterRecycle = binding.noteFilterRecycle;
+        List<Note> noteFiltered = new ArrayList<>();
+        noteRecycleAdapterFiltered = new NoteRecycleAdapter(noteFiltered, getOnCallbackAdapter(noteFiltered));
+        noteFilterRecycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+        switch (mediaType) {
+            case PICTURE:
+                noteViewModel.fetchAllNotesWithImage(categoryId).observe(getViewLifecycleOwner(), noteImages -> noteImages.forEach(note -> {
+                    if (note.getPictures().size() > 0) {
+                        noteFiltered.add(note.getNote());
+                        noteFilterRecycle.setAdapter(noteRecycleAdapterFiltered);
+                        noteRecycleAdapterFiltered.notifyDataSetChanged();
+                    }
+                }));
+                break;
+            case AUDIO:
+                noteViewModel.fetchAllNotesWithAudio(categoryId).observe(getViewLifecycleOwner(), noteAudios -> noteAudios.forEach(n -> {
+                    if (n.getAudios().size() > 0) {
+                        noteFiltered.add(n.getNote());
+                        noteFilterRecycle.setAdapter(noteRecycleAdapterFiltered);
+                        noteRecycleAdapterFiltered.notifyDataSetChanged();
+                    }
+                }));
+                break;
+        }
+    }
+
 
     private void sortButtonClicked(View view) {
         LayoutInflater inflater = getLayoutInflater();
@@ -279,6 +307,11 @@ public class NoteListFragment extends Fragment {
             @Override
             public void onNoteSelected(View view, int position) {
                 Navigation.findNavController(view).navigate(NoteListFragmentDirections.actionNoteDetailActivity().setOldNote(notes.get(position)));
+
+                Handler handler = new Handler();
+                Runnable runnable = () -> searchView.hide();
+                handler.postDelayed(runnable, 1000);
+
             }
 
             @Override

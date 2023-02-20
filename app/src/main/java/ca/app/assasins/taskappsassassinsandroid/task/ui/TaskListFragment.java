@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
@@ -38,8 +37,6 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.common.helper.SwipeHelper;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
-import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
-import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
@@ -51,7 +48,7 @@ public class TaskListFragment extends Fragment {
     private final List<Task> tasks = new ArrayList<>();
     private List<Task> tasksFiltered = new ArrayList<>();
     private TaskListViewAdapter taskListViewAdapter;
-
+    private TaskListViewAdapter taskListViewAdapterFiltered;
     boolean titleSortedByAsc = false;
     boolean createdDateSortedByAsc = false;
 
@@ -64,7 +61,6 @@ public class TaskListFragment extends Fragment {
     private CategoryViewModel categoryViewModel;
 
     private TaskListViewModel taskListViewModel;
-    private TaskListViewAdapter taskListViewAdapterFiltered;
     long categoryId;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
