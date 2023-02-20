@@ -12,6 +12,7 @@ import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.model.TaskAudios;
@@ -110,5 +111,14 @@ public class TaskListViewModel extends ViewModel {
 
     public void deleteAudio(@NonNull Audio audio) {
         this.taskRepository.deleteAudio(audio);
+    }
+
+    public LiveData<List<TaskImages>> fetchAllTaskWithImages(long categoryId) {
+
+        return taskRepository.fetchAllTaskWithImages(categoryId);
+    }
+
+    public LiveData<List<TaskAudios>> fetchAllTaskWithAudio(long categoryId) {
+        return taskRepository.fetchAllTaskWithAudio(categoryId);
     }
 }

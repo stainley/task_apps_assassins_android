@@ -92,6 +92,10 @@ public abstract class NoteDao implements AbstractDao<Note> {
     public abstract LiveData<List<NoteAudios>> getAllNotesWithAudio(long categoryId);
 
     @Transaction
+    @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId")
+    public abstract LiveData<List<NoteImages>> getAllNotesWithImage(long categoryId);
+
+    @Transaction
     public Boolean addPicture(Note note, List<Picture> pictures) {
         final long noteId = saveNote(note);
         pictures.forEach(picture -> {

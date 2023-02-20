@@ -1,11 +1,14 @@
 package ca.app.assasins.taskappsassassinsandroid.task.ui;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,10 +16,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -27,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.search.SearchView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +43,9 @@ import java.util.stream.Collectors;
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.common.helper.MediaType;
 import ca.app.assasins.taskappsassassinsandroid.common.helper.SwipeHelper;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
-import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
-import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
@@ -51,7 +57,7 @@ public class TaskListFragment extends Fragment {
     private final List<Task> tasks = new ArrayList<>();
     private List<Task> tasksFiltered = new ArrayList<>();
     private TaskListViewAdapter taskListViewAdapter;
-
+    private TaskListViewAdapter taskListViewAdapterFiltered;
     boolean titleSortedByAsc = false;
     boolean createdDateSortedByAsc = false;
 
@@ -64,14 +70,27 @@ public class TaskListFragment extends Fragment {
     private CategoryViewModel categoryViewModel;
 
     private TaskListViewModel taskListViewModel;
-    private TaskListViewAdapter taskListViewAdapterFiltered;
-    long categoryId;
+    private long categoryId;
+    private SearchView searchView;
+
+    private final ActivityResultLauncher<Intent> textToSpeakLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                List<String> results = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                String spokenText = results.get(0);
+                searchView.getEditText().setText(spokenText);
+            }
+        }
+    });
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
 
         RecyclerView taskListRecycleView = binding.taskList;
+        searchView = binding.searchView;
 
         taskListViewAdapter = new TaskListViewAdapter(tasks, getOnCallbackAdapter(tasks));
 
@@ -81,6 +100,14 @@ public class TaskListFragment extends Fragment {
         binding.newTaskBtn.setOnClickListener(this::createNewTask);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
+        binding.taskWithImagesBtn.setOnClickListener(this::filterTaskWithImage);
+        binding.taskWithAudioBtn.setOnClickListener(this::filterTaskWithAudio);
+
+        searchView.inflateMenu(R.menu.search_bar_menu);
+        searchView.setOnMenuItemClickListener(item -> {
+            displaySpeechRecognizer();
+            return true;
+        });
 
         new SwipeHelper(getContext(), 300, binding.taskList) {
             @Override
@@ -111,7 +138,7 @@ public class TaskListFragment extends Fragment {
                         SwipeDirection.LEFT,
                         position -> {
                             LayoutInflater inflater = getLayoutInflater();
-                            View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
+                            View moveNoteView = inflater.inflate(R.layout.categories_dropdown, null);
                             autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
 
                             adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
@@ -171,7 +198,48 @@ public class TaskListFragment extends Fragment {
             this.taskListViewAdapter.notifyDataSetChanged();
         });
 
-        binding.searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
+        searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
+    }
+
+    private void filterTaskWithImage(View view) {
+        searchView.setHint("Task with image");
+        filterTask(MediaType.PICTURE);
+
+    }
+
+    private void filterTaskWithAudio(View view) {
+
+        searchView.setHint("Task with audio");
+        filterTask(MediaType.AUDIO);
+    }
+
+    private void filterTask(MediaType mediaType) {
+        RecyclerView taskFilterRecycle = binding.taskFilterRecycle;
+        List<Task> taskFiltered = new ArrayList<>();
+        taskListViewAdapterFiltered = new TaskListViewAdapter(taskFiltered, getOnCallbackAdapter(taskFiltered));
+        taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        switch (mediaType) {
+            case PICTURE:
+                taskListViewModel.fetchAllTaskWithImages(categoryId).observe(getViewLifecycleOwner(), taskImages -> taskImages.forEach(images -> {
+                    if (images.pictures.size() > 0) {
+                        taskFiltered.add(images.task);
+                        taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
+                        taskListViewAdapterFiltered.notifyDataSetChanged();
+                    }
+                }));
+                break;
+            case AUDIO:
+                taskListViewModel.fetchAllTaskWithAudio(categoryId).observe(getViewLifecycleOwner(), taskAudio -> taskAudio.forEach(audios -> {
+                    if (audios.getAudios().size() > 0) {
+                        taskFiltered.add(audios.getTask());
+                        taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
+                        taskListViewAdapterFiltered.notifyDataSetChanged();
+                    }
+                }));
+                break;
+        }
+
     }
 
 
@@ -183,21 +251,17 @@ public class TaskListFragment extends Fragment {
         LayoutInflater inflater = getLayoutInflater();
 
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
-        View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
+        View bottomSheetView = inflater.inflate(R.layout.activity_sort_sheet, null);
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
         bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
 
             if (titleSortedByAsc) {
                 titleSortedByAsc = false;
-                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             } else {
                 titleSortedByAsc = true;
-                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             }
             bottomSheetDialog.dismiss();
         });
@@ -205,14 +269,10 @@ public class TaskListFragment extends Fragment {
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
             if (createdDateSortedByAsc) {
                 createdDateSortedByAsc = false;
-                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             } else {
                 createdDateSortedByAsc = true;
-                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             }
             bottomSheetDialog.dismiss();
         });
@@ -250,9 +310,15 @@ public class TaskListFragment extends Fragment {
             }
 
             @Override
-            public void getSubtaskCount(TextView dueDate, int position) {
-                taskListViewModel.fetchSubTaskByTaskId(tasks.get(position).getTaskId()).observe(getViewLifecycleOwner(), subtasks -> {
-                    dueDate.setText(subtasks.size() + (subtasks.size() > 1 ? " subtasks" : " subtask"));
+            public void getSubtaskCount(TextView subtaskView, int position) {
+                subtaskView.setText("0 subtasks");
+                taskListViewModel.fetchSubTaskByTaskId(tasks.get(position).getTaskId()).observe(getViewLifecycleOwner(), tasks -> {
+                    if (tasks.size() > 0) {
+                        if (tasks.get(0) != null && tasks.get(0).getSubTasks().size() > 0) {
+                            int totalSubTask = tasks.get(0).getSubTasks().size();
+                            subtaskView.setText(totalSubTask + " subtasks");
+                        }
+                    }
                 });
             }
         };
@@ -275,7 +341,6 @@ public class TaskListFragment extends Fragment {
                     return task.getTaskName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                //taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
                 taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, getOnCallbackAdapter(tasksFiltered));
 
                 taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
@@ -286,5 +351,13 @@ public class TaskListFragment extends Fragment {
                 taskListViewAdapterFiltered.notifyDataSetChanged();
             }
         };
+    }
+
+    private void displaySpeechRecognizer() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        // This starts the activity and populates the intent with the speech text.
+        //startActivityForResult(intent, SPEECH_REQUEST_CODE);
+        textToSpeakLauncher.launch(intent);
     }
 }

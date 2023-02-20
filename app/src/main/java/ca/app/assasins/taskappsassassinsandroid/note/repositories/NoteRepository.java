@@ -122,4 +122,8 @@ public class NoteRepository {
     public void updateNoteColor(Color color) {
         AppDatabase.databaseWriterExecutor.execute(() -> colorDao.update(color));
     }
+    
+    public LiveData<List<NoteImages>> fetchAllNoteWithImage(long categoryId) {
+        return noteDao.getAllNotesWithImage(categoryId);
+    }
 }

@@ -119,6 +119,7 @@ public class CategoryActivity extends AppCompatActivity {
         newEditText.setPadding(50, 0, 50, 32);
         newEditText.setText(categoriesFiltered.get(position).getName());
         newEditText.setHint("Rename Category");
+        newEditText.setPadding(75, newEditText.getPaddingTop(), newEditText.getPaddingRight(), newEditText.getPaddingBottom());
 
 
         new MaterialAlertDialogBuilder(context)
@@ -170,6 +171,8 @@ public class CategoryActivity extends AppCompatActivity {
         newEditText.setSingleLine();
         newEditText.setPadding(50, 0, 50, 32);
         newEditText.setHint("Category Name");
+        newEditText.setPadding(75, newEditText.getPaddingTop(), newEditText.getPaddingRight(), newEditText.getPaddingBottom());
+
 
         new MaterialAlertDialogBuilder(this).setTitle("New Category").setMessage("Would you like to create new category?").setIcon(getDrawable(R.drawable.note))
                 .setView(newEditText)

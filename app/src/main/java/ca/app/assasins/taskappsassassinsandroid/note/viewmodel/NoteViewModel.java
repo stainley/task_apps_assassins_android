@@ -4,8 +4,15 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import org.mockito.internal.matchers.Not;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
@@ -22,6 +29,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 public class NoteViewModel extends ViewModel {
 
     private final NoteRepository noteRepository;
+
 
     public NoteViewModel(Application application) {
         noteRepository = new NoteRepository(application);
@@ -105,5 +113,9 @@ public class NoteViewModel extends ViewModel {
 
     public void updateColor(@NonNull Color color) {
         noteRepository.updateNoteColor(color);
+    }
+    
+    public LiveData<List<NoteImages>> fetchAllNotesWithImage(long categoryId) {
+        return noteRepository.fetchAllNoteWithImage(categoryId);
     }
 }
