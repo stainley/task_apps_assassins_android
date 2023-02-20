@@ -557,8 +557,8 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             if (!taskName.toString().isEmpty() && task.getTaskId() == 0 && task.getCompletionDate() > 0) {
                 task.setTaskName(taskName.toString());
                 taskListViewModel.saveTaskWithChildren(task, myPictures, subTasks, mAudios);
-            } else {
-                Toast.makeText(this, "Task title and due date is required", Toast.LENGTH_SHORT).show();
+            } else if (task.getCompletionDate() == 0 && !taskName.toString().isEmpty()) {
+                Toast.makeText(this, "Due date is required", Toast.LENGTH_SHORT).show();
             }
 
             // Update old task
