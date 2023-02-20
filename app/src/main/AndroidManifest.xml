@@ -32,7 +32,11 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCkfsvErrURiERF5fJHgWVTyUr82bbCE-U" />
+            android:value="@string/google_map" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
 
         <activity
             android:name=".note.ui.MapsActivity"

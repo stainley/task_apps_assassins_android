@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
@@ -36,12 +38,14 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.common.helper.SwipeHelper;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
+import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
 import ca.app.assasins.taskappsassassinsandroid.task.ui.adapter.TaskListViewAdapter;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModel;
 import ca.app.assasins.taskappsassassinsandroid.task.viewmodel.TaskListViewModelFactory;
 
-public class TaskListFragment extends Fragment implements TaskListViewAdapter.OnTaskListCallback {
+public class TaskListFragment extends Fragment {
 
     private FragmentTaskListBinding binding;
     private final List<Task> tasks = new ArrayList<>();
@@ -68,7 +72,8 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
 
         RecyclerView taskListRecycleView = binding.taskList;
-        taskListViewAdapter = new TaskListViewAdapter(tasks, this);
+
+        taskListViewAdapter = new TaskListViewAdapter(tasks, getOnCallbackAdapter(tasks));
 
         taskListRecycleView.setAdapter(taskListViewAdapter);
         taskListRecycleView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -236,9 +241,21 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
         binding = null;
     }
 
-    @Override
-    public void onTaskSelected(View view, int position) {
-        Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position)));
+    @NonNull
+    private TaskListViewAdapter.OnTaskListCallback getOnCallbackAdapter(List<Task> tasks) {
+        return new TaskListViewAdapter.OnTaskListCallback() {
+            @Override
+            public void onTaskSelected(View view, int position) {
+                Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasks.get(position)));
+            }
+
+            @Override
+            public void getSubtaskCount(TextView dueDate, int position) {
+                taskListViewModel.fetchSubTaskByTaskId(tasks.get(position).getTaskId()).observe(getViewLifecycleOwner(), subtasks -> {
+                    dueDate.setText(subtasks.size() + (subtasks.size() > 1 ? " subtasks" : " subtask"));
+                });
+            }
+        };
     }
 
     private Supplier<TextWatcher> getTextWatcherSupplier() {
@@ -258,8 +275,8 @@ public class TaskListFragment extends Fragment implements TaskListViewAdapter.On
                     return task.getTaskName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                System.out.println("taskFiltered: " + tasksFiltered.size());
-                taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
+                //taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
+                taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, getOnCallbackAdapter(tasksFiltered));
 
                 taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
             }
