@@ -311,8 +311,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             } else {
                 binding.moreActionBtn.setVisibility(View.INVISIBLE);
             }
-        }
-        else {
+        } else {
             binding.taskCompletionCkb.setEnabled(false);
         }
     }
@@ -549,19 +548,20 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
             task.setCreationDate(new Date().getTime());
             task.setCompleted(binding.taskCompletionCkb.isChecked());
             task.setCategoryId(categoryId);
+            task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : task.getCompletionDate());
             Task oldTask = this.task;
 
-            if (task != null || calendar != null) {
-                task.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
-            }
 
+            // Save new task
             assert taskName != null;
-            if (!taskName.toString().isEmpty() && task.getTaskId() == 0) {
+            if (!taskName.toString().isEmpty() && task.getTaskId() == 0 && task.getCompletionDate() > 0) {
                 task.setTaskName(taskName.toString());
                 taskListViewModel.saveTaskWithChildren(task, myPictures, subTasks, mAudios);
+            } else {
+                Toast.makeText(this, "Task title and due date is required", Toast.LENGTH_SHORT).show();
             }
 
-            // FIXME: duplicating images
+            // Update old task
             if (oldTask != null && !oldTask.getTaskName().equals("") && oldTask.getTaskId() > 0) {
                 oldTask.setCompletionDate(calendar != null ? calendar.getTime().getTime() : oldTask.getCompletionDate());
                 taskListViewModel.updateTaskAll(oldTask, myPictures, subTasks, mAudios);

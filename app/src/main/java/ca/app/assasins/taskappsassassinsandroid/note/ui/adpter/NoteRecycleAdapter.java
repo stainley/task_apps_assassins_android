@@ -44,7 +44,14 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.title.setText(notes.get(position).getTitle());
-        holder.description.setText(notes.get(position).getDescription());
+
+        StringBuilder noteStr = new StringBuilder();
+        if(notes.get(position).getDescription().length() > 10) {
+            noteStr.append(notes.get(position).getDescription().substring(0, 10).trim()).append(" ...");
+            holder.description.setText(noteStr.toString());
+        } else {
+            holder.description.setText(notes.get(position).getDescription());
+        }
 
         onNoteCallback.showAudioIcon(holder.playAudioIcon, position);
 
