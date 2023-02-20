@@ -18,9 +18,6 @@ import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
-import ca.app.assasins.taskappsassassinsandroid.task.model.SubTask;
-import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
-import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 
 @Dao
 public abstract class NoteDao implements AbstractDao<Note> {
@@ -84,6 +81,10 @@ public abstract class NoteDao implements AbstractDao<Note> {
     @Transaction
     @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId")
     public abstract LiveData<List<NoteAudios>> getAllNotesWithAudio(long categoryId);
+
+    @Transaction
+    @Query("SELECT * FROM NOTE_TBL WHERE categoryId = :categoryId")
+    public abstract LiveData<List<NoteImages>> getAllNotesWithImage(long categoryId);
 
     @Transaction
     public Boolean addPicture(Note note, List<Picture> pictures) {
