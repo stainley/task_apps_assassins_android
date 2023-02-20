@@ -39,6 +39,7 @@
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
                     android:focusable="true"
+                    android:fontFamily="@font/roboto_medium"
                     android:hint="@string/task_name"
                     android:paddingBottom="16dp"
                     android:textSize="18sp"
@@ -61,6 +62,7 @@
                     android:layout_height="46dp"
                     android:background="?android:attr/selectableItemBackground"
                     android:drawableLeft="@drawable/ic_due_time_24"
+                    android:fontFamily="@font/roboto_medium"
                     android:hint="No due date"
                     android:textAlignment="textStart" />
 
