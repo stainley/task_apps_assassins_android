@@ -418,7 +418,8 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                         .setMessage("Tap long press Mic to start recording.")
                         .setCancelable(false)
                         .setNegativeButton("Exit", (dialog, which) -> {
-                            stopRecordAudio();
+                            if (mediaRecorder != null)
+                                stopRecordAudio();
                             dialog.dismiss();
                         })
                         .show();
@@ -457,6 +458,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
+        mediaRecorder = null;
     }
 
     private void recordAudio() {

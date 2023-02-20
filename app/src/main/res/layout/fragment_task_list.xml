@@ -103,7 +103,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginTop="76dp"
                     android:padding="8dp"
-                    app:layout_constraintBottom_toBottomOf="@id/task_with_images_btn" />
+                    app:layout_constraintBottom_toBottomOf="@id/task_with_audio_btn" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

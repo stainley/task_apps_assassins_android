@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModel;
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.common.helper.MediaType;
 import ca.app.assasins.taskappsassassinsandroid.common.helper.SwipeHelper;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentTaskListBinding;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -99,6 +100,9 @@ public class TaskListFragment extends Fragment {
         binding.newTaskBtn.setOnClickListener(this::createNewTask);
         binding.sortButton.setOnClickListener(this::sortButtonClicked);
 
+        binding.taskWithImagesBtn.setOnClickListener(this::filterTaskWithImage);
+        binding.taskWithAudioBtn.setOnClickListener(this::filterTaskWithAudio);
+
         searchView.inflateMenu(R.menu.search_bar_menu);
         searchView.setOnMenuItemClickListener(item -> {
             displaySpeechRecognizer();
@@ -134,7 +138,7 @@ public class TaskListFragment extends Fragment {
                         SwipeDirection.LEFT,
                         position -> {
                             LayoutInflater inflater = getLayoutInflater();
-                            View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
+                            View moveNoteView = inflater.inflate(R.layout.categories_dropdown, null);
                             autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
 
                             adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
@@ -197,6 +201,47 @@ public class TaskListFragment extends Fragment {
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
     }
 
+    private void filterTaskWithImage(View view) {
+        searchView.setHint("Task with image");
+        filterTask(MediaType.PICTURE);
+
+    }
+
+    private void filterTaskWithAudio(View view) {
+
+        searchView.setHint("Task with audio");
+        filterTask(MediaType.AUDIO);
+    }
+
+    private void filterTask(MediaType mediaType) {
+        RecyclerView taskFilterRecycle = binding.taskFilterRecycle;
+        List<Task> taskFiltered = new ArrayList<>();
+        taskListViewAdapterFiltered = new TaskListViewAdapter(taskFiltered, getOnCallbackAdapter(taskFiltered));
+        taskFilterRecycle.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        switch (mediaType) {
+            case PICTURE:
+                taskListViewModel.fetchAllTaskWithImages(categoryId).observe(getViewLifecycleOwner(), taskImages -> taskImages.forEach(images -> {
+                    if (images.pictures.size() > 0) {
+                        taskFiltered.add(images.task);
+                        taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
+                        taskListViewAdapterFiltered.notifyDataSetChanged();
+                    }
+                }));
+                break;
+            case AUDIO:
+                taskListViewModel.fetchAllTaskWithAudio(categoryId).observe(getViewLifecycleOwner(), taskAudio -> taskAudio.forEach(audios -> {
+                    if (audios.getAudios().size() > 0) {
+                        taskFiltered.add(audios.getTask());
+                        taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
+                        taskListViewAdapterFiltered.notifyDataSetChanged();
+                    }
+                }));
+                break;
+        }
+
+    }
+
 
     public void createNewTask(View view) {
         Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity());
@@ -206,21 +251,17 @@ public class TaskListFragment extends Fragment {
         LayoutInflater inflater = getLayoutInflater();
 
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext(), R.style.BottomSheetDialogTheme);
-        View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
+        View bottomSheetView = inflater.inflate(R.layout.activity_sort_sheet, null);
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
         bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
 
             if (titleSortedByAsc) {
                 titleSortedByAsc = false;
-                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             } else {
                 titleSortedByAsc = true;
-                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             }
             bottomSheetDialog.dismiss();
         });
@@ -228,14 +269,10 @@ public class TaskListFragment extends Fragment {
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
             if (createdDateSortedByAsc) {
                 createdDateSortedByAsc = false;
-                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             } else {
                 createdDateSortedByAsc = true;
-                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             }
             bottomSheetDialog.dismiss();
         });
@@ -304,7 +341,6 @@ public class TaskListFragment extends Fragment {
                     return task.getTaskName().toLowerCase().contains(s.toString().toLowerCase());
                 }).collect(Collectors.toList());
 
-                //taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, (view, position) -> Navigation.findNavController(view).navigate(TaskListFragmentDirections.actionTaskDetailActivity().setOldTask(tasksFiltered.get(position))));
                 taskListViewAdapterFiltered = new TaskListViewAdapter(tasksFiltered, getOnCallbackAdapter(tasksFiltered));
 
                 taskFilterRecycle.setAdapter(taskListViewAdapterFiltered);
