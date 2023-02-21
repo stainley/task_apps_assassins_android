@@ -28,7 +28,6 @@
         android:id="@+id/subtaskName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="Sub Task Name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/deleteSubTaskBtn"
