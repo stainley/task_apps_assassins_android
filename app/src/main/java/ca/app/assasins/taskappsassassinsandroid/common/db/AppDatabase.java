@@ -13,8 +13,10 @@ import java.util.concurrent.Executors;
 import ca.app.assasins.taskappsassassinsandroid.category.dao.CategoryDao;
 import ca.app.assasins.taskappsassassinsandroid.category.model.Category;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AudioDao;
+import ca.app.assasins.taskappsassassinsandroid.note.dao.ColorDao;
 import ca.app.assasins.taskappsassassinsandroid.common.dao.PictureDao;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.note.dao.NoteDao;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
@@ -28,7 +30,8 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
         Task.class,
         SubTask.class,
         Picture.class,
-        Audio.class
+        Audio.class,
+        Color.class
 }, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -56,5 +59,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract SubTaskDao subTaskDao();
     public abstract AudioDao audioDao();
+
+    public abstract ColorDao colorDao();
 
 }

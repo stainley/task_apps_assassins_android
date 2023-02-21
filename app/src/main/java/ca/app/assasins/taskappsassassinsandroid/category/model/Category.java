@@ -2,6 +2,7 @@ package ca.app.assasins.taskappsassassinsandroid.category.model;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ public class Category implements Serializable {
 
     public Category() {}
 
+    @Ignore
     public Category(String name) {
         this.name = name;
     }

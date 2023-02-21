@@ -19,16 +19,20 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="165dp"
         android:layout_height="210dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/noteCardChild">
 
         <ImageView
             android:id="@+id/noteThumbnailView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:scaleType="fitXY"/>
 
         <TextView
             android:id="@+id/title"
@@ -37,6 +41,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:fontFamily="@font/roboto_bold"
             android:gravity="start"
             android:textSize="17sp"
             android:textStyle="bold"
@@ -52,6 +57,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:fontFamily="@font/roboto_medium"
             android:gravity="start"
             android:textSize="12sp"
             android:textStyle="italic"

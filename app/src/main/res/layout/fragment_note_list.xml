@@ -19,8 +19,9 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="76dp"
             android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto_black"
             android:text="Category Title"
-            android:textSize="26sp"
+            android:textSize="32sp"
             android:textStyle="bold" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -28,7 +29,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="120dp"
-            android:padding="8dp" />
+            android:padding="8dp"
+            app:cardCornerRadius="12dp" />
 
         <Toolbar
             android:id="@+id/noteAppBar"
@@ -103,6 +105,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginTop="76dp"
                     android:padding="8dp"
+                    app:cardCornerRadius="12dp"
                     app:layout_constraintBottom_toBottomOf="@id/note_with_audio_btn" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 

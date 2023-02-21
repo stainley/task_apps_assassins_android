@@ -4,14 +4,23 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import org.mockito.internal.matchers.Not;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteAudios;
+import ca.app.assasins.taskappsassassinsandroid.note.model.NoteColors;
 import ca.app.assasins.taskappsassassinsandroid.note.model.NoteImages;
 import ca.app.assasins.taskappsassassinsandroid.note.repositories.NoteRepository;
 import ca.app.assasins.taskappsassassinsandroid.task.model.Task;
@@ -20,6 +29,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.TaskImages;
 public class NoteViewModel extends ViewModel {
 
     private final NoteRepository noteRepository;
+
 
     public NoteViewModel(Application application) {
         noteRepository = new NoteRepository(application);
@@ -65,8 +75,8 @@ public class NoteViewModel extends ViewModel {
         noteRepository.saveNoteWithPictures(note, pictures);
     }
 
-    public void updateNoteWithPictures(Note note, List<Picture> pictures, List<Audio> audios) {
-        noteRepository.updateNoteWithPictures(note, pictures, audios);
+    public void updateNoteWithPictures(Note note, List<Picture> pictures, List<Audio> audios, Color color) {
+        noteRepository.updateNoteWithPictures(note, pictures, audios, color);
     }
 
     public LiveData<List<NoteImages>> fetchPicturesByNoteId(long noteId) {
@@ -81,12 +91,16 @@ public class NoteViewModel extends ViewModel {
         return noteRepository.fetchAudiosByNoteId(noteId);
     }
 
+    public LiveData<List<NoteColors>> fetchColorsByNoteId(long noteId) {
+        return noteRepository.fetchColorsByNoteId(noteId);
+    }
+
     public void deletePicture(@NonNull Picture picture) {
         this.noteRepository.deletePicture(picture);
     }
 
-    public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios) {
-        noteRepository.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
+    public void saveNoteWithPicturesAudios(Note newNote, List<Picture> myPictures, List<Audio> mAudios, Color color) {
+        noteRepository.saveNoteWithPicturesAudios(newNote, myPictures, mAudios, color);
     }
 
     public void deleteAudio(@NonNull Audio audio) {
@@ -95,5 +109,13 @@ public class NoteViewModel extends ViewModel {
 
     public LiveData<List<NoteAudios>> fetchAllNotesWithAudio(long categoryId) {
         return noteRepository.fetAllNoteWithAudio(categoryId);
+    }
+
+    public void updateColor(@NonNull Color color) {
+        noteRepository.updateNoteColor(color);
+    }
+    
+    public LiveData<List<NoteImages>> fetchAllNotesWithImage(long categoryId) {
+        return noteRepository.fetchAllNoteWithImage(categoryId);
     }
 }

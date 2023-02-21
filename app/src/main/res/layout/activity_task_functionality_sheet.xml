@@ -3,87 +3,9 @@
     android:id="@+id/bottomSheetContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bottom_sheet_back"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/take_photo_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="12dp">
-
-        <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_marginStart="10dp"
-            android:src="@drawable/camera" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="25dp"
-            android:text="@string/take_photo"
-            android:textSize="15sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/upload_image_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="12dp">
-
-        <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_marginStart="10dp"
-            android:src="@drawable/photo" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="25dp"
-            android:text="@string/add_image"
-            android:textSize="15sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="12dp">
-
-        <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_marginStart="10dp"
-            android:src="@drawable/mic" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="25dp"
-            android:text="@string/recording"
-            android:textSize="15sp" />
-    </LinearLayout>
+    <include layout="@layout/activity_add_image_audio_sheet" />
 
     <LinearLayout
         android:id="@+id/addSubTaskBtn"
@@ -95,7 +17,8 @@
         android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="12dp"
+        android:visibility="visible">
 
         <ImageView
             android:layout_width="25dp"
@@ -110,5 +33,8 @@
             android:layout_marginEnd="25dp"
             android:text="Sub Task"
             android:textSize="15sp" />
+
     </LinearLayout>
+
+
 </LinearLayout>

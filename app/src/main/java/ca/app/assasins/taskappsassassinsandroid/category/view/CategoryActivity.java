@@ -208,6 +208,7 @@ public class CategoryActivity extends AppCompatActivity {
         newEditText.setPadding(50, 0, 50, 32);
         newEditText.setText(categoriesFiltered.get(position).getName());
         newEditText.setHint("Rename Category");
+        newEditText.setPadding(75, newEditText.getPaddingTop(), newEditText.getPaddingRight(), newEditText.getPaddingBottom());
 
 
         new MaterialAlertDialogBuilder(context).setTitle("Rename Category").setView(newEditText).setMessage("Would you like to rename this category?").setIcon(getDrawable(R.drawable.note)).setNeutralButton("Cancel", (dialog, which) -> {
@@ -254,6 +255,8 @@ public class CategoryActivity extends AppCompatActivity {
         newEditText.setSingleLine();
         newEditText.setPadding(50, 0, 50, 32);
         newEditText.setHint("Category Name");
+        newEditText.setPadding(75, newEditText.getPaddingTop(), newEditText.getPaddingRight(), newEditText.getPaddingBottom());
+
 
         new MaterialAlertDialogBuilder(this).setTitle("New Category").setMessage("Would you like to create new category?").setIcon(getDrawable(R.drawable.note)).setView(newEditText).setNeutralButton("Cancel", (dialog, which) -> {
 

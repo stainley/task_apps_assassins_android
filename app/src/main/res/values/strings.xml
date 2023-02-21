@@ -22,4 +22,5 @@
     <string name="authorities">com.example.fileprovider</string>
 
     <string name="select">Select Category</string>
+    <string name="dictate">Dictate</string>
 </resources>

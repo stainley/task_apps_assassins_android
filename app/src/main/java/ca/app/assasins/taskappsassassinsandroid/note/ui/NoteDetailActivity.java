@@ -18,17 +18,19 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -63,6 +65,7 @@ import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteAudioRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NotePictureRVAdapter;
@@ -91,8 +94,24 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
     private final List<Audio> mAudios = new ArrayList<>();
 
     private TextToSpeech textToSpeech;
-    private AlertDialog dialogReadingNote;
     private TextView textReadingNote;
+    private Color selectedNoteColor;
+    private String selectedColorName = "colorDefaultNoteColor";
+    private final StringBuilder descriptionInfo = new StringBuilder();
+
+
+    private final ActivityResultLauncher<Intent> textToSpeakLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                List<String> results = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                results.forEach(spoken -> descriptionInfo.append(spoken).append(".").append(" "));
+
+                binding.description.setText(descriptionInfo.toString());
+            }
+        }
+    });
 
     private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
 
@@ -162,8 +181,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
             Location lasKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lasKnownLocation != null)
-                updateLocationInfo(lasKnownLocation);
+            if (lasKnownLocation != null) updateLocationInfo(lasKnownLocation);
         }
 
         // Audio record
@@ -174,9 +192,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         noteAudioRVAdapter = new NoteAudioRVAdapter(mAudios, new NoteAudioRVAdapter.OnAudioOperationCallback() {
             @Override
             public void onAudioPlay(SeekBar seekBar, int position) {
-                System.out.println("SEEKBAR SENDED: " + (int) seekBar.getTag() + " - Position: " + position);
-                int tempPosition = (int) seekBar.getTag();
-                System.out.println("Play Audio");
 
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
@@ -219,8 +234,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                     public void run() {
                         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                             synchronized (seekBar) {
-                                System.out.println("tempPosition: " + tempPosition);
-                                System.out.println("SEEKBAR POSITION: " + (int) seekBar.getTag() + " - Position: " + position);
                                 seekBar.setProgress(mediaPlayer.getCurrentPosition());
                                 handler.postDelayed(this, 1000);
                             }
@@ -231,7 +244,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 if (!mediaPlayer.isPlaying()) {
                     mediaPlayer.start();
                     seekBar.setMax(mediaPlayer.getDuration());
-                    System.out.println("AUDIO DURATION: " + mediaPlayer.getDuration());
                     handler.removeCallbacks(progress_bar);
                     handler.post(progress_bar);
                 }
@@ -257,7 +269,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         categoryId = categorySP.getLong("categoryId", -1);
         noteViewModel = new ViewModelProvider(new ViewModelStore(), new NoteViewModelFactory(getApplication())).get(NoteViewModel.class);
 
-        //FIXME: this returning from map
         NoteDetailActivityArgs noteDetailActivityArgs = NoteDetailActivityArgs.fromBundle(getIntent().getExtras());
         note = noteDetailActivityArgs.getOldNote();
 
@@ -286,21 +297,40 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
             });
 
+            noteViewModel.fetchColorsByNoteId(note.getNoteId()).observe(this, noteColors -> {
+                List<Color> colors = new ArrayList<>();
+
+                noteColors.forEach(resultColors -> colors.addAll(resultColors.getColors()));
+                selectedNoteColor = colors.get(0);
+
+                if (!selectedNoteColor.getColor().equals("colorDefaultNoteColor")) {
+                    binding.noteDetailView.setBackgroundColor(getSourceColor(selectedNoteColor.getColor()));
+                }
+            });
+
         } else {
             binding.moreActionBtn.setVisibility(View.INVISIBLE);
             binding.editDateInfo.setVisibility(View.INVISIBLE);
         }
+        descriptionInfo.append(Objects.requireNonNull(binding.description.getText())).append(" ");
 
         binding.addBtn.setOnClickListener(this::addBtnClicked);
         binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
+        binding.colorPickerBtn.setOnClickListener(this::colorPickerBtnClicked);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
         return super.onCreateView(name, context, attrs);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@Nullable View parent, @NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
 
 
+        return super.onCreateView(parent, name, context, attrs);
     }
 
     private void updateLocationInfo(Location location) {
@@ -314,6 +344,13 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         if (item.getItemId() == android.R.id.home) {
             String title = Objects.requireNonNull(binding.title.getText()).toString();
             String description = Objects.requireNonNull(binding.description.getText()).toString();
+            Color color = new Color();
+            color.setColor(this.selectedNoteColor != null ? this.selectedNoteColor.getColor() : selectedColorName);
+            color.setId(this.selectedNoteColor != null ? this.selectedNoteColor.getId() : 0);
+
+            if (note != null) {
+                color.setParentNoteId(note.getNoteId());
+            }
 
             Note newNote = new Note();
             newNote.setTitle(title);
@@ -325,11 +362,15 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             newNote.setNoteId(this.note != null ? this.note.getNoteId() : 0);
 
             if (!title.isEmpty() && newNote.getNoteId() == 0) {
-                noteViewModel.saveNoteWithPicturesAudios(newNote, myPictures, mAudios);
+                noteViewModel.saveNoteWithPicturesAudios(newNote, myPictures, mAudios, color);
             } else if (!title.isEmpty() && newNote.getNoteId() > 0) {
-                noteViewModel.updateNoteWithPictures(newNote, myPictures, mAudios);
+                noteViewModel.updateNoteWithPictures(newNote, myPictures, mAudios, color);
             }
 
+            if (color.getId() != 0) {
+                noteViewModel.updateColor(color);
+            }
+            navigateUpTo(new Intent(this, NoteListFragment.class));
             return false;
         }
 
@@ -338,7 +379,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
     private void addBtnClicked(View view) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_add_image_audio_sheet, (LinearLayout) findViewById(R.id.bottomSheetContainer));
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_note_functionality_sheet, findViewById(R.id.bottomSheetContainer));
         bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(view12 -> {
             Toast.makeText(NoteDetailActivity.this, "Take a photo!!!", Toast.LENGTH_SHORT).show();
             takePhoto();
@@ -353,21 +394,18 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
         bottomSheetView.findViewById(R.id.record_audio_btn).setOnClickListener(v -> {
 
-            if (hasPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO)) {
+            if (hasPermission(getApplicationContext())) {
                 LayoutInflater inflater = getLayoutInflater();
 
                 View customDialog = inflater.inflate(R.layout.fragment_audio_dialog, null);
                 Button startRecordAudio = customDialog.findViewById(R.id.recordingAudioBtn);
 
-                AlertDialog record = new MaterialAlertDialogBuilder(this)
-                        .setView(customDialog).setTitle("Record")
-                        .setMessage("Tap long press Mic to start recording.")
-                        .setCancelable(false)
-                        .setNegativeButton("Exit", (dialog, which) -> {
-                            stopRecordAudio();
-                            dialog.dismiss();
-                        })
-                        .show();
+                AlertDialog record = new MaterialAlertDialogBuilder(this).setView(customDialog).setTitle("Record").setMessage("Tap long press Mic to start recording.").setCancelable(false).setNegativeButton("Exit", (dialog, which) -> {
+                    if (mediaRecorder != null) {
+                        stopRecordAudio();
+                    }
+                    dialog.dismiss();
+                }).show();
 
                 Boolean[] isRecording = new Boolean[1];
                 isRecording[0] = false;
@@ -394,9 +432,18 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             bottomSheetDialog.dismiss();
         });
 
+        bottomSheetView.findViewById(R.id.dictation_audio_btn).setOnClickListener(this::dictateNoteDescription);
+
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
     }
+
+    private void dictateNoteDescription(View view) {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        textToSpeakLauncher.launch(intent);
+    }
+
 
     public void takePhoto() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -418,70 +465,142 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         }
     }
 
+    private void colorPickerBtnClicked(View view) {
+        final BottomSheetDialog colorPickerBottomSheetDialog = new BottomSheetDialog(NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_color_picker, findViewById(R.id.colorPickerBottomSheetLayout));
+
+        colorPickerBottomSheetDialog.setContentView(bottomSheetView);
+        colorPickerBottomSheetDialog.show();
+
+        final ImageView checkColor1 = bottomSheetView.findViewById(R.id.check_color1);
+        final ImageView checkColor2 = bottomSheetView.findViewById(R.id.check_color2);
+        final ImageView checkColor3 = bottomSheetView.findViewById(R.id.check_color3);
+        final ImageView checkColor4 = bottomSheetView.findViewById(R.id.check_color4);
+        final ImageView checkColor5 = bottomSheetView.findViewById(R.id.check_color5);
+        final ImageView checkColor6 = bottomSheetView.findViewById(R.id.check_color6);
+        final ImageView checkColor7 = bottomSheetView.findViewById(R.id.check_color7);
+        final ImageView checkColor8 = bottomSheetView.findViewById(R.id.check_color8);
+
+        bottomSheetView.findViewById(R.id.view_color1).setOnClickListener(v -> {
+            checkColor1.setImageResource(R.drawable.ic_check);
+            checkColor2.setImageResource(0);
+            checkColor3.setImageResource(0);
+            checkColor4.setImageResource(0);
+            checkColor5.setImageResource(0);
+            checkColor6.setImageResource(0);
+            checkColor7.setImageResource(0);
+            checkColor8.setImageResource(0);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorDefaultNoteColor, getTheme()));
+            selectedColorName = "colorDefaultNoteColor";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorDefaultNoteColor");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color2).setOnClickListener(v -> {
+            checkColor2.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote2, getTheme()));
+            selectedColorName = "colorNote2";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote2");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color3).setOnClickListener(v -> {
+            checkColor3.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote3, getTheme()));
+            selectedColorName = "colorNote3";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote3");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color4).setOnClickListener(v -> {
+            checkColor4.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote4, getTheme()));
+            selectedColorName = "colorNote4";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote4");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color5).setOnClickListener(v -> {
+            checkColor5.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote5, getTheme()));
+            selectedColorName = "colorNote5";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote5");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color6).setOnClickListener(v -> {
+            checkColor6.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote6, getTheme()));
+            selectedColorName = "colorNote6";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote6");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color7).setOnClickListener(v -> {
+            checkColor7.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote7, getTheme()));
+            selectedColorName = "colorNote7";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote7");
+        });
+
+        bottomSheetView.findViewById(R.id.view_color8).setOnClickListener(v -> {
+            checkColor8.setImageResource(R.drawable.ic_check);
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote8, getTheme()));
+            selectedColorName = "colorNote8";
+            if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote8");
+        });
+    }
+
     private void moreActionBtnClicked(View view) {
         final BottomSheetDialog moreActionBottomSheetDialog = new BottomSheetDialog(NoteDetailActivity.this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_more_action_sheet, (LinearLayout) findViewById(R.id.moreActionBottomSheetContainer));
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_more_action_sheet, findViewById(R.id.moreActionBottomSheetContainer));
         bottomSheetView.findViewById(R.id.delete_note).setOnClickListener(view1 -> {
             noteViewModel.deleteNote(note);
             moreActionBottomSheetDialog.dismiss();
             finish();
         });
 
-        bottomSheetView.findViewById(R.id.show_map).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
-                mapIntent.putExtra("note", note);
-                moreActionBottomSheetDialog.dismiss();
-                startActivity(mapIntent);
-            }
+        bottomSheetView.findViewById(R.id.show_map).setOnClickListener(v -> {
+            Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
+            mapIntent.putExtra("note", note);
+            moreActionBottomSheetDialog.dismiss();
+            startActivity(mapIntent);
         });
 
-        bottomSheetView.findViewById(R.id.read_note).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                moreActionBottomSheetDialog.dismiss();
-                LayoutInflater inflater = getLayoutInflater();
-                View readNoteView = (View) inflater.inflate(R.layout.layout_read_note, null);
+        bottomSheetView.findViewById(R.id.read_note).setOnClickListener(v -> {
+            moreActionBottomSheetDialog.dismiss();
+            LayoutInflater inflater = getLayoutInflater();
+            View readNoteView = inflater.inflate(R.layout.layout_read_note, null);
 
-                AlertDialog progress = new MaterialAlertDialogBuilder(NoteDetailActivity.this)
-                        .setView(readNoteView)
-                        .setCancelable(false).show();
+            AlertDialog progress = new MaterialAlertDialogBuilder(NoteDetailActivity.this).setView(readNoteView).setCancelable(false).show();
 
-                textToSpeech = new TextToSpeech(NoteDetailActivity.this, status -> {
-                    if (status == TextToSpeech.SUCCESS) {
-                        int result = textToSpeech.setLanguage(Locale.ENGLISH);
+            textToSpeech = new TextToSpeech(NoteDetailActivity.this, status -> {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = textToSpeech.setLanguage(Locale.ENGLISH);
 
-                        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                            Toast.makeText(NoteDetailActivity.this, "Sorry, language not supported!", Toast.LENGTH_SHORT).show();
-                        } else {
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Toast.makeText(NoteDetailActivity.this, "Sorry, language not supported!", Toast.LENGTH_SHORT).show();
+                    } else {
 
-                            textReadingNote = readNoteView.findViewById(R.id.text_reading_text);
-                            TextView stopReadButton = readNoteView.findViewById(R.id.stop_reading);
+                        textReadingNote = readNoteView.findViewById(R.id.text_reading_text);
+                        TextView stopReadButton = readNoteView.findViewById(R.id.stop_reading);
 
-                            String title = binding.title.getText().toString().trim();
-                            String description = binding.description.getText().toString().trim();
+                        String title = binding.title.getText().toString().trim();
+                        String description = Objects.requireNonNull(binding.description.getText()).toString().trim();
 
-                            readNoteView.findViewById(R.id.start_reading).setOnClickListener(view1 -> {
-                                textReadingNote.setText("Reading Note...");
-                                textToSpeech.speak(title, TextToSpeech.QUEUE_ADD, null);
-                                textToSpeech.speak(description, TextToSpeech.QUEUE_ADD, null);
+                        readNoteView.findViewById(R.id.start_reading).setOnClickListener(view1 -> {
+                            textReadingNote.setText("Reading Note...");
+                            textToSpeech.speak(title, TextToSpeech.QUEUE_ADD, null);
+                            textToSpeech.speak(description, TextToSpeech.QUEUE_ADD, null);
 
-                                stopReadButton.setText("STOP");
-                            });
+                            stopReadButton.setText("STOP");
+                        });
 
-                            readNoteView.findViewById(R.id.stop_reading).setOnClickListener(view1 -> {
-                                textReadingNote.setText("Do you want the NOTES APP to read the note for you?");
-                                stopReadButton.setText("CANCEL");
-                                if (textToSpeech != null) {
-                                    textToSpeech.stop();
-                                }
-                                progress.dismiss();
-                            });
-                        }
+                        readNoteView.findViewById(R.id.stop_reading).setOnClickListener(view1 -> {
+                            textReadingNote.setText("Do you want the NOTES APP to read the note for you?");
+                            stopReadButton.setText("CANCEL");
+                            if (textToSpeech != null) {
+                                textToSpeech.stop();
+                            }
+                            progress.dismiss();
+                        });
                     }
-                });
-            }
+                }
+            });
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
         moreActionBottomSheetDialog.show();
@@ -492,6 +611,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
+        mediaRecorder = null;
         Toast.makeText(NoteDetailActivity.this, "Audio stopped", Toast.LENGTH_SHORT).show();
 
     }
@@ -549,8 +669,30 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         return stringBuilder.toString();
     }
 
-    private boolean hasPermission(Context context, String permissionStr) {
-        return ContextCompat.checkSelfPermission(context, permissionStr) == PackageManager.PERMISSION_GRANTED;
+    public int getSourceColor(String colorName) {
+        switch (colorName) {
+            default:
+            case "colorDefaultNoteColor":
+                return binding.noteDetailView.getResources().getColor(R.color.colorDefaultNoteColor, getTheme());
+            case "colorNote2":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote2, getTheme());
+            case "colorNote3":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote3, getTheme());
+            case "colorNote4":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote4, getTheme());
+            case "colorNote5":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote5, getTheme());
+            case "colorNote6":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote6, getTheme());
+            case "colorNote7":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote7, getTheme());
+            case "colorNote8":
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote8, getTheme());
+        }
+    }
+
+    private boolean hasPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void startListening() {
