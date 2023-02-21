@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/colorPickerBottomSheetLayout"
-    android:background="@drawable/bottom_sheet_back"
     android:orientation="vertical">
 
     <TextView
@@ -13,7 +12,6 @@
         android:gravity="start"
         android:padding="20dp"
         android:text="Pick Color:"
-        android:textColor="@color/colorPrimaryText"
         android:textSize="18sp"
         android:textStyle="bold"/>
 

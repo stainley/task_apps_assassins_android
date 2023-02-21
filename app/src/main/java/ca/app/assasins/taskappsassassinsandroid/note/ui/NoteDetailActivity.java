@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -71,6 +72,7 @@ import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteAudioRVAdapte
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NotePictureRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
+import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragment;
 
 public class NoteDetailActivity extends AppCompatActivity implements NotePictureRVAdapter.OnPictureNoteCallback {
 
@@ -370,7 +372,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             if (color.getId() != 0) {
                 noteViewModel.updateColor(color);
             }
-
+            navigateUpTo(new Intent(this, NoteListFragment.class));
             return false;
         }
 
@@ -496,97 +498,48 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         });
 
         bottomSheetView.findViewById(R.id.view_color2).setOnClickListener(v -> {
-            checkColor1.setImageResource(0);
             checkColor2.setImageResource(R.drawable.ic_check);
-            checkColor3.setImageResource(0);
-            checkColor4.setImageResource(0);
-            checkColor5.setImageResource(0);
-            checkColor6.setImageResource(0);
-            checkColor7.setImageResource(0);
-            checkColor8.setImageResource(0);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote2));
             selectedColorName = "colorNote2";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote2");
         });
 
         bottomSheetView.findViewById(R.id.view_color3).setOnClickListener(v -> {
-            checkColor1.setImageResource(0);
-            checkColor2.setImageResource(0);
             checkColor3.setImageResource(R.drawable.ic_check);
-            checkColor4.setImageResource(0);
-            checkColor5.setImageResource(0);
-            checkColor6.setImageResource(0);
-            checkColor7.setImageResource(0);
-            checkColor8.setImageResource(0);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote3));
             selectedColorName = "colorNote3";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote3");
         });
 
         bottomSheetView.findViewById(R.id.view_color4).setOnClickListener(v -> {
-            checkColor1.setImageResource(0);
-            checkColor2.setImageResource(0);
-            checkColor3.setImageResource(0);
             checkColor4.setImageResource(R.drawable.ic_check);
-            checkColor5.setImageResource(0);
-            checkColor6.setImageResource(0);
-            checkColor7.setImageResource(0);
-            checkColor8.setImageResource(0);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote4));
             selectedColorName = "colorNote4";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote4");
         });
 
         bottomSheetView.findViewById(R.id.view_color5).setOnClickListener(v -> {
-            checkColor1.setImageResource(0);
-            checkColor2.setImageResource(0);
-            checkColor3.setImageResource(0);
-            checkColor4.setImageResource(0);
             checkColor5.setImageResource(R.drawable.ic_check);
-            checkColor6.setImageResource(0);
-            checkColor7.setImageResource(0);
-            checkColor8.setImageResource(0);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote5));
             selectedColorName = "colorNote5";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote5");
         });
 
         bottomSheetView.findViewById(R.id.view_color6).setOnClickListener(v -> {
-            checkColor1.setImageResource(0);
-            checkColor2.setImageResource(0);
-            checkColor3.setImageResource(0);
-            checkColor4.setImageResource(0);
-            checkColor5.setImageResource(0);
             checkColor6.setImageResource(R.drawable.ic_check);
-            checkColor7.setImageResource(0);
-            checkColor8.setImageResource(0);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote6));
             selectedColorName = "colorNote6";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote6");
         });
 
         bottomSheetView.findViewById(R.id.view_color7).setOnClickListener(v -> {
-            checkColor1.setImageResource(0);
-            checkColor2.setImageResource(0);
-            checkColor3.setImageResource(0);
-            checkColor4.setImageResource(0);
-            checkColor5.setImageResource(0);
-            checkColor6.setImageResource(0);
             checkColor7.setImageResource(R.drawable.ic_check);
-            checkColor8.setImageResource(0);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote7));
             selectedColorName = "colorNote7";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote7");
         });
 
         bottomSheetView.findViewById(R.id.view_color8).setOnClickListener(v -> {
-            checkColor1.setImageResource(0);
-            checkColor2.setImageResource(0);
-            checkColor3.setImageResource(0);
-            checkColor4.setImageResource(0);
-            checkColor5.setImageResource(0);
-            checkColor6.setImageResource(0);
-            checkColor7.setImageResource(0);
             checkColor8.setImageResource(R.drawable.ic_check);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote8));
             selectedColorName = "colorNote8";
@@ -603,14 +556,11 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             finish();
         });
 
-        bottomSheetView.findViewById(R.id.show_map).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
-                mapIntent.putExtra("note", note);
-                moreActionBottomSheetDialog.dismiss();
-                startActivity(mapIntent);
-            }
+        bottomSheetView.findViewById(R.id.show_map).setOnClickListener(v -> {
+            Intent mapIntent = new Intent(getApplicationContext(), MapsActivity.class);
+            mapIntent.putExtra("note", note);
+            moreActionBottomSheetDialog.dismiss();
+            startActivity(mapIntent);
         });
 
         bottomSheetView.findViewById(R.id.read_note).setOnClickListener(new View.OnClickListener() {
@@ -634,7 +584,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                             TextView stopReadButton = readNoteView.findViewById(R.id.stop_reading);
 
                             String title = binding.title.getText().toString().trim();
-                            String description = binding.description.getText().toString().trim();
+                            String description = Objects.requireNonNull(binding.description.getText()).toString().trim();
 
                             readNoteView.findViewById(R.id.start_reading).setOnClickListener(view1 -> {
                                 textReadingNote.setText("Reading Note...");
@@ -728,21 +678,21 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         switch (colorName) {
             default:
             case "colorDefaultNoteColor":
-                return binding.noteDetailView.getResources().getColor(R.color.colorDefaultNoteColor);
+                return binding.noteDetailView.getResources().getColor(R.color.colorDefaultNoteColor, getTheme());
             case "colorNote2":
-                return binding.noteDetailView.getResources().getColor(R.color.colorNote2);
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote2, getTheme());
             case "colorNote3":
-                return binding.noteDetailView.getResources().getColor(R.color.colorNote3);
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote3, getTheme());
             case "colorNote4":
-                return binding.noteDetailView.getResources().getColor(R.color.colorNote4);
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote4, getTheme());
             case "colorNote5":
-                return binding.noteDetailView.getResources().getColor(R.color.colorNote5);
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote5, getTheme());
             case "colorNote6":
-                return binding.noteDetailView.getResources().getColor(R.color.colorNote6);
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote6, getTheme());
             case "colorNote7":
-                return binding.noteDetailView.getResources().getColor(R.color.colorNote7);
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote7, getTheme());
             case "colorNote8":
-                return binding.noteDetailView.getResources().getColor(R.color.colorNote8);
+                return binding.noteDetailView.getResources().getColor(R.color.colorNote8, getTheme());
         }
     }
 

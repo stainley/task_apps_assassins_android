@@ -240,7 +240,6 @@ public class TaskListFragment extends Fragment {
                 }));
                 break;
         }
-
     }
 
 
@@ -259,10 +258,10 @@ public class TaskListFragment extends Fragment {
 
             if (titleSortedByAsc) {
                 titleSortedByAsc = false;
-                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             } else {
                 titleSortedByAsc = true;
-                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             }
             bottomSheetDialog.dismiss();
         });
@@ -270,10 +269,10 @@ public class TaskListFragment extends Fragment {
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
             if (createdDateSortedByAsc) {
                 createdDateSortedByAsc = false;
-                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             } else {
                 createdDateSortedByAsc = true;
-                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             }
             bottomSheetDialog.dismiss();
         });
@@ -282,11 +281,10 @@ public class TaskListFragment extends Fragment {
         bottomSheetDialog.show();
     }
 
-    public void refreshNotes(List<Task> result) {
+    public void refreshTasks(List<Task> result) {
         this.tasks.clear();
         this.tasks.addAll(result);
 
-        this.taskListViewAdapter.notifyItemChanged(result.size());
         this.taskListViewAdapter.notifyDataSetChanged();
     }
 

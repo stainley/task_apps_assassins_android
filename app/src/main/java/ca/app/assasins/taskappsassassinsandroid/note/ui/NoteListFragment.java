@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,7 +18,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.activity.OnBackPressedCallback;
@@ -36,7 +34,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
@@ -44,6 +41,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -175,6 +173,7 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
         noteRecycleAdapter.notifyDataSetChanged();
     }
 
@@ -227,21 +226,17 @@ public class NoteListFragment extends Fragment {
         LayoutInflater inflater = getLayoutInflater();
 
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireActivity(), R.style.BottomSheetDialogTheme);
-        View bottomSheetView = (View) inflater.inflate(R.layout.activity_sort_sheet, null);
+        View bottomSheetView = inflater.inflate(R.layout.activity_sort_sheet, null);
         bottomSheetView = bottomSheetView.findViewById(R.id.bottomSheetSortContainer);
 
         bottomSheetView.findViewById(R.id.sort_by_title).setOnClickListener(view1 -> {
 
             if (titleSortedByAsc) {
                 titleSortedByAsc = false;
-                noteViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                noteViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             } else {
                 titleSortedByAsc = true;
-                noteViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                noteViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             }
             bottomSheetDialog.dismiss();
         });
@@ -249,14 +244,10 @@ public class NoteListFragment extends Fragment {
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
             if (createdDateSortedByAsc) {
                 createdDateSortedByAsc = false;
-                noteViewModel.fetchAllNotesOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                noteViewModel.fetchAllNotesOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             } else {
                 createdDateSortedByAsc = true;
-                noteViewModel.fetchAllNotesOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), notesResult -> {
-                    refreshNotes(notesResult);
-                });
+                noteViewModel.fetchAllNotesOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
             }
             bottomSheetDialog.dismiss();
         });
@@ -328,7 +319,7 @@ public class NoteListFragment extends Fragment {
             @Override
             public void onMoveNote(int position, Note note) {
                 LayoutInflater inflater = getLayoutInflater();
-                View moveNoteView = (View) inflater.inflate(R.layout.categories_dropdown, null);
+                View moveNoteView = inflater.inflate(R.layout.categories_dropdown, null);
                 autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
 
                 adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
@@ -371,11 +362,12 @@ public class NoteListFragment extends Fragment {
             @Override
             public void setCardBackgroundColor(View view, int position) {
                 noteViewModel.fetchColorsByNoteId(notes.get(position).getNoteId()).observe(getViewLifecycleOwner(), noteColors -> {
-                    List<Color> colors = new ArrayList<Color>();
+                    List<Color> colors = new ArrayList<>();
                     noteColors.forEach(resultColors -> colors.addAll(resultColors.getColors()));
-
-                    if (colors.get(0).getColor() != "colorDefaultNoteColor") {
-                        view.setBackgroundColor(getSourceColor(view, colors.get(0).getColor()));
+                    if (colors.size() > 0) {
+                        if (!Objects.equals(colors.get(0).getColor(), "colorDefaultNoteColor")) {
+                            view.setBackgroundColor(getSourceColor(view, colors.get(0).getColor()));
+                        }
                     }
                 });
             }
@@ -395,21 +387,21 @@ public class NoteListFragment extends Fragment {
         switch (colorName) {
             default:
             case "colorDefaultNoteColor":
-                return view.getResources().getColor(R.color.colorDefaultNoteColor);
+                return view.getResources().getColor(R.color.colorDefaultNoteColor, requireActivity().getTheme());
             case "colorNote2":
-                return view.getResources().getColor(R.color.colorNote2);
+                return view.getResources().getColor(R.color.colorNote2, requireActivity().getTheme());
             case "colorNote3":
-                return view.getResources().getColor(R.color.colorNote3);
+                return view.getResources().getColor(R.color.colorNote3, requireActivity().getTheme());
             case "colorNote4":
-                return view.getResources().getColor(R.color.colorNote4);
+                return view.getResources().getColor(R.color.colorNote4, requireActivity().getTheme());
             case "colorNote5":
-                return view.getResources().getColor(R.color.colorNote5);
+                return view.getResources().getColor(R.color.colorNote5, requireActivity().getTheme());
             case "colorNote6":
-                return view.getResources().getColor(R.color.colorNote6);
+                return view.getResources().getColor(R.color.colorNote6, requireActivity().getTheme());
             case "colorNote7":
-                return view.getResources().getColor(R.color.colorNote7);
+                return view.getResources().getColor(R.color.colorNote7, requireActivity().getTheme());
             case "colorNote8":
-                return view.getResources().getColor(R.color.colorNote8);
+                return view.getResources().getColor(R.color.colorNote8, requireActivity().getTheme());
         }
     }
 }
