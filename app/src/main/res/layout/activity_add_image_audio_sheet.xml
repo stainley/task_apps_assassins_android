@@ -87,35 +87,5 @@
             android:textSize="15sp" />
 
     </LinearLayout>
-    <LinearLayout
-        android:id="@+id/addSubTaskBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:visibility="invisible">
-
-        <ImageView
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_marginStart="10dp"
-            android:src="@drawable/subtask" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="25dp"
-            android:text="Sub Task"
-            android:textSize="15sp" />
-
-    </LinearLayout>
-
-
 
 </LinearLayout>
