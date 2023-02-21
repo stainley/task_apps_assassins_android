@@ -5,14 +5,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
@@ -21,9 +18,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.search.SearchBar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,13 +26,10 @@ import java.util.Map;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNavigationBinding;
-import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
-import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
 
 public class NavigationActivity extends AppCompatActivity {
     private static final String TAG = NavigationActivity.class.getName();
 
-    private MaterialToolbar noteAppBar;
     private ArrayList<String> permissionsList;
     private final String[] permissionsStr = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
 
@@ -47,20 +39,17 @@ public class NavigationActivity extends AppCompatActivity {
         public void onActivityResult(Map<String, Boolean> result) {
             ArrayList<Boolean> list = new ArrayList<>(result.values());
             permissionsList = new ArrayList<>();
-            int permissionsCount = 0;
             for (int i = 0; i < list.size(); i++) {
                 if (shouldShowRequestPermissionRationale(permissionsStr[i])) {
                     permissionsList.add(permissionsStr[i]);
                 } else if (!hasPermission(NavigationActivity.this, permissionsStr[i])) {
-                    permissionsCount++;
                 }
             }
             if (permissionsList.size() > 0) {
                 //Some permissions are denied and can be asked again.
                 askForPermissions(permissionsList);
-            } else if (permissionsCount > 0) {
-                //Show alert dialog
-            }
+            }  //Show alert dialog
+
         }
     });
 

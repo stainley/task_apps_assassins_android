@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.activity.result.ActivityResult;
@@ -110,60 +111,6 @@ public class TaskListFragment extends Fragment {
             return true;
         });
 
-        new SwipeHelper(getContext(), 300, binding.taskList) {
-            @Override
-            protected void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer) {
-                int index = viewHolder.getAdapterPosition();
-                Task task = tasks.get(index);
-
-                if (task.isCompleted()) {
-                    buffer.add(new SwipeUnderlayButton(requireActivity(),
-                            "Delete",
-                            R.drawable.delete,
-                            30,
-                            50,
-                            Color.parseColor("#ffffff"),
-                            SwipeDirection.LEFT,
-                            position -> {
-                                taskListViewModel.deleteTask(task);
-                                taskListViewAdapter.notifyItemRemoved(position);
-                            }));
-                }
-
-                buffer.add(new SwipeUnderlayButton(requireActivity(),
-                        "Update",
-                        R.drawable.move,
-                        30,
-                        50,
-                        R.color.md_theme_light_onTertiaryContainer,
-                        SwipeDirection.LEFT,
-                        position -> {
-                            LayoutInflater inflater = getLayoutInflater();
-                            View moveNoteView = inflater.inflate(R.layout.categories_dropdown, null);
-                            autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
-
-                            adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
-                            autoCompleteTextView.setAdapter(adapterItems);
-                            autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
-                                String category = adapterView.getItemAtPosition(position1).toString();
-
-                                categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
-                                    task.setCategoryId(result.getId());
-                                    taskListViewModel.updateTask(task);
-                                });
-                            });
-
-                            new MaterialAlertDialogBuilder(requireActivity())
-                                    .setTitle("Move Note")
-                                    .setView(moveNoteView)
-                                    .setNeutralButton("Cancel", (dialog, which) -> {
-
-                                    }).setNegativeButton("Done", (dialog, which) -> {
-
-                                    }).setCancelable(false).show();
-                        }));
-            }
-        };
 
         return binding.getRoot();
     }
@@ -200,6 +147,60 @@ public class TaskListFragment extends Fragment {
         });
 
         searchView.getEditText().addTextChangedListener(getTextWatcherSupplier().get());
+
+        new SwipeHelper(getContext(), 300, binding.taskList) {
+            @Override
+            protected void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer) {
+                int index = viewHolder.getAdapterPosition();
+                System.out.println("BEFORE: " + tasks.get(index).getTaskName());
+                Task task = tasks.get(index);
+                System.out.println("AFTER: " + task.getTaskName());
+                if (task.isCompleted()) {
+                    buffer.add(new SwipeUnderlayButton(requireActivity(),
+                            "Delete",
+                            R.drawable.delete,
+                            30,
+                            50,
+                            Color.parseColor("#ffffff"),
+                            SwipeDirection.LEFT,
+                            position -> {
+                                taskListViewModel.deleteTask(task);
+                                taskListViewAdapter.notifyItemRemoved(position);
+                            }));
+                }
+
+                buffer.add(new SwipeUnderlayButton(requireActivity(), "Update", R.drawable.move, 30, 50, R.color.md_theme_light_onTertiaryContainer, SwipeDirection.LEFT, position -> {
+                    Task taskUpdate = tasks.get(index);
+
+                    LayoutInflater inflater = getLayoutInflater();
+                    View moveNoteView = inflater.inflate(R.layout.categories_dropdown, null);
+                    autoCompleteTextView = moveNoteView.findViewById(R.id.auto_complete_txt);
+
+                    adapterItems = new ArrayAdapter<>(getContext(), R.layout.categories_dropdown_items, categories);
+                    autoCompleteTextView.setAdapter(adapterItems);
+                    autoCompleteTextView.setOnItemClickListener((adapterView, view, position1, id) -> {
+                        String category = adapterView.getItemAtPosition(position1).toString();
+                        categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
+                            taskUpdate.setCategoryId(result.getId());
+                        });
+                    });
+
+                    new MaterialAlertDialogBuilder(requireActivity())
+                            .setTitle("Move Task")
+                            .setView(moveNoteView)
+                            .setIcon(getResources().getDrawable(R.drawable.move, requireActivity().getTheme()))
+                            .setMessage("Select the category you want to move your task.")
+                            .setNegativeButton("Cancel", (dialog, which) -> {
+                            }).setPositiveButton("Done", (dialog, which) -> {
+                                taskListViewModel.updateTask(taskUpdate);
+                                tasks.remove(taskUpdate);
+                                taskListViewAdapter.notifyItemRemoved(index);
+                                Toast.makeText(getContext(), "Task moved to " + categories[position], Toast.LENGTH_SHORT).show();
+
+                            }).setCancelable(false).show();
+                }));
+            }
+        };
     }
 
     private void filterTaskWithImage(View view) {
@@ -240,7 +241,6 @@ public class TaskListFragment extends Fragment {
                 }));
                 break;
         }
-
     }
 
 
@@ -259,10 +259,10 @@ public class TaskListFragment extends Fragment {
 
             if (titleSortedByAsc) {
                 titleSortedByAsc = false;
-                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllDescByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             } else {
                 titleSortedByAsc = true;
-                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllAscByCategory(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             }
             bottomSheetDialog.dismiss();
         });
@@ -270,10 +270,10 @@ public class TaskListFragment extends Fragment {
         bottomSheetView.findViewById(R.id.sort_by_created_date).setOnClickListener(view12 -> {
             if (createdDateSortedByAsc) {
                 createdDateSortedByAsc = false;
-                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllTasksOrderByDateDesc(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             } else {
                 createdDateSortedByAsc = true;
-                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), this::refreshNotes);
+                taskListViewModel.fetchAllTasksOrderByDateAsc(categoryId).observe(getViewLifecycleOwner(), this::refreshTasks);
             }
             bottomSheetDialog.dismiss();
         });
@@ -282,11 +282,10 @@ public class TaskListFragment extends Fragment {
         bottomSheetDialog.show();
     }
 
-    public void refreshNotes(List<Task> result) {
+    public void refreshTasks(List<Task> result) {
         this.tasks.clear();
         this.tasks.addAll(result);
 
-        this.taskListViewAdapter.notifyItemChanged(result.size());
         this.taskListViewAdapter.notifyDataSetChanged();
     }
 

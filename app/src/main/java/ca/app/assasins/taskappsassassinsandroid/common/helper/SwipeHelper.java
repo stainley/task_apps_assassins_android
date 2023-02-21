@@ -37,7 +37,8 @@ import java.util.stream.Collectors;
  */
 public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     /**
-     * Creates a Callback for the given drag and swipe allowance. These values serve as*/
+     * Creates a Callback for the given drag and swipe allowance. These values serve as
+     */
 
     private final int buttonWidth;
     private RecyclerView recyclerView;
@@ -66,19 +67,21 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             Point point = new Point((int) event.getRawX(), (int) event.getRawY());
 
             RecyclerView.ViewHolder swipeViewHolder = recyclerView.findViewHolderForAdapterPosition(swipePosition);
-            View swipedItem = swipeViewHolder.itemView;
-            Rect rect = new Rect();
-            swipedItem.getGlobalVisibleRect(rect);
+            if (swipeViewHolder != null) {
+                View swipedItem = swipeViewHolder.itemView;
+                Rect rect = new Rect();
+                swipedItem.getGlobalVisibleRect(rect);
 
-            if (event.getAction() == MotionEvent.ACTION_DOWN ||
-                    event.getAction() == MotionEvent.ACTION_UP ||
-                    event.getAction() == MotionEvent.ACTION_MOVE) {
-                if (rect.top < point.y && rect.bottom > point.y)
-                    gestureDetector.onTouchEvent(event);
-                else {
-                    removeQueue.add(swipePosition);
-                    swipePosition = -1;
-                    recoverSwipedItem();
+                if (event.getAction() == MotionEvent.ACTION_DOWN ||
+                        event.getAction() == MotionEvent.ACTION_UP ||
+                        event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (rect.top < point.y && rect.bottom > point.y)
+                        gestureDetector.onTouchEvent(event);
+                    else {
+                        removeQueue.add(swipePosition);
+                        swipePosition = -1;
+                        recoverSwipedItem();
+                    }
                 }
             }
             return false;
@@ -112,13 +115,14 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
         /**
          * SwipeUnderlayButton is used to create underlay buttons in swipe action
-         * @param context the context of the app
-         * @param text the text to be shown on the button in case the drawable not provided
+         *
+         * @param context    the context of the app
+         * @param text       the text to be shown on the button in case the drawable not provided
          * @param imageResId the vector asset you have in drawable folder, 0 in case no drawable provided
-         * @param textSize the size (int) of the button text
+         * @param textSize   the size (int) of the button text
          * @param cornerSize the size (int) of the corner of the button round rect, 0 in case you want sharp corners
-         * @param color background color of the button
-         * @param listener handler of action
+         * @param color      background color of the button
+         * @param listener   handler of action
          */
         public SwipeUnderlayButton(Context context, String text, int imageResId, int textSize, int cornerSize, int color, SwipeDirection swipeDirection, SwipeUnderlayButtonClickListener listener) {
             this.context = context;
@@ -162,13 +166,13 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             float x = 0, y = 0;
             if (imageResId == 0) {
                 // if it is showing only text
-                x = cWidth/2f - r.width()/2f - r.left;
-                y = cHeight/2f + r.height()/2f - r.bottom;
+                x = cWidth / 2f - r.width() / 2f - r.left;
+                y = cHeight / 2f + r.height() / 2f - r.bottom;
                 c.drawText(text, rectF.left + x, rectF.top + y, p);
             } else {
                 Drawable d = ContextCompat.getDrawable(context, imageResId);
                 Bitmap bitmap = drawableToBitmap(d);
-                c.drawBitmap(bitmap, (rectF.left+rectF.right)/2 - textSize,(rectF.top+rectF.bottom)/2 - textSize,p);
+                c.drawBitmap(bitmap, (rectF.left + rectF.right) / 2 - textSize, (rectF.top + rectF.bottom) / 2 - textSize, p);
             }
             clickRegion = rectF;
             this.position = position;
@@ -180,7 +184,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             Bitmap bitmap = Bitmap.createBitmap(d.getIntrinsicWidth(),
                     d.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(bitmap);
-            d.setBounds(0,0,canvas.getWidth(), canvas.getHeight());
+            d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             d.draw(canvas);
             return bitmap;
         }
@@ -188,9 +192,8 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     /**
-     *
-     * @param context the context should be passed to be used in swipeHelper class
-     * @param buttonWidth the width of buttons
+     * @param context      the context should be passed to be used in swipeHelper class
+     * @param buttonWidth  the width of buttons
      * @param recyclerView the instance of recyclerView in the app
      */
     public SwipeHelper(Context context, int buttonWidth, RecyclerView recyclerView) {
@@ -252,12 +255,12 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public float getSwipeEscapeVelocity(float defaultValue) {
-        return 0.1f*defaultValue;
+        return 0.1f * defaultValue;
     }
 
     @Override
     public float getSwipeVelocityThreshold(float defaultValue) {
-        return 5.0f*defaultValue;
+        return 5.0f * defaultValue;
     }
 
     @Override
@@ -278,9 +281,9 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             } else {
                 buffer = buttonBuffer.get(position);
             }
-            translationX = dX*buffer.size()*buttonWidth / itemView.getWidth();
-            List<SwipeUnderlayButton> leftButtons = buffer.stream().filter(btn -> btn.getSwipeDirection()==SwipeDirection.LEFT).collect(Collectors.toList());
-            List<SwipeUnderlayButton> rightButtons = buffer.stream().filter(btn -> btn.getSwipeDirection()==SwipeDirection.RIGHT).collect(Collectors.toList());
+            translationX = dX * buffer.size() * buttonWidth / itemView.getWidth();
+            List<SwipeUnderlayButton> leftButtons = buffer.stream().filter(btn -> btn.getSwipeDirection() == SwipeDirection.LEFT).collect(Collectors.toList());
+            List<SwipeUnderlayButton> rightButtons = buffer.stream().filter(btn -> btn.getSwipeDirection() == SwipeDirection.RIGHT).collect(Collectors.toList());
             if (dX < 0) // swipe to left
                 drawButtonOnSwipeLeft(c, itemView, leftButtons, position, translationX);
             else if (dX > 0) // swipe to right
@@ -292,7 +295,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     private void drawButtonOnSwipeLeft(Canvas c, View itemView, List<SwipeUnderlayButton> buffer, int position, float translationX) {
         float right = itemView.getRight();
-        float dButtonWidth = -1*translationX / buffer.size();
+        float dButtonWidth = -1 * translationX / buffer.size();
         for (SwipeUnderlayButton button : buffer) {
             if (button.getSwipeDirection() != SwipeDirection.LEFT) continue;
             float left = right - dButtonWidth;
@@ -318,8 +321,9 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
 
     /**
      * An abstract method to be overridden in order to create underlay buttons
+     *
      * @param viewHolder recyclerView ViewHolder
-     * @param buffer list of buttons
+     * @param buffer     list of buttons
      */
     protected abstract void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer);
 }
