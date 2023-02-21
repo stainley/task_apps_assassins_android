@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -72,7 +71,6 @@ import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteAudioRVAdapte
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NotePictureRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModelFactory;
-import ca.app.assasins.taskappsassassinsandroid.task.ui.TaskListFragment;
 
 public class NoteDetailActivity extends AppCompatActivity implements NotePictureRVAdapter.OnPictureNoteCallback {
 
@@ -314,7 +312,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             binding.moreActionBtn.setVisibility(View.INVISIBLE);
             binding.editDateInfo.setVisibility(View.INVISIBLE);
         }
-        descriptionInfo.append(binding.description.getText().toString()).append(" ");
+        descriptionInfo.append(Objects.requireNonNull(binding.description.getText())).append(" ");
 
         binding.addBtn.setOnClickListener(this::addBtnClicked);
         binding.moreActionBtn.setOnClickListener(this::moreActionBtnClicked);
@@ -492,56 +490,56 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             checkColor6.setImageResource(0);
             checkColor7.setImageResource(0);
             checkColor8.setImageResource(0);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorDefaultNoteColor));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorDefaultNoteColor, getTheme()));
             selectedColorName = "colorDefaultNoteColor";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorDefaultNoteColor");
         });
 
         bottomSheetView.findViewById(R.id.view_color2).setOnClickListener(v -> {
             checkColor2.setImageResource(R.drawable.ic_check);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote2));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote2, getTheme()));
             selectedColorName = "colorNote2";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote2");
         });
 
         bottomSheetView.findViewById(R.id.view_color3).setOnClickListener(v -> {
             checkColor3.setImageResource(R.drawable.ic_check);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote3));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote3, getTheme()));
             selectedColorName = "colorNote3";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote3");
         });
 
         bottomSheetView.findViewById(R.id.view_color4).setOnClickListener(v -> {
             checkColor4.setImageResource(R.drawable.ic_check);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote4));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote4, getTheme()));
             selectedColorName = "colorNote4";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote4");
         });
 
         bottomSheetView.findViewById(R.id.view_color5).setOnClickListener(v -> {
             checkColor5.setImageResource(R.drawable.ic_check);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote5));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote5, getTheme()));
             selectedColorName = "colorNote5";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote5");
         });
 
         bottomSheetView.findViewById(R.id.view_color6).setOnClickListener(v -> {
             checkColor6.setImageResource(R.drawable.ic_check);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote6));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote6, getTheme()));
             selectedColorName = "colorNote6";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote6");
         });
 
         bottomSheetView.findViewById(R.id.view_color7).setOnClickListener(v -> {
             checkColor7.setImageResource(R.drawable.ic_check);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote7));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote7, getTheme()));
             selectedColorName = "colorNote7";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote7");
         });
 
         bottomSheetView.findViewById(R.id.view_color8).setOnClickListener(v -> {
             checkColor8.setImageResource(R.drawable.ic_check);
-            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote8));
+            binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorNote8, getTheme()));
             selectedColorName = "colorNote8";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorNote8");
         });
@@ -563,49 +561,46 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             startActivity(mapIntent);
         });
 
-        bottomSheetView.findViewById(R.id.read_note).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                moreActionBottomSheetDialog.dismiss();
-                LayoutInflater inflater = getLayoutInflater();
-                View readNoteView = (View) inflater.inflate(R.layout.layout_read_note, null);
+        bottomSheetView.findViewById(R.id.read_note).setOnClickListener(v -> {
+            moreActionBottomSheetDialog.dismiss();
+            LayoutInflater inflater = getLayoutInflater();
+            View readNoteView = inflater.inflate(R.layout.layout_read_note, null);
 
-                AlertDialog progress = new MaterialAlertDialogBuilder(NoteDetailActivity.this).setView(readNoteView).setCancelable(false).show();
+            AlertDialog progress = new MaterialAlertDialogBuilder(NoteDetailActivity.this).setView(readNoteView).setCancelable(false).show();
 
-                textToSpeech = new TextToSpeech(NoteDetailActivity.this, status -> {
-                    if (status == TextToSpeech.SUCCESS) {
-                        int result = textToSpeech.setLanguage(Locale.ENGLISH);
+            textToSpeech = new TextToSpeech(NoteDetailActivity.this, status -> {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = textToSpeech.setLanguage(Locale.ENGLISH);
 
-                        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                            Toast.makeText(NoteDetailActivity.this, "Sorry, language not supported!", Toast.LENGTH_SHORT).show();
-                        } else {
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Toast.makeText(NoteDetailActivity.this, "Sorry, language not supported!", Toast.LENGTH_SHORT).show();
+                    } else {
 
-                            textReadingNote = readNoteView.findViewById(R.id.text_reading_text);
-                            TextView stopReadButton = readNoteView.findViewById(R.id.stop_reading);
+                        textReadingNote = readNoteView.findViewById(R.id.text_reading_text);
+                        TextView stopReadButton = readNoteView.findViewById(R.id.stop_reading);
 
-                            String title = binding.title.getText().toString().trim();
-                            String description = Objects.requireNonNull(binding.description.getText()).toString().trim();
+                        String title = binding.title.getText().toString().trim();
+                        String description = Objects.requireNonNull(binding.description.getText()).toString().trim();
 
-                            readNoteView.findViewById(R.id.start_reading).setOnClickListener(view1 -> {
-                                textReadingNote.setText("Reading Note...");
-                                textToSpeech.speak(title, TextToSpeech.QUEUE_ADD, null);
-                                textToSpeech.speak(description, TextToSpeech.QUEUE_ADD, null);
+                        readNoteView.findViewById(R.id.start_reading).setOnClickListener(view1 -> {
+                            textReadingNote.setText("Reading Note...");
+                            textToSpeech.speak(title, TextToSpeech.QUEUE_ADD, null);
+                            textToSpeech.speak(description, TextToSpeech.QUEUE_ADD, null);
 
-                                stopReadButton.setText("STOP");
-                            });
+                            stopReadButton.setText("STOP");
+                        });
 
-                            readNoteView.findViewById(R.id.stop_reading).setOnClickListener(view1 -> {
-                                textReadingNote.setText("Do you want the NOTES APP to read the note for you?");
-                                stopReadButton.setText("CANCEL");
-                                if (textToSpeech != null) {
-                                    textToSpeech.stop();
-                                }
-                                progress.dismiss();
-                            });
-                        }
+                        readNoteView.findViewById(R.id.stop_reading).setOnClickListener(view1 -> {
+                            textReadingNote.setText("Do you want the NOTES APP to read the note for you?");
+                            stopReadButton.setText("CANCEL");
+                            if (textToSpeech != null) {
+                                textToSpeech.stop();
+                            }
+                            progress.dismiss();
+                        });
                     }
-                });
-            }
+                }
+            });
         });
         moreActionBottomSheetDialog.setContentView(bottomSheetView);
         moreActionBottomSheetDialog.show();
