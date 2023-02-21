@@ -44,7 +44,7 @@ public abstract class TaskDao implements AbstractDao<Task> {
     @Override
     public abstract void delete(Task task);
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     @Override
     public abstract void update(Task task);
 
