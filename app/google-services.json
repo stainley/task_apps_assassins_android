@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "375075194469",
+    "project_id": "taskappsassassinsandroid",
+    "storage_bucket": "taskappsassassinsandroid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375075194469:android:b04e47c70f49be0ae5a88c",
+        "android_client_info": {
+          "package_name": "ca.app.assasins.taskappsassassinsandroid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375075194469-fsc4esleldmu3g9n9rfcerrp4i4ckkd1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ca.app.assasins.taskappsassassinsandroid",
+            "certificate_hash": "0cafd5a24f9cce87e70cb8ef811d4370c7109078"
+          }
+        },
+        {
+          "client_id": "375075194469-tfq6o6hhsb1oim57fr5nn1ptue43t7l1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCm_VSXEk6qnHSciWAnu_7jGgS2CrFj0pg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375075194469-tfq6o6hhsb1oim57fr5nn1ptue43t7l1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
