@@ -4,14 +4,12 @@
     android:layout_height="match_parent"
     android:background="?android:attr/selectableItemBackground"
     android:orientation="vertical">
-
     <include layout="@layout/activity_add_image_audio_sheet" />
 
     <LinearLayout
         android:id="@+id/dictation_audio_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_vertical"

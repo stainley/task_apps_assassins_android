@@ -55,10 +55,6 @@ public class TaskListViewAdapter extends RecyclerView.Adapter<TaskListViewAdapte
         holder.taskCardView.setOnClickListener(view -> this.onTaskListCallback.onTaskSelected(view, position));
     }
 
-    public void setData(final List<Task> task) {
-
-    }
-
     @Override
     public int getItemCount() {
         return tasks.size();

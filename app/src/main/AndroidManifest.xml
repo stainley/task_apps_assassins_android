@@ -50,11 +50,6 @@
             android:parentActivityName=".category.view.CategoryActivity"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".note.ui.NoteDetailActivity"
-            android:exported="false"
-            android:parentActivityName=".note.ui.NoteDetailActivity"
-            android:theme="@style/AppTheme.ActionBar" />
-        <activity
             android:name=".category.view.CategoryActivity"
             android:exported="true">
             <intent-filter>
@@ -63,6 +58,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".note.ui.NoteDetailActivity"
+            android:exported="false"
+            android:parentActivityName=".note.ui.NoteDetailActivity"
+            android:theme="@style/AppTheme.ActionBar" />
         <activity
             android:name=".task.ui.TaskDetailActivity"
             android:exported="false"

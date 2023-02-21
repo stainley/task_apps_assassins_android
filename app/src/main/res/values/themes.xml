@@ -52,6 +52,8 @@
 
         <!-- specify shared element transitions -->
 
+        <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+
     </style>
 
 
@@ -83,6 +85,7 @@
         <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_light_inversePrimary</item>
 
+
         <!-- enable window content transitions -->
         <item name="android:windowActivityTransitions">true</item>
 
@@ -91,6 +94,7 @@
         <item name="android:windowExitTransition">@android:transition/explode</item>
 
         <!-- specify shared element transitions -->
+        <item name="bottomSheetStyle">@style/BottomSheetDialogTheme</item>
 
     </style>
 
@@ -99,6 +103,6 @@
     </style>
 
     <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@android:color/transparent</item>
+        <item name="android:background">@drawable/bottom_sheet_back</item>
     </style>
 </resources>
