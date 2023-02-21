@@ -43,6 +43,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.setIsRecyclable(false);
         holder.title.setText(notes.get(position).getTitle());
 
         StringBuilder noteStr = new StringBuilder();
