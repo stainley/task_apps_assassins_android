@@ -579,25 +579,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
             if (selectedNoteColor != null)
                 selectedNoteColor.setColor("colorNote8");
         });
-
-//        if (alreadyAvailableNote != null && alreadyAvailableNote.getColor() != null && !alreadyAvailableNote.getColor().trim().isEmpty()) {
-//            if (alreadyAvailableNote.getColor().equals("#FFB400")) {
-//                layoutMiscellaneous.findViewById(R.id.view_color2).performClick();
-//            } else if (alreadyAvailableNote.getColor().equals("#3B81FF")) {
-//                layoutMiscellaneous.findViewById(R.id.view_color3).performClick();
-//            } else if (alreadyAvailableNote.getColor().equals("#FF4E4E")) {
-//                layoutMiscellaneous.findViewById(R.id.view_color4).performClick();
-//            } else if (alreadyAvailableNote.getColor().equals("#13A662")) {
-//                layoutMiscellaneous.findViewById(R.id.view_color5).performClick();
-//            } else if (alreadyAvailableNote.getColor().equals("#FF388E")) {
-//                layoutMiscellaneous.findViewById(R.id.view_color6).performClick();
-//            } else if (alreadyAvailableNote.getColor().equals("#118E9C")) {
-//                layoutMiscellaneous.findViewById(R.id.view_color7).performClick();
-//            } else if (alreadyAvailableNote.getColor().equals("#FF822E")) {
-//                layoutMiscellaneous.findViewById(R.id.view_color8).performClick();
-//            }
-//        }
-
     }
 
     private void moreActionBtnClicked(View view) {

@@ -52,6 +52,7 @@ import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewM
 import ca.app.assasins.taskappsassassinsandroid.category.viewmodel.CategoryViewModelFactory;
 import ca.app.assasins.taskappsassassinsandroid.common.helper.MediaType;
 import ca.app.assasins.taskappsassassinsandroid.databinding.FragmentNoteListBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteRecycleAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.viewmodel.NoteViewModel;
@@ -366,6 +367,15 @@ public class NoteListFragment extends Fragment {
                     }
                 }));
             }
+
+            @Override
+            public void setCardBackgroundColor(View view, int position) {
+                noteViewModel.fetchColorsByNoteId(notes.get(position).getNoteId()).observe(getViewLifecycleOwner(), noteColors -> {
+                    List<Color> colors = new ArrayList<Color>();
+                    noteColors.forEach(resultColors -> colors.addAll(resultColors.getColors()));
+                    view.setBackgroundColor(getSourceColor(view, colors.get(0).getColor()));
+                });
+            }
         };
     }
 
@@ -376,5 +386,27 @@ public class NoteListFragment extends Fragment {
         // This starts the activity and populates the intent with the speech text.
         //startActivityForResult(intent, SPEECH_REQUEST_CODE);
         textToSpeakLauncher.launch(intent);
+    }
+
+    public int getSourceColor(View view, String colorName) {
+        switch (colorName) {
+            default:
+            case "colorDefaultNoteColor":
+                return view.getResources().getColor(R.color.colorDefaultNoteColor);
+            case "colorNote2":
+                return view.getResources().getColor(R.color.colorNote2);
+            case "colorNote3":
+                return view.getResources().getColor(R.color.colorNote3);
+            case "colorNote4":
+                return view.getResources().getColor(R.color.colorNote4);
+            case "colorNote5":
+                return view.getResources().getColor(R.color.colorNote5);
+            case "colorNote6":
+                return view.getResources().getColor(R.color.colorNote6);
+            case "colorNote7":
+                return view.getResources().getColor(R.color.colorNote7);
+            case "colorNote8":
+                return view.getResources().getColor(R.color.colorNote8);
+        }
     }
 }

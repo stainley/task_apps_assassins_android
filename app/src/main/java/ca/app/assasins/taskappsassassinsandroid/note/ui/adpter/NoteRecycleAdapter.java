@@ -57,6 +57,8 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
         onNoteCallback.onDisplayThumbnail(holder.noteThumbnailView, position);
 
+        onNoteCallback.setCardBackgroundColor(holder.noteCard, position);
+
         holder.noteCard.setOnClickListener(view -> {
             this.onNoteCallback.onNoteSelected(view, position);
         });
@@ -125,5 +127,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
         void onDisplayThumbnail(ImageView Imageview, int position);
 
         void showAudioIcon(ImageButton audioIcon, int position);
+
+        void setCardBackgroundColor(View view, int position);
     }
 }
