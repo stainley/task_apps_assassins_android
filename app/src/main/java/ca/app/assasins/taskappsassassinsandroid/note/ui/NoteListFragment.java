@@ -316,15 +316,19 @@ public class NoteListFragment extends Fragment {
 
                     categoryViewModel.getCategoryByName(category).observe(getViewLifecycleOwner(), result -> {
                         note.setCategoryId(result.getId());
-                        noteViewModel.updateNote(note);
+
                     });
                 });
 
-                new MaterialAlertDialogBuilder(requireActivity()).setTitle("Move Note").setView(moveNoteView).setNeutralButton("Cancel", (dialog, which) -> {
+                new MaterialAlertDialogBuilder(requireActivity())
+                        .setTitle("Move Note")
+                        .setIcon(getResources().getDrawable(R.drawable.move, requireActivity().getTheme()))
+                        .setMessage("Select the category you want to move your note.")
+                        .setView(moveNoteView).setNegativeButton("Cancel", (dialog, which) -> {
 
-                }).setNegativeButton("Done", (dialog, which) -> {
-
-                }).setCancelable(false).show();
+                        }).setPositiveButton("Done", (dialog, which) -> {
+                            noteViewModel.updateNote(note);
+                        }).setCancelable(false).show();
             }
 
             @Override
@@ -371,24 +375,27 @@ public class NoteListFragment extends Fragment {
     }
 
     public int getSourceColor(View view, String colorName) {
-        switch (colorName) {
-            default:
-            case "colorDefaultNoteColor":
-                return view.getResources().getColor(R.color.colorDefaultNoteColor, requireActivity().getTheme());
-            case "colorNote2":
-                return view.getResources().getColor(R.color.colorNote2, requireActivity().getTheme());
-            case "colorNote3":
-                return view.getResources().getColor(R.color.colorNote3, requireActivity().getTheme());
-            case "colorNote4":
-                return view.getResources().getColor(R.color.colorNote4, requireActivity().getTheme());
-            case "colorNote5":
-                return view.getResources().getColor(R.color.colorNote5, requireActivity().getTheme());
-            case "colorNote6":
-                return view.getResources().getColor(R.color.colorNote6, requireActivity().getTheme());
-            case "colorNote7":
-                return view.getResources().getColor(R.color.colorNote7, requireActivity().getTheme());
-            case "colorNote8":
-                return view.getResources().getColor(R.color.colorNote8, requireActivity().getTheme());
+        if (!colorName.isEmpty()) {
+            switch (colorName) {
+                default:
+                case "colorDefaultNoteColor":
+                    return view.getResources().getColor(R.color.colorDefaultNoteColor, requireActivity().getTheme());
+                case "colorNote2":
+                    return view.getResources().getColor(R.color.colorNote2, requireActivity().getTheme());
+                case "colorNote3":
+                    return view.getResources().getColor(R.color.colorNote3, requireActivity().getTheme());
+                case "colorNote4":
+                    return view.getResources().getColor(R.color.colorNote4, requireActivity().getTheme());
+                case "colorNote5":
+                    return view.getResources().getColor(R.color.colorNote5, requireActivity().getTheme());
+                case "colorNote6":
+                    return view.getResources().getColor(R.color.colorNote6, requireActivity().getTheme());
+                case "colorNote7":
+                    return view.getResources().getColor(R.color.colorNote7, requireActivity().getTheme());
+                case "colorNote8":
+                    return view.getResources().getColor(R.color.colorNote8, requireActivity().getTheme());
+            }
         }
+        return 0;
     }
 }

@@ -319,20 +319,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
         binding.colorPickerBtn.setOnClickListener(this::colorPickerBtnClicked);
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
-        return super.onCreateView(name, context, attrs);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@Nullable View parent, @NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
-
-
-        return super.onCreateView(parent, name, context, attrs);
-    }
-
     private void updateLocationInfo(Location location) {
         this.latitude = location.getLatitude();
         this.longitude = location.getLongitude();
@@ -483,13 +469,6 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
 
         bottomSheetView.findViewById(R.id.view_color1).setOnClickListener(v -> {
             checkColor1.setImageResource(R.drawable.ic_check);
-            checkColor2.setImageResource(0);
-            checkColor3.setImageResource(0);
-            checkColor4.setImageResource(0);
-            checkColor5.setImageResource(0);
-            checkColor6.setImageResource(0);
-            checkColor7.setImageResource(0);
-            checkColor8.setImageResource(0);
             binding.noteDetailView.setBackgroundColor(getResources().getColor(R.color.colorDefaultNoteColor, getTheme()));
             selectedColorName = "colorDefaultNoteColor";
             if (selectedNoteColor != null) selectedNoteColor.setColor("colorDefaultNoteColor");

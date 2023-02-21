@@ -10,7 +10,14 @@ import androidx.room.Transaction;
 import androidx.room.Update;
 import androidx.room.Upsert;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
@@ -26,6 +33,9 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.TaskWithSubTask;
 
 @Dao
 public abstract class TaskDao implements AbstractDao<Task> {
+
+    //Firebase Database
+    private final FirebaseDatabase database = FirebaseDatabase.getInstance("https://taskappsassassinsandroid-default-rtdb.firebaseio.com/");
 
     @Insert
     @Override
@@ -44,7 +54,7 @@ public abstract class TaskDao implements AbstractDao<Task> {
     @Override
     public abstract void delete(Task task);
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     @Override
     public abstract void update(Task task);
 
@@ -120,17 +130,43 @@ public abstract class TaskDao implements AbstractDao<Task> {
     @Transaction
     public void saveTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks, List<Audio> mAudios) {
         final long taskId = saveTask(task);
+
+        // Write a message to Firebase Database
+        final DatabaseReference taskReference = database.getReference();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference dbRefSubTasks = null;
+        if (currentUser != null) {
+
+            task.setTaskId(taskId);
+            String userUID = currentUser.getUid();
+            String key = taskReference.push().getKey();
+            if(key != null) {
+                dbRefSubTasks = taskReference.child(userUID)
+                        .child(key);
+                dbRefSubTasks.setValue(task);
+            }
+
+        }
+
+
         if (!pictures.isEmpty()) {
             pictures.forEach(picture -> {
                 picture.setParentTaskId(taskId);
                 savePicture(picture);
             });
         }
+        List<SubTask> cloudSubtasks = new ArrayList<>();
+
         if (!subTasks.isEmpty()) {
             subTasks.forEach(subTask -> {
                 subTask.setTaskParentId(taskId);
                 saveSubTask(subTask);
+                cloudSubtasks.add(subTask);
             });
+        }
+        if (currentUser != null) {
+            dbRefSubTasks.child("subtasks").setValue(cloudSubtasks);
+            //.child(child("subtasks")).setValue(cloudSubtasks);
         }
 
         if (!mAudios.isEmpty()) {

@@ -525,12 +525,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    //MESSAGE: Saving on Back
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
     // Save on back button pressed
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
