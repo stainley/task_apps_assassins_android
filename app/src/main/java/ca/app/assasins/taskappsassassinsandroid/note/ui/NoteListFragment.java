@@ -373,7 +373,10 @@ public class NoteListFragment extends Fragment {
                 noteViewModel.fetchColorsByNoteId(notes.get(position).getNoteId()).observe(getViewLifecycleOwner(), noteColors -> {
                     List<Color> colors = new ArrayList<Color>();
                     noteColors.forEach(resultColors -> colors.addAll(resultColors.getColors()));
-                    view.setBackgroundColor(getSourceColor(view, colors.get(0).getColor()));
+
+                    if (colors.get(0).getColor() != "colorDefaultNoteColor") {
+                        view.setBackgroundColor(getSourceColor(view, colors.get(0).getColor()));
+                    }
                 });
             }
         };

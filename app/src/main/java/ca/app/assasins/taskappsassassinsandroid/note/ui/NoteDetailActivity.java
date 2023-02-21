@@ -304,7 +304,9 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 noteColors.forEach(resultColors -> colors.addAll(resultColors.getColors()));
                 selectedNoteColor = colors.get(0);
 
-                binding.noteDetailView.setBackgroundColor(getSourceColor(selectedNoteColor.getColor()));
+                if (selectedNoteColor.getColor() != "colorDefaultNoteColor") {
+                    binding.noteDetailView.setBackgroundColor(getSourceColor(selectedNoteColor.getColor()));
+                }
             });
 
         } else {
