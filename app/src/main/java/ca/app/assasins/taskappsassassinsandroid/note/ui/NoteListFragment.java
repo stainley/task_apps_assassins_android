@@ -95,13 +95,15 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+
+
+        /*OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 requireActivity().finish();
             }
         };
-        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);*/
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -151,7 +153,7 @@ public class NoteListFragment extends Fragment {
             this.notes.clear();
             this.notes.addAll(notesResult);
 
-            this.noteRecycleAdapter.notifyItemChanged(notesResult.size());
+            this.noteRecycleAdapter.notifyDataSetChanged();
         });
 
         Toolbar noteAppBar = binding.noteAppBar;
