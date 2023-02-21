@@ -10,7 +10,12 @@ import androidx.room.Transaction;
 import androidx.room.Update;
 import androidx.room.Upsert;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import ca.app.assasins.taskappsassassinsandroid.common.dao.AbstractDao;
@@ -26,6 +31,11 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.TaskWithSubTask;
 
 @Dao
 public abstract class TaskDao implements AbstractDao<Task> {
+
+    //Firebase Database
+    private FirebaseDatabase database = FirebaseDatabase.getInstance("https://taskappsassassinsandroid-default-rtdb.firebaseio.com/");
+    private DatabaseReference taskReference = database.getReference();
+    private DatabaseReference subTaskReference = database.getReference();
 
     @Insert
     @Override
@@ -120,6 +130,16 @@ public abstract class TaskDao implements AbstractDao<Task> {
     @Transaction
     public void saveTaskAll(Task task, List<Picture> pictures, List<SubTask> subTasks, List<Audio> mAudios) {
         final long taskId = saveTask(task);
+
+        // Write a message to Firebase Database
+        taskReference = taskReference.child("tasks");
+        subTaskReference = subTaskReference.child("subtasks");
+        task.setTaskId(taskId);
+        taskReference.
+                child(Objects.requireNonNull(FirebaseAuth.getInstance()
+                        .getUid())).setValue(task);
+
+
         if (!pictures.isEmpty()) {
             pictures.forEach(picture -> {
                 picture.setParentTaskId(taskId);
