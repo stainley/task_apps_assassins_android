@@ -1,6 +1,5 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui.adpter;
 
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -13,8 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
