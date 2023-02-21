@@ -19,7 +19,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="165dp"
         android:layout_height="210dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/noteCardChild">
 
         <ImageView
             android:id="@+id/noteThumbnailView"
