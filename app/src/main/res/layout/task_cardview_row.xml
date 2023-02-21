@@ -23,6 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checked="false"
+            android:theme="@style/Widget.Material3.CheckedTextView"
             android:fontFamily="@font/roboto_bold"
             android:text="Try to buy this message"
             android:textSize="18sp"

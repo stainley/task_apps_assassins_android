@@ -26,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,10 +62,10 @@ import java.util.Random;
 
 import ca.app.assasins.taskappsassassinsandroid.R;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Audio;
-import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Coordinate;
 import ca.app.assasins.taskappsassassinsandroid.common.model.Picture;
 import ca.app.assasins.taskappsassassinsandroid.databinding.ActivityNoteDetailBinding;
+import ca.app.assasins.taskappsassassinsandroid.note.model.Color;
 import ca.app.assasins.taskappsassassinsandroid.note.model.Note;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NoteAudioRVAdapter;
 import ca.app.assasins.taskappsassassinsandroid.note.ui.adpter.NotePictureRVAdapter;
@@ -304,7 +303,7 @@ public class NoteDetailActivity extends AppCompatActivity implements NotePicture
                 noteColors.forEach(resultColors -> colors.addAll(resultColors.getColors()));
                 selectedNoteColor = colors.get(0);
 
-                if (selectedNoteColor.getColor() != "colorDefaultNoteColor") {
+                if (!selectedNoteColor.getColor().equals("colorDefaultNoteColor")) {
                     binding.noteDetailView.setBackgroundColor(getSourceColor(selectedNoteColor.getColor()));
                 }
             });
