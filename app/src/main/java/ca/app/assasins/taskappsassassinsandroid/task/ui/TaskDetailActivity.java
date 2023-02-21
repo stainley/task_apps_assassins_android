@@ -48,10 +48,6 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -338,11 +334,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         MaterialDatePicker<Long> selectDate = MaterialDatePicker.Builder.datePicker().setTitleText("Select date").build();
         selectDate.setCancelable(false);
         selectDate.show(getSupportFragmentManager(), "calendar");
-        selectDate.addOnPositiveButtonClickListener(selection -> {
-
-            System.out.println("DATE PICKER: " + new Date(1677046200000L)  + " - " + selection);
-            date[0] = new Date(selection);
-        });
+        selectDate.addOnPositiveButtonClickListener(selection -> date[0] = new Date(selection));
 
     }
 

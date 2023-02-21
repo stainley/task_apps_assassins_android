@@ -11,9 +11,11 @@ import androidx.room.Update;
 import androidx.room.Upsert;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,9 +35,7 @@ import ca.app.assasins.taskappsassassinsandroid.task.model.TaskWithSubTask;
 public abstract class TaskDao implements AbstractDao<Task> {
 
     //Firebase Database
-    private FirebaseDatabase database = FirebaseDatabase.getInstance("https://taskappsassassinsandroid-default-rtdb.firebaseio.com/");
-    private DatabaseReference taskReference = database.getReference();
-    private DatabaseReference subTaskReference = database.getReference();
+    private final FirebaseDatabase database = FirebaseDatabase.getInstance("https://taskappsassassinsandroid-default-rtdb.firebaseio.com/");
 
     @Insert
     @Override
@@ -132,12 +132,21 @@ public abstract class TaskDao implements AbstractDao<Task> {
         final long taskId = saveTask(task);
 
         // Write a message to Firebase Database
-        taskReference = taskReference.child("tasks");
-        subTaskReference = subTaskReference.child("subtasks");
-        task.setTaskId(taskId);
-        taskReference.
-                child(Objects.requireNonNull(FirebaseAuth.getInstance()
-                        .getUid())).setValue(task);
+        final DatabaseReference taskReference = database.getReference();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference dbRefSubTasks = null;
+        if (currentUser != null) {
+
+            task.setTaskId(taskId);
+            String userUID = currentUser.getUid();
+            String key = taskReference.push().getKey();
+            if(key != null) {
+                dbRefSubTasks = taskReference.child(userUID)
+                        .child(key);
+                dbRefSubTasks.setValue(task);
+            }
+
+        }
 
 
         if (!pictures.isEmpty()) {
@@ -146,11 +155,18 @@ public abstract class TaskDao implements AbstractDao<Task> {
                 savePicture(picture);
             });
         }
+        List<SubTask> cloudSubtasks = new ArrayList<>();
+
         if (!subTasks.isEmpty()) {
             subTasks.forEach(subTask -> {
                 subTask.setTaskParentId(taskId);
                 saveSubTask(subTask);
+                cloudSubtasks.add(subTask);
             });
+        }
+        if (currentUser != null) {
+            dbRefSubTasks.child("subtasks").setValue(cloudSubtasks);
+            //.child(child("subtasks")).setValue(cloudSubtasks);
         }
 
         if (!mAudios.isEmpty()) {
