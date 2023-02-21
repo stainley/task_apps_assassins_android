@@ -100,7 +100,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     private final List<SubTask> subTasks = new ArrayList<>();
     private final List<SubTask> additionalSubTasks = new ArrayList<>();
 
-    private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<Uri>() {
+    private final ActivityResultLauncher<PickVisualMediaRequest> selectPictureLauncher = registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), new ActivityResultCallback<>() {
 
         @Override
         public void onActivityResult(Uri result) {
@@ -304,7 +304,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         }
     }
 
-    public void dueDateTask(View view) {
+    private void dueDateTask(View view) {
 
         final int[] hour = new int[1];
         final int[] minute = new int[1];
@@ -339,7 +339,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     }
 
 
-    public void takePhoto() {
+    private void takePhoto() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
             ContentResolver cr = getContentResolver();
@@ -352,7 +352,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         }
     }
 
-    public void addPhotoFromLibrary() {
+    private void addPhotoFromLibrary() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             selectPictureLauncher.launch(new PickVisualMediaRequest());
         }
@@ -360,7 +360,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
 
     private void addBtnClicked(View view) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_add_image_audio_sheet, findViewById(R.id.bottomSheetContainer));
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.activity_task_functionality_sheet, findViewById(R.id.bottomSheetContainer));
         bottomSheetView.findViewById(R.id.take_photo_btn).setOnClickListener(view1 -> {
             takePhoto();
             bottomSheetDialog.dismiss();
@@ -418,7 +418,8 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
                         .setMessage("Tap long press Mic to start recording.")
                         .setCancelable(false)
                         .setNegativeButton("Exit", (dialog, which) -> {
-                            stopRecordAudio();
+                            if (mediaRecorder != null)
+                                stopRecordAudio();
                             dialog.dismiss();
                         })
                         .show();
@@ -457,6 +458,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
         mediaRecorder.stop();
         mediaRecorder.reset();
         mediaRecorder.release();
+        mediaRecorder = null;
     }
 
     private void recordAudio() {
@@ -521,12 +523,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskPicture
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    //MESSAGE: Saving on Back
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 
     // Save on back button pressed

@@ -38,6 +38,7 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull SubTaskViewHolder holder, int position) {
+
         holder.subTaskCkb.setChecked(subTasks.get(position).isCompleted());
         holder.deleteTaskBtn.setOnClickListener(v -> onSubTaskCallback.onSubTaskDeleted(v, position));
         holder.subTaskCkb.setOnClickListener(v -> onSubTaskCallback.onSubTaskCompleted(v, position));
@@ -55,11 +56,11 @@ public class SubTaskViewAdapter extends RecyclerView.Adapter<SubTaskViewAdapter.
         if (subTasks.get(position).isCompleted()) {
             holder.subtaskNameTxt.setPaintFlags(holder.subtaskNameTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             holder.subtaskNameTxt.setText(subTasks.get(position).getName());
-            holder.subtaskNameTxt.setTextColor(Color.GRAY);
+            //holder.subtaskNameTxt.setTextColor(Color.GRAY);
         } else {
             holder.subtaskNameTxt.setText(subTasks.get(position).getName());
             holder.subtaskNameTxt.setPaintFlags(0);
-            holder.subtaskNameTxt.setTextColor(Color.BLACK);
+            //holder.subtaskNameTxt.setTextColor(Color.BLACK);
         }
     }
 

@@ -55,10 +55,6 @@ public class TaskListViewAdapter extends RecyclerView.Adapter<TaskListViewAdapte
         holder.taskCardView.setOnClickListener(view -> this.onTaskListCallback.onTaskSelected(view, position));
     }
 
-    public void setData(final List<Task> task) {
-
-    }
-
     @Override
     public int getItemCount() {
         return tasks.size();
@@ -68,20 +64,21 @@ public class TaskListViewAdapter extends RecyclerView.Adapter<TaskListViewAdapte
         private final CheckedTextView taskTitleLabel;
         private final MaterialCardView taskCardView;
         private final TextView numberSubtask;
-        private  final TextView dueDate;
+        private final TextView dueDate;
 
         public TaskListAdapter(@NonNull View itemView) {
             super(itemView);
             taskTitleLabel = itemView.findViewById(R.id.taskTitleLabel);
             taskCardView = itemView.findViewById(R.id.taskCardView);
-            numberSubtask = itemView.findViewById(R.id.number_subtask);
-            dueDate = itemView.findViewById(R.id.due_date);
+            numberSubtask = itemView.findViewById(R.id.number_subtask_txt);
+            dueDate = itemView.findViewById(R.id.due_date_txt);
 
         }
     }
 
     public interface OnTaskListCallback {
         void onTaskSelected(View view, int position);
-        void getSubtaskCount(TextView dueDate, int position);
+
+        void getSubtaskCount(TextView subtaskView, int position);
     }
 }

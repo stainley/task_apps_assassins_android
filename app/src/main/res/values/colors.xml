@@ -72,5 +72,12 @@
     <color name="CustomColor1">#C5E4FF</color>
     <color name="colorDivider">#ECECEC</color>
     <color name="colorPrimaryText">#212121</color>
-
+    <color name="colorDefaultNoteColor">#F4F4F4</color>
+    <color name="colorNote2">#FFB400</color>
+    <color name="colorNote3">#3B81FF</color>
+    <color name="colorNote4">#FF4E4E</color>
+    <color name="colorNote5">#13A662</color>
+    <color name="colorNote6">#FF388E</color>
+    <color name="colorNote7">#118E9C</color>
+    <color name="colorNote8">#FF822E</color>
 </resources>

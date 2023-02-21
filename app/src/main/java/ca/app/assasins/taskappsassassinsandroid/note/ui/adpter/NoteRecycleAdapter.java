@@ -57,6 +57,8 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
         onNoteCallback.onDisplayThumbnail(holder.noteThumbnailView, position);
 
+        onNoteCallback.setCardBackgroundColor(holder.noteCardChild, position);
+
         holder.noteCard.setOnClickListener(view -> {
             this.onNoteCallback.onNoteSelected(view, position);
         });
@@ -98,6 +100,8 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
         private final TextView description;
         private final CardView noteCard;
+
+        private final View noteCardChild;
         private final ImageView noteThumbnailView;
 
         private final ImageButton playAudioIcon;
@@ -109,6 +113,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
             title = itemView.findViewById(R.id.title);
             description = itemView.findViewById(R.id.description);
             noteCard = itemView.findViewById(R.id.noteCard);
+            noteCardChild = itemView.findViewById(R.id.noteCardChild);
             playAudioIcon = itemView.findViewById(R.id.play_audio_icon);
             cardNoteMenu = itemView.findViewById(R.id.card_note_menu);
             noteThumbnailView = itemView.findViewById(R.id.noteThumbnailView);
@@ -125,5 +130,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
         void onDisplayThumbnail(ImageView Imageview, int position);
 
         void showAudioIcon(ImageButton audioIcon, int position);
+
+        void setCardBackgroundColor(View view, int position);
     }
 }
