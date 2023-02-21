@@ -1,6 +1,5 @@
 package ca.app.assasins.taskappsassassinsandroid.note.ui.adpter;
 
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.View;
@@ -13,8 +12,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -43,6 +40,7 @@ public class NoteRecycleAdapter extends RecyclerView.Adapter<NoteRecycleAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.setIsRecyclable(false);
         holder.title.setText(notes.get(position).getTitle());
 
         StringBuilder noteStr = new StringBuilder();

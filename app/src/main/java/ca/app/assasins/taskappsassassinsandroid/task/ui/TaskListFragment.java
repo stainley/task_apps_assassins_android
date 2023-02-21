@@ -317,7 +317,12 @@ public class TaskListFragment extends Fragment {
                     if (tasks.size() > 0) {
                         if (tasks.get(0) != null && tasks.get(0).getSubTasks().size() > 0) {
                             int totalSubTask = tasks.get(0).getSubTasks().size();
-                            subtaskView.setText(totalSubTask + " subtasks");
+                            if (totalSubTask == 1) {
+                                subtaskView.setText(totalSubTask + " subtask");
+                            }
+                            else {
+                                subtaskView.setText(totalSubTask + " subtasks");
+                            }
                         }
                     }
                 });
